@@ -21,6 +21,9 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
+# Modified by: Jhonny Velasquez
+# Date: 02-01-2023
+
 import sys
 import argparse
 
@@ -53,24 +56,6 @@ except:
 	print("")
 	parser.print_help()
 
-# ----------------- REAL SENSE SET UP BEGIN -----------------
-
-# Configure depth and color streams
-# pipeline = rs.pipeline()
-# config = rs.config()
-# config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-
-# Get device product line for setting a supporting resolution
-#pipeline_wrapper = rs.pipeline_wrapper(pipeline)
-#pipeline_profile = config.resolve(pipeline_wrapper)
-#device = pipeline_profile.get_device()
-#device_product_line = str(device.get_info(rs.camera_info.product_line))
-
-# Start streaming
-# pipeline.start(config)
-
-# ----------------- REAL SENSE SET UP END -----------------
-
 # initialize the RealSense pipeline
 pipeline = rs.pipeline()
 config = rs.config()
@@ -80,8 +65,6 @@ config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 # Start the pipeline
 pipeline.start(config)
 
-# create video sources and outputs
-# input = videoSource(args.input_URI, argv=sys.argv)
 output = videoOutput("display://0")
 	
 # load the object detection network
@@ -93,24 +76,18 @@ net = detectNet(model="/home/mdelab/Downloads/ssd-mobilenet-finetuned-v3.onnx", 
                  input_blob="input_0", output_cvg="scores", output_bbox="boxes", 
                  threshold=args.threshold)
 
+# Import openCV here so that it doesn't conflict with the jetson-inference imports
 import cv2
 
 # process frames until the user exits
 while True:
 
 	# Real Sense frame data: Wait for a coherent pair of frames: depth and color
-	#frames = pipeline.wait_for_frames()
-	#depth_frame = frames.get_depth_frame()
-	# color_frame = frames.get_color_frame()
-	# print(depth_frame)
 
     # Wait for the next set of frames from the pipeline
     frames = pipeline.wait_for_frames()
     depth_frame = frames.get_depth_frame()
     color_frame = frames.get_color_frame()
-
-    # Convert the depth frame to a numpy array
-    # depth_image = np.asanyarray(depth_frame.get_data())
 
     # Convert the color frame to a numpy array
     color_image = np.asanyarray(color_frame.get_data())
@@ -132,18 +109,17 @@ while True:
         print(detection)
         x, y = detection.Center
 	
-	# trying to add visual 
-        
+	    # trying to add visual feedback to the image    
         # cv2.circle(color_frame, (x,y), 8, (0,0,255), -1)
 
         print(detection.Center)
-        depth_value = depth_frame.get_distance((int(x),int(y))
+        depth_value = depth_frame.get_distance(int(x),int(y))
 
         # Print the depth value
         print("Depth value (cm):", depth_value * 100)
 
 	    # render the image
-        # output.Render(img)
+        output.Render(img)
 
 	    # update the title bar
         output.SetStatus("{:s} | Network {:.0f} FPS".format(args.network, net.GetNetworkFPS()))
@@ -151,10 +127,9 @@ while True:
 	    # print out performance info
         net.PrintProfilerTimes()
 
-	# exit on input/output EOS
-    #if not output.IsStreaming():
-    #    break
+	    # exit on input/output EOS
+        if not output.IsStreaming():
+            break
         #if not input.IsStreaming() or not output.IsStreaming():
         #    break
-
 
