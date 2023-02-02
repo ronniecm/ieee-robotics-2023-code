@@ -1,11 +1,15 @@
 import cv2 as cv
 from math import atan2, cos, sin, sqrt, pi
 import numpy as np
+import sys
 
 # Python script to demonstrate working of PCA
 # To be used for pedestal orientatation 
-# detection for alignment of robotic arm
+# detection for alignment of robotic arm.
+# *** Works best when objects are on dark background ***
+
 # Modified from: https://automaticaddison.com/how-to-determine-the-orientation-of-an-object-using-opencv/
+
 
 
 # Modified by: Jhonny Velasquez
@@ -88,52 +92,60 @@ def getOrientation(pts, img):
 
     return angle
 
+def main():
+    # Check if there is more than one command line argument
+    if len(sys.argv) != 2:
+        print("Usage: python3 pose_detect.py <image>")
+        exit(0)
 
-# Load the image
-img = cv.imread("/Users/jvelasquez/Downloads/realLabelImages/IMG_7192.jpg")
+    # Load the image using first command line argument
+    img = cv.imread(sys.argv[1])
 
-# Was the image there?
-if img is None:
-    print("Error: File not found")
-    exit(0)
+    # Was the image there?
+    if img is None:
+        print("Error: File not found")
+        exit(0)
 
-# pscv.imshow('Input Image', img)
+    # pscv.imshow('Input Image', img)
 
-# Convert image to grayscale for contour detection
-gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+    # Convert image to grayscale for contour detection
+    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-# Convert image to binary
-_, bw = cv.threshold(gray, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
+    # Convert image to binary
+    _, bw = cv.threshold(gray, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
 
-# Find all the contours in the thresholded image (binary image)
-# Countours in this scenario are a series of continous points 
-# surrounding an area having uniform color or intensity.
-contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
+    # Find all the contours in the thresholded image (binary image)
+    # Countours in this scenario are a series of continous points 
+    # surrounding an area having uniform color or intensity.
+    contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
 
-# Filter out contours that are too small or too large
-min_countour_area = 3700
-max_countour_area = 100000
+    # Filter out contours that are too small or too large
+    min_countour_area = 3700
+    max_countour_area = 100000
 
-# Loop over all the contours
-for i, c in enumerate(contours):
+    # Loop over all the contours
+    for i, c in enumerate(contours):
 
-    # Calculate the area of each contour
-    area = cv.contourArea(c)
+        # Calculate the area of each contour
+        area = cv.contourArea(c)
 
-    # Ignore contours that are too small or too large
-    # Could be used to filter out noise
-    if area < min_countour_area or area > max_countour_area:
-        continue
+        # Ignore contours that are too small or too large
+        # Could be used to filter out noise
+        if area < min_countour_area or area > max_countour_area:
+            continue
 
-    # Draw each contour only for visualisation purposes
-    cv.drawContours(img, contours, i, (0, 0, 255), 2)
+        # Draw each contour only for visualisation purposes
+        cv.drawContours(img, contours, i, (0, 0, 255), 2)
 
-    # Find the orientation of each shape
-    getOrientation(c, img)
+        # Find the orientation of each shape
+        getOrientation(c, img)
 
-# cv.imshow('Output Image', img)
-# cv.waitKey(0)
-# cv.destroyAllWindows()
+    # cv.imshow('Output Image', img)
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
 
-# Save the output image to the current directory
-cv.imwrite("output_img.jpg", img)
+    # Save the output image to the current directory
+    cv.imwrite("output_img.jpg", img)
+
+if __name__ == "__main__":
+    main()
