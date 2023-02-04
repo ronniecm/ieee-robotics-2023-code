@@ -84,26 +84,6 @@ class RobotCommand:
         self.pub.publish(4)
 
 
-'''
-'''
-#This is just a helper function it does not need to be in any specific class
-def getScore(distance, class_id):
-        score = 0
-        pedestal_weight = 25
-        duck_weight = 2
-
-        #Handle case for when distance is 0
-        if distance == 0:
-            return 0
-
-        if class_id < 4 and class_id >= 1:
-            score += pedestal_weight/np.sqrt(distance)
-        elif class_id == 4:
-            score = duck_weight/np.sqrt(distance)
-        else:
-            score = 0
-
-        return score
 
 #This will line it self up with object, right now works in x component and then y 
 #But will use foward kinematics soon 
@@ -160,25 +140,7 @@ class RealSense:
                  input_blob="input_0", output_cvg="scores", output_bbox="boxes",
                  threshold=self.args.threshold)
 
-        import cv2
-
-    def inCenterFrame(self, center_x):
-        if center_x < self.frame_center + self.threshold/2 and center_x > self.frame_center - self.threshold/2:
-            return True
-        else:
-            return False
-    def centerToRight(self, center_x):
-        if center_x >= self.frame_center + self.threshold/2:
-            return True
-        else:
-            return False
-
-    def centerToLeft(self, center_x):
-        if center_x <= self.frame_center - self.threshold/2:
-            return True
-        else:
-            return False
-
+        
     def homeing(self, max_score_tuple):
 
         #Now we extract tuple date    
@@ -200,23 +162,7 @@ class RealSense:
             #we will stop for little so that we can remove the object/load caresol
                 print("REMOVE PEDESTAL")
                 self.bot.stopBot()
-        #Now we will go back to the home position
-        #Write something here to keep track of actions taken to get to this point
-        #We will need to write a function to go back to home position
-        #Now reverse the actions that it took to get to the object
-            print("REVERSING")
-        #print(actions)
-        #for action in actions:
-        #    pub.publish(action)
-        #    rate.sleep()
-        #    print(actions)
 
-        #Now that we have returned to our starting postion we can clear the actions that it 
-        #took to get to the object so that we can record actions to get to the next object
-        
-        #actions.clear()
-        #Now that we chave gone through all the actions we need to tell it to stop
-            self.bot.stopBot()
             return
             
         #Now we need to check if we are in a 100 pixel range of the center of the frame
@@ -237,9 +183,50 @@ class RealSense:
             self.bot.goFoward()
             #actions.append(6)
 
-    #Will make Helper Functions for where object is relative to fram
-    
-    #This is like the main loop
+   
+
+    '''
+    REALSENSE CLASS HElPER FUNCTIONS
+    '''
+    def inCenterFrame(self, center_x):
+        if center_x < self.frame_center + self.threshold/2 and center_x > self.frame_center - self.threshold/2:
+            return True
+        else:
+            return False
+    def centerToRight(self, center_x):
+        if center_x >= self.frame_center + self.threshold/2:
+            return True
+        else:
+            return False
+
+    def centerToLeft(self, center_x):
+        if center_x <= self.frame_center - self.threshold/2:
+            return True
+        else:
+            return False
+
+    def getScore(distance, class_id):
+        score = 0
+        pedestal_weight = 25
+        duck_weight = 2
+
+        #Handle case for when distance is 0
+        if distance == 0:
+            return 0
+
+        if class_id < 4 and class_id >= 1:
+            score += pedestal_weight/np.sqrt(distance)
+        elif class_id == 4:
+            score = duck_weight/np.sqrt(distance)
+        else:
+            score = 0
+
+        return score
+
+    '''
+    This is like the main loop
+    '''
+
     def run(self):
         
         while True:
@@ -333,8 +320,7 @@ class RealSense:
                 break
 
 if __name__ == "__main__":
-    
-    
+    #Takes in camera dimensions
     camera = RealSense(640, 480)
     camera.run()
 
