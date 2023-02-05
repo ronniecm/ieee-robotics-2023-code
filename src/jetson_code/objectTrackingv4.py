@@ -43,21 +43,59 @@ import jetson_utils_python
 
 import rospy
 from std_msgs.msg import Int8
-from std_msgs,msg import Float64
+from std_msgs.msg import Float64
 
 #This class will serve as the direct communication from jetson to arduino
 #Using this class will allow us to talk to the arduino
 
 class RobotCommand:
-    def __init__(self, node_name, command_topic, msg_type, queue_size):
-        rospy.init_node(node_name, anonymous=True)
+    def __init__(self, robot_name, node_name, command_topic, msg_type, queue_size):
+
+        try:
+            rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
+            self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), msg_type, queue_size =10)
+
+            rospy.Subscriber('%s/ultraFront' %robot_name, Float64, self.ultraFront)
+            rospy.Subscriber('%s/ultraRight' %robot_name, Float64, self.ultraRight)
+            rospy.Subscriber('%s/ultraBack' %robot_name, Float64, self.ultraBack)
+            rospy.Subscriber('%s/ultraLeft' %robot_name, Float64, self.ultraLeft)
+
+            print("ROS SETUP OKAY")
+
+        except:
+            print("SOMETHING ROS RELATED FUCKED UP")
+            pass
+            #print("Could no set up ROS topic: %s/%s" %(robot_name, command_topic))
+
+           
+
         #Using .pub() to publish messages to robot
+        self.robot_name = robot_name
         self.msg_type = msg_type
         self.command_topic = command_topic
-        self.pub = rospy.Publisher(command_topic, msg_type, queue_size =10)
         self.rate = rospy.Rate(10)
         self.prevDectect = False
         self.reversedActions = []
+        
+
+    
+    '''
+    ROS Callback functions
+    '''
+
+    def ultraFront(self, msg):
+        print(msg.data, "GOT READING!!!!")
+        pass
+    def ultraRight(self, msg):
+        pass
+    def ultraBack(self, msg):
+        pass
+    def ultraLeft(self, msg):
+        pass
+
+        #Now we will set up the subscribers for the ultrasonic sensors
+
+
         #This should be all that we need to run once to make sure that everything is setup okay
         #Now we can make different commands for the robot
     
@@ -264,7 +302,7 @@ class RealSense:
             center_pixel_dist = depth_frame.get_distance(int(320),int(240))
 
             
-            if self.detections.isEmpty()
+            if self.detections.isEmpty():
  
                 self.bot.stopBot()
                 
@@ -325,9 +363,12 @@ class RealSense:
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("talker","chatter", Int8, queue_size = 10)
-    camera = RealSense(bot)
-    camera.run()
+    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
+    while True:
+        bot.stopBot()
+        
+    #camera = RealSense(bot)
+    #camera.run()
 
 
       
@@ -341,20 +382,8 @@ Need to make a function that subscribes to Arduino ultrasonic sensors
 
 '''
 
-def ultraFront(data):
-    pass
-def ultraRight(data):
-    pass
-def ultraBack(data):
-    pass
-def ultraLeft(data):
-    pass
 
-def ultraListener():
-    rospy.Subscriber('ultraFront', Float64, queue_size =10)
-    rospy.Subscriber('ultraRight', Float64, queue_size =10)
-    rospy.Subscriber('ultraBack', Float64, queue_size =10)
-    rospy.Subscriber('ultraLeft', Float64, queue_size =10)
+    
 
 
 
