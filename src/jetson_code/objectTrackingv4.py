@@ -166,7 +166,7 @@ class RealSense:
             return
             
         #Now we need to check if we are in a 100 pixel range of the center of the frame
-        if self.inCenterFrame(center_x) is False:
+        if not self.inCenterFrame(center_x):
         
             #We need to check  if center bounding box is on left or right of screen
             if self.centerToRight(center_x):
@@ -179,7 +179,7 @@ class RealSense:
                 self.bot.goLeft()
             
     
-        elif self.inCenterFrame(center_x) is True:
+        elif self.inCenterFrame(center_x):
             self.bot.goFoward()
             #actions.append(6)
 
@@ -222,7 +222,11 @@ class RealSense:
             score = 0
 
         return score
-
+    def isEmpty():
+        if len(self.detections ) == 0:
+            return True
+        else:
+            return False
     '''
     This is like the main loop
     '''
@@ -250,7 +254,7 @@ class RealSense:
             # img = input.Capture()
 
             # detect objects in the image (with overlay)
-            detections = self.net.Detect(img, overlay=self.args.overlay)
+            self.detections = self.net.Detect(img, overlay=self.args.overlay)
 
             # print the detections
             print("detected {:d} objects in image".format(len(detections)))
@@ -259,10 +263,9 @@ class RealSense:
             center_pixel_dist = depth_frame.get_distance(int(320),int(240))
 
             
-            if len(detections) == 0:
+            if self.detections.isEmpty()
  
                 self.bot.stopBot()
-                
                 
                 #elif center_pixel_dist >= 0.5:
                     #when we detect something closeby we will stop rotating and move foward
