@@ -89,9 +89,9 @@ class RobotCommand:
 #But will use foward kinematics soon 
 
 class RealSense:
-    def __init__(self, screen_width, screen_height):
+    def __init__(self,botObject):
         #We will create a Robot command object here:
-        self.bot = RobotCommand("talker","chatter", Int8, queue_size = 10)
+        self.bot = botObject
 
         self.screen_width = screen_width
         self.screen_height = screen_height
@@ -321,7 +321,8 @@ class RealSense:
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    camera = RealSense(640, 480)
+    bot = RobotCommand("talker","chatter", Int8, queue_size = 10)
+    camera = RealSense(bot)
     camera.run()
 
 
