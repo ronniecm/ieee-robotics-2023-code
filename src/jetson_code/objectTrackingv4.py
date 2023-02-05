@@ -329,15 +329,12 @@ if __name__ == "__main__":
     camera.run()
 
 
-        
-
-
-        
-    
-   
-    
-    
-
+      
+#TODO
+'''
+Look into how to access IMU data:
+Follow link: https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
+'''
     
 
     
