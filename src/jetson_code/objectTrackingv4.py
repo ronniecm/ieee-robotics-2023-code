@@ -43,6 +43,7 @@ import jetson_utils_python
 
 import rospy
 from std_msgs.msg import Int8
+from std_msgs,msg import Float64
 
 #This class will serve as the direct communication from jetson to arduino
 #Using this class will allow us to talk to the arduino
@@ -334,7 +335,32 @@ if __name__ == "__main__":
 '''
 Look into how to access IMU data:
 Follow link: https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
+
+Need to make a function that subscribes to Arduino ultrasonic sensors
+    They need a function in the void loop that publishes ultra sonic readingsr
+
 '''
+
+def ultraFront(data):
+    pass
+def ultraRight(data):
+    pass
+def ultraBack(data):
+    pass
+def ultraLeft(data):
+    pass
+
+def ultraListener():
+    rospy.Subscriber('ultraFront', Float64, queue_size =10)
+    rospy.Subscriber('ultraRight', Float64, queue_size =10)
+    rospy.Subscriber('ultraBack', Float64, queue_size =10)
+    rospy.Subscriber('ultraLeft', Float64, queue_size =10)
+
+
+
+
+
+
     
 
     
