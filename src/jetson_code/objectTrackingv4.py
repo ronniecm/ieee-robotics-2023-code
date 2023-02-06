@@ -26,20 +26,24 @@
 # Modified by Juan Suquilanda
 # Modified by: Jhonny Velasquez
 
-import sys
-import argparse
-import time
+onJetson = False
 
-# import pyrealsense2 as rs
+if onJetson:
 
-import numpy as np
-import cv2
-import pyrealsense2 as rs
+    import sys
+    import argparse
+    import time
+
+    # import pyrealsense2 as rs
+
+    import numpy as np
+    import cv2
+    import pyrealsense2 as rs
 
 
-from jetson_inference import detectNet
-from jetson_utils import videoSource, videoOutput, logUsage
-import jetson_utils_python
+    from jetson_inference import detectNet
+    from jetson_utils import videoSource, videoOutput, logUsage
+    import jetson_utils_python
 
 import rospy
 from std_msgs.msg import Int8
@@ -366,6 +370,7 @@ if __name__ == "__main__":
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
     while True:
         bot.stopBot()
+        break
         
     #camera = RealSense(bot)
     #camera.run()
