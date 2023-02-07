@@ -48,6 +48,7 @@ if onJetson:
 import rospy
 from std_msgs.msg import Int8
 from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist
 
 #This class will serve as the direct communication from jetson to arduino
 #Using this class will allow us to talk to the arduino
@@ -103,7 +104,18 @@ class RobotCommand:
         #This should be all that we need to run once to make sure that everything is setup okay
         #Now we can make different commands for the robot
     
-    def buildMsg(self, msg_type, msg):
+    def buildMsg(self, x, y, rot):
+        msg = Twist()
+        print("Before params: ", msg)
+        print("Building msg with following params: %s,%s,%s" %(x,y,rot))
+        msg.linear.x = x
+        msg.linear.y = y
+
+        msg.angular.z = rot
+        print("Message Built", msg)
+        print(msg)
+    
+        
         #Put the foward kinematics stuff here
         pass
 
@@ -370,6 +382,8 @@ if __name__ == "__main__":
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
     while True:
         bot.stopBot()
+        bot.buildMsg(1, 1, 1)
+        break
         
         
     #camera = RealSense(bot)
