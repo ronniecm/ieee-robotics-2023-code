@@ -1,114 +1,86 @@
-int trigPin = 11;    // Trigger
-int echoPin = 12;    // Echo
-int trigPinS = 10;
-int echoPinS = 9;
-int trigPinT = 8;
-int echoPinT = 13;
-long duration, cm, inches;
-long duration1, cm1, inches1;
-long durationT,cmT,inchesT;
+//Front Left trig and echo pins and distance
+#define Front_Left_trigPin 11    // Trigger
+#define Front_Left_echoPin 12    // Echo
+long duration_FrontLeft, cm_FrontLeft, inches_FrontLeft;
+
+//Back Left trig and echo pins and distance
+#define Back_Left_trigPin 10
+#define Back_Left_echoPin 9
+long duration_Back_Left, cm_Back_Left, inches_Back_Left;
+
+//Top Left trig and echo pins and distance
+#define Top_Left_trigPin 13
+#define Top_Left_echoPin 8
+long duration_Top_Left,cm_Top_Left,inches_Top_Left;
+
 void setup() {
   //Serial Port begin
   Serial.begin (9600);
   //Define inputs and outputs
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-  pinMode(trigPinS, OUTPUT);
-  pinMode(echoPinS, INPUT);
-  pinMode(trigPinT,INPUT);
-  pinMode(echoPinT,OUTPUT);
+  pinMode(Front_Left_trigPin, OUTPUT);
+  pinMode(Front_Left_echoPin, INPUT);
+
+  pinMode(Back_Left_trigPin, OUTPUT);
+  pinMode(Back_Left_echoPin, INPUT);
+  
+  pinMode(Top_Left_trigPin,OUTPUT);
+  pinMode(Top_Left_echoPin,INPUT);
+  
 }
  
 void loop() {
+  //Below is front left calculations
   // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
   // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-  digitalWrite(trigPin, LOW);
+  digitalWrite(Front_Left_trigPin, LOW);
   delayMicroseconds(5);
-  digitalWrite(trigPin, HIGH);
+  digitalWrite(Front_Left_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPin, LOW);
+  digitalWrite(Front_Left_trigPin, LOW);
  
   // Read the signal from the sensor: a HIGH pulse whose
   // duration is the time (in microseconds) from the sending
   // of the ping to the reception of its echo off of an object.
-  pinMode(echoPin, INPUT);
-  
-  duration = pulseIn(echoPin, HIGH);
- 
+  pinMode(Front_Left_echoPin, INPUT);
+  duration_FrontLeft = pulseIn(Front_Left_echoPin, HIGH);
   // Convert the time into a distance
-  cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
-  inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
+  cm_FrontLeft = (duration_FrontLeft/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  inches_FrontLeft = (duration_FrontLeft/2) / 74;   // Divide by 74 or multiply by 0.0135
+  Serial.print(inches_FrontLeft);
+  Serial.println(" Inches Front Left");
+  delay(1000);
 
-  //Serial.print(inches);
-  //Serial.print("in FRONT, ");
-  //Serial.println();
 
-  delay(100);
-
-  digitalWrite(trigPinS, LOW);
+  //below is back left calculations
+  digitalWrite(Back_Left_trigPin, LOW);
   delayMicroseconds(5);
-  digitalWrite(trigPinS, HIGH);
+  digitalWrite(Back_Left_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPinS, LOW);
-
-  pinMode(echoPinS, INPUT);
-
-  duration1 = pulseIn(echoPinS, HIGH);
- 
+  digitalWrite(Back_Left_trigPin, LOW);
+  pinMode(Back_Left_echoPin, INPUT);
+  duration_Back_Left = pulseIn(Back_Left_echoPin, HIGH);
   // Convert the time into a distance
-  cm1 = (duration1/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
-  inches1 = (duration1/2) / 74;   // Divide by 74 or multiply by 0.0135
+  cm_Back_Left = (duration_Back_Left/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  inches_Back_Left = (duration_Back_Left/2) / 74;   // Divide by 74 or multiply by 0.0135
+  Serial.print(inches_Back_Left);
+  Serial.println(" Back Left ");
+  delay(1000);
 
-  //Serial.print(inches1);
-  //Serial.print("in SIDE, ");
-  //Serial.println();
-  delay(100);
-  digitalWrite(trigPinT,LOW);
+
+  //below is Top Left calculations
+  digitalWrite(Top_Left_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(trigPinT, HIGH);
+  digitalWrite(Top_Left_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigPinT,LOW);
-  
-  pinMode(echoPinT, INPUT);
+  digitalWrite(Top_Left_trigPin,LOW);
+  pinMode(Top_Left_echoPin, INPUT);
+  duration_Top_Left = pulseIn(Top_Left_echoPin, HIGH);
+  cm_Top_Left = (duration_Top_Left/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
+  inches_Top_Left = (duration_Top_Left/2) / 74;  
+  Serial.print(inches_Top_Left);
+  Serial.println(" Top Left ");
+  delay(1000);
 
-  durationT = pulseIn(echoPinT, HIGH);
-  cmT = (durationT/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
-  inchesT = (durationT/2) / 74;  
 
-  delay(100);
-
-  if(inches <= 3)
-  {
-    if(inches1 <= 3)
-    {
-      Serial.print("CORNER Detected");
-      Serial.println();
-    }
-    else
-    {
-    Serial.print("On Gameboard");
-    Serial.println();
-    }
-  }
-  else if(inches1 <= 3)
-  {
-    Serial.print("SIDE Detected");
-    Serial.println();
-  }
-  else if(inchesT-inches1 <= 2)
-  {
-      Serial.print("MIDDLE");
-      Serial.println();
-    
-  }
- else
-  {
-    Serial.print("On Gameboard");
-    Serial.println();
-    
-  }
- 
-
-  delay(250);
 
 }
