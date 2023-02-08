@@ -288,8 +288,12 @@ class RealSense:
 
     #Realsense stops detecting around 0.15 so we will do 1 cm before that
     def checkWalls(self):
-        if self.right_pixel_dist <= .16 or self.left_pixel_dist <= 0.16:
+        
+        if self.right_pixel_dist <= .20 or self.left_pixel_dist <= 0.20:
             error = self.right_pixel_dist - self.left_pixel_dist
+            print("Right Distance: %f" %self.right_pixel_dist)
+            print("Left Distance: %f" %self.left_pixel_dist)
+
             print("Distance Error to walls: %f" %error)
             
             #For now we will allow half a centimeter of error. Need to test to make erros smaller
