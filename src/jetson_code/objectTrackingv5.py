@@ -371,7 +371,7 @@ class RealSense:
                     #If we are getting distance then there is something in frame
                     #but we are not guarenteed that it is accurate
                     if dist > 0:
-                        score = getScore(dist, class_id)
+                        score = self.getScore(dist, class_id)
                         #print("CurrentScore" , score)
                         #Score will always be greater than zero here
                         #info = (class_id, score, dist, center_x, actions)
