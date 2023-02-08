@@ -26,7 +26,7 @@
 # Modified by Juan Suquilanda
 # Modified by: Jhonny Velasquez
 
-onJetson = False
+onJetson = True
 
 if onJetson:
 
@@ -132,12 +132,12 @@ class RobotCommand:
 #But will use foward kinematics soon 
 
 class RealSense:
-    def __init__(self,botObject):
+    def __init__(self, botObject):
         #We will create a Robot command object here:
         self.bot = botObject
 
-        self.screen_width = screen_width
-        self.screen_height = screen_height
+        self.screen_width = 640
+        self.screen_height = 480
         self.frame_center = self.screen_width/2
         self.threshold = 200 
 
@@ -248,7 +248,7 @@ class RealSense:
         else:
             return False
 
-    def getScore(distance, class_id):
+    def getScore(self, distance, class_id):
         score = 0
         pedestal_weight = 25
         duck_weight = 2
@@ -265,8 +265,9 @@ class RealSense:
             score = 0
 
         return score
-    def isEmpty():
-        if len(self.detections ) == 0:
+
+    def isEmpty(self):
+        if len(self.detections) == 0:
             return True
         else:
             return False
@@ -300,13 +301,13 @@ class RealSense:
             self.detections = self.net.Detect(img, overlay=self.args.overlay)
 
             # print the detections
-            print("detected {:d} objects in image".format(len(detections)))
+            print("detected {:d} objects in image".format(len(self.detections)))
 
             #Might need this somewhere else in the code
             center_pixel_dist = depth_frame.get_distance(int(320),int(240))
 
             
-            if self.detections.isEmpty():
+            if len(self.detections) == 0:
  
                 self.bot.stopBot()
                 
@@ -323,7 +324,7 @@ class RealSense:
                 score = 0
                 #This will be for case that score is zero
 
-                for d in detections:
+                for d in self.detections:
                     class_id = d.ClassID
                     center_x, center_y = d.Center
                     print("Detection center",d.Center)
@@ -331,7 +332,7 @@ class RealSense:
                     #If we are getting distance then there is something in frame
                     #but we are not guarenteed that it is accurate
                     if dist > 0:
-                        score = getScore(dist, class_id)
+                        score = self.getScore(dist, class_id)
                         #print("CurrentScore" , score)
                         #Score will always be greater than zero here
                         #info = (class_id, score, dist, center_x, actions)
@@ -367,13 +368,9 @@ class RealSense:
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
-    while True:
-        bot.stopBot()
-        break
-        
-    #camera = RealSense(bot)
-    #camera.run()
+    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)    
+    camera = RealSense(bot)
+    camera.run()
 
 
       
