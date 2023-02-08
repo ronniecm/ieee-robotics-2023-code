@@ -288,7 +288,7 @@ class RealSense:
 
     #Realsense stops detecting around 0.15 so we will do 1 cm before that
     def checkWalls(self):
-        
+
         if self.right_pixel_dist <= .20 or self.left_pixel_dist <= 0.20:
             error = self.right_pixel_dist - self.left_pixel_dist
             print("Right Distance: %f" %self.right_pixel_dist)
@@ -343,8 +343,8 @@ class RealSense:
 
             #Extracting pixel distance from far right and far left to measure alignment error
             #And then later correct in the checkWalls() function
-            self.right_pixel_dist = center_pixel_dist = depth_frame.get_distance(int(20),int(240))
-            self.left_pixel_dist = center_pixel_dist = depth_frame.get_distance(int(620),int(240))
+            self.left_pixel_dist = depth_frame.get_distance(int(20),int(240))
+            self.right_pixel_dist = depth_frame.get_distance(int(620),int(240))
 
 
             
