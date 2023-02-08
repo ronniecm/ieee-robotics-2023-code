@@ -133,8 +133,10 @@ class RobotCommand:
         self.pub.publish(3)
         pass
     def rotateLeft(self):
+        self.pub.publish(7)
         pass
     def rotateRight(self):
+        self.pub.publish(8)
         pass
     def stopBot(self):
         self.pub.publish(4)
@@ -283,6 +285,23 @@ class RealSense:
             return True
         else:
             return False
+
+    #Realsense stops detecting around 0.15 so we will do 1 cm before that
+    def checkWalls(self):
+        if self.right_pixel_dist <= .16 or self.left_pixel_dist <= 0.16:
+            error = self.right_pixel_dist - self.left_pixel_dist
+            print("Distance Error to walls: %f" %error)
+            
+            #For now we will allow half a centimeter of error. Need to test to make erros smaller
+            if abs(error) >= 0 or abs(error) < 0.5:
+                "Error Corrected!"
+                return
+            else:
+                #The sign of the error determines what directions to rotate in
+                if error < 0:
+                    self.bot.rotateLeft()
+                if error > 0:
+                    self.bot.rotateRight()
     '''
     This is like the main loop
     '''
@@ -316,12 +335,20 @@ class RealSense:
             print("detected {:d} objects in image".format(len(self.detections)))
 
             #Might need this somewhere else in the code
-            center_pixel_dist = depth_frame.get_distance(int(320),int(240))
+            self.center_pixel_dist = depth_frame.get_distance(int(320),int(240))
+
+            #Extracting pixel distance from far right and far left to measure alignment error
+            #And then later correct in the checkWalls() function
+            self.right_pixel_dist = center_pixel_dist = depth_frame.get_distance(int(20),int(240))
+            self.left_pixel_dist = center_pixel_dist = depth_frame.get_distance(int(620),int(240))
+
 
             
             if len(self.detections) == 0:
- 
-                self.bot.stopBot()
+                
+                #Test to make implementing ultrasonics easier
+                self.checkWalls()
+                #self.bot.stopBot()
                 
                 #elif center_pixel_dist >= 0.5:
                     #when we detect something closeby we will stop rotating and move foward
