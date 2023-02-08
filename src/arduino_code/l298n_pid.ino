@@ -21,61 +21,61 @@
 #define ENCA_1 27 
 #define ENCB_1 28
 
-#define ENCA_2 31
-#define ENCB_2 32
+#define ENCA_2 37
+#define ENCB_2 38
 
-#define ENCA_3 37
-#define ENCB_3 38
+#define ENCA_3 31
+#define ENCB_3 32
 
 #define ENCA_4 33
 #define ENCB_4 34
 
 #define ENCPOWER 39
 
-/*
-double kP = 5;
-double kI = 10;
-double kD = 0;
-double setpoint, input, output, toMotor;
-PID pidController(&input, &output, &setpoint, kP, kI, kD, DIRECT);
+double kP[4] = {15, 12.5, 8, 15};
+double kI = 0.0;
+double kD[4] = {0.35, 0.4, 0.3, 0.4};
+double setpoint[4];
+double in[4];
+double out[4];
 
-float demand= 0;
-*/
+PID pidController1(&in[0], &out[0], &setpoint[0], kP[0], kI, kD[0], DIRECT);
+PID pidController2(&in[1], &out[1], &setpoint[1], kP[1], kI, kD[1], DIRECT);
+PID pidController3(&in[2], &out[2], &setpoint[2], kP[2], kI, kD[2], DIRECT);
+PID pidController4(&in[3], &out[3], &setpoint[3], kP[3], kI, kD[3], DIRECT);
 
 int pos_i[4];
 unsigned long previousTime[4];
 int prevPos[4];
-float rpm[4];
-
-/*
-volatile float velocity_i = 0;
-volatile long prevT_i;
+double rpmSum[4];
+double finalRpm[4];
+float demand = 0;
+int count = 0;
 
 unsigned long currentMillis;
 unsigned long previousMillis;
-*/
+
 
 void setup() {
   // put your setup code here, to run once:
   pinMode(ENA_1, OUTPUT);
+  pinMode(ENB_1, OUTPUT);
+  pinMode(ENA_2, OUTPUT);
+  pinMode(ENB_2, OUTPUT);
+
   pinMode(IN1_1, OUTPUT);
   pinMode(IN2_1, OUTPUT);
-  pinMode(ENB_1, OUTPUT);
   pinMode(IN3_1, OUTPUT);
   pinMode(IN4_1, OUTPUT);
+  pinMode(IN1_2, OUTPUT);
+  pinMode(IN2_2, OUTPUT);
+  pinMode(IN3_2, OUTPUT);
+  pinMode(IN4_2, OUTPUT);
   
   pinMode(ENCA_1, INPUT);
   pinMode(ENCB_1, INPUT);
   pinMode(ENCA_2, INPUT);
   pinMode(ENCB_2, INPUT);
-
-  pinMode(ENA_2, OUTPUT);
-  pinMode(IN1_2, OUTPUT);
-  pinMode(IN2_2, OUTPUT);
-  pinMode(ENB_2, OUTPUT);
-  pinMode(IN3_2, OUTPUT);
-  pinMode(IN4_2, OUTPUT);
-  
   pinMode(ENCA_3, INPUT);
   pinMode(ENCB_3, INPUT);
   pinMode(ENCA_4, INPUT);
@@ -88,170 +88,147 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENCB_3), readEncoder3, RISING);
   attachInterrupt(digitalPinToInterrupt(ENCB_4), readEncoder4, RISING);
 
+  pidController1.SetMode(AUTOMATIC);
+  pidController2.SetMode(AUTOMATIC);
+  pidController3.SetMode(AUTOMATIC);
+  pidController4.SetMode(AUTOMATIC);
 
-  /*
-  pidController.SetMode(AUTOMATIC);
-  pidController.SetOutputLimits(-100, 100);
-  pidController.SetSampleTime(10);
-  */
+  pidController1.SetSampleTime(10);
+  pidController2.SetSampleTime(10);
+  pidController3.SetSampleTime(10);
+  pidController4.SetSampleTime(10);
+
   Serial.begin(9600);
   digitalWrite(ENCPOWER, HIGH);
-  //Timer1.initialize(1000);
-  //Timer1.attachInterrupt(calcRPM);
+
+  Timer1.initialize(1000);
+  Timer1.attachInterrupt(calcRPM);
 }
 
 
 void loop() {
-  forward(0.5);
-  int pos[4];
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
-    for(int i = 0; i < 4; i++) {
-        pos[i] = pos_i[i];
-      }  
-  }
+  currentMillis = millis();
+  if (currentMillis - previousMillis >= 10) {
+    previousMillis = currentMillis;
+    if (Serial.available() > 0) {
+      char c = Serial.read();
+      if (c == 'a') {
+        demand += 0.1;  
+      }
+      else if (c == 'z') {
+        demand -= 0.1;  
+      }
+      else if (c == 'g') {
+        demand = 0;  
+      }
+      Serial.println(demand);
+    }
+    mecanumDrive(0.0, demand, 0);
+  }    
   for(int i = 0; i < 4; i++) {
-    Serial.print(pos[i]);
-    Serial.print(" ");  
+    Serial.print(finalRpm[i]);
+    Serial.print(" ");
   }
   Serial.println();
 }
 
+ 
 void calcRPM() {
+  count++;
   for(int i = 0; i < 4; i++) {
     int deltaPos = pos_i[i] - prevPos[i];
     double revs = deltaPos / 3000.0;
-    double rpm = revs * 60000.0;
-    Serial.print(rpm);
-    Serial.print(" ");
+    double rpmCalc = revs * 60000;
     prevPos[i] = pos_i[i];
+    rpmSum[i] += rpmCalc;
+    if (count >= 10) {
+      finalRpm[i] = rpmSum[i] / 10.0;
+      rpmSum[i] = 0;
+    }
   }
-  Serial.println();  
+  if(count >= 10) {
+    count = 0;
+  }
 }
 
-void rotateL(float norm) {
-  int speed = (norm) * 255;
-  digitalWrite(IN1_1, HIGH);
-  digitalWrite(IN2_1, LOW);
-  analogWrite(ENA_1, speed);
+void mecanumDrive(float x, float y, float rotation) {
+  double frontLeft = y + x + rotation;
+  double frontRight = y - x - rotation;
+  double backLeft = y - x + rotation;
+  double backRight = y + x - rotation;
 
-  digitalWrite(IN3_1, HIGH);
-  digitalWrite(IN4_1, LOW);
-  analogWrite(ENB_1, speed);
+  double frontLeftRPM = (frontLeft) * 340.0 / 2.0;
+  double frontRightRPM = frontRight * 340.0 / 2.0;
+  double backLeftRPM = backLeft * 340.0 / 2.0;
+  double backRightRPM = backRight * 340.0 / 2.0;
+  
+  setpoint[0] = abs(frontLeftRPM);
+  setpoint[1] = abs(frontRightRPM);
+  setpoint[2] = abs(backLeftRPM);
+  setpoint[3] = abs(backRightRPM);
+  
+  for(int i = 0; i < 4; i++) {
+    in[i] = abs(finalRpm[i]);  
+  }
+  pidController1.Compute();
+  pidController2.Compute();
+  pidController3.Compute();
+  pidController4.Compute();
+  
+  frontLeft = constrain(frontLeft * 255, -255, 255);
+  frontRight = frontRight * 255;
+  backLeft = backLeft * 255;
+  backRight = backRight * 255;
 
-  digitalWrite(IN1_2, HIGH);
-  digitalWrite(IN2_2, LOW);
-  analogWrite(ENA_2, speed);
+  // Apply the calculated values to the motor control pins
+  if(frontLeft >= 0) {
+    digitalWrite(IN1_1, LOW);
+    digitalWrite(IN2_1, HIGH);
+  } else {
+    digitalWrite(IN1_1, HIGH);
+    digitalWrite(IN2_1, LOW);
+  }
+  analogWriteFrequency(ENA_1, 490);
+  analogWrite(ENA_1, abs(out[0]));
+  //analogWrite(ENA_1, 25);
+  
+  if(frontRight >= 0) {
+    digitalWrite(IN3_1, HIGH);
+    digitalWrite(IN4_1, LOW);
+  } else {
+    digitalWrite(IN3_1, LOW);
+    digitalWrite(IN4_1, HIGH);
+  }
+  analogWriteFrequency(ENB_1, 490);
+  analogWrite(ENB_1, abs(out[1]));
+  //analogWrite(ENB_1, 25);
 
-  digitalWrite(IN3_2, LOW);
-  digitalWrite(IN4_2, HIGH);
-  analogWrite(ENB_2, speed);
+
+  if(backLeft >= 0) {
+    digitalWrite(IN3_2, LOW);
+    digitalWrite(IN4_2, HIGH);
+  } else {
+    digitalWrite(IN3_2, HIGH);
+    digitalWrite(IN4_2, LOW);
+  }
+  analogWriteFrequency(ENB_2, 490);
+  analogWrite(ENB_2, abs(out[2]));
+  //analogWrite(ENB_2, 25);
+
+  if(backRight >= 0) {
+    digitalWrite(IN1_2, LOW);
+    digitalWrite(IN2_2, HIGH);
+  } else {
+    digitalWrite(IN1_2, HIGH);
+    digitalWrite(IN2_2, LOW);
+  }
+  analogWriteFrequency(ENA_2, 490);
+  analogWrite(ENA_2, abs(out[3]));
+  //analogWrite(ENA_2, 25);
+
 }
 
-void rotateR(float norm) {
-  int speed = (norm) * 255;
-  digitalWrite(IN1_1, LOW);
-  digitalWrite(IN2_1, HIGH);
-  analogWrite(ENA_1, speed);
 
-  digitalWrite(IN3_1, LOW);
-  digitalWrite(IN4_1, HIGH);
-  analogWrite(ENB_1, speed);
-
-  digitalWrite(IN1_2, LOW);
-  digitalWrite(IN2_2, HIGH);
-  analogWrite(ENA_2, speed);
-
-  digitalWrite(IN3_2, HIGH);
-  digitalWrite(IN4_2, LOW);
-  analogWrite(ENB_2, speed);
-}
-
-void reverse(float norm) {
-  int speed = (norm) * 255;
-  digitalWrite(IN1_1, HIGH);
-  digitalWrite(IN2_1, LOW);
-  analogWrite(ENA_1, speed);
-
-  digitalWrite(IN3_1, LOW);
-  digitalWrite(IN4_1, HIGH);
-  analogWrite(ENB_1, speed);
-
-  digitalWrite(IN1_2, LOW);
-  digitalWrite(IN2_2, HIGH);
-  analogWrite(ENA_2, speed);
-
-  digitalWrite(IN3_2, LOW);
-  digitalWrite(IN4_2, HIGH);
-  analogWrite(ENB_2, speed);  
-}
-
-void forward(float norm) {
-  int speed = (norm) * 255;
-  digitalWrite(IN1_1, LOW);
-  digitalWrite(IN2_1, HIGH);
-  analogWrite(ENA_1, speed);
-
-  digitalWrite(IN3_1, HIGH);
-  digitalWrite(IN4_1, LOW);
-  analogWrite(ENB_1, speed);
-
-  digitalWrite(IN1_2, HIGH);
-  digitalWrite(IN2_2, LOW);
-  analogWrite(ENA_2, speed);
-
-  digitalWrite(IN3_2, HIGH);
-  digitalWrite(IN4_2, LOW);
-  analogWrite(ENB_2, speed);  
-}
-
-void strafeR(float norm) {
-   int speed = (norm) * 255;
-  digitalWrite(IN1_1, LOW);
-  digitalWrite(IN2_1, HIGH);
-  analogWrite(ENA_1, speed);
-
-  digitalWrite(IN3_1, LOW);
-  digitalWrite(IN4_1, HIGH);
-  analogWrite(ENB_1, speed);
-
-  digitalWrite(IN1_2, HIGH);
-  digitalWrite(IN2_2, LOW);
-  analogWrite(ENA_2, speed);
-
-  digitalWrite(IN3_2, LOW);
-  digitalWrite(IN4_2, HIGH);
-  analogWrite(ENB_2, speed); 
-}
-
-void strafeL(float norm) {
-  int speed = (norm) * 255;
-  digitalWrite(IN1_1, HIGH);
-  digitalWrite(IN2_1, LOW);
-  analogWrite(ENA_1, speed);
-
-  digitalWrite(IN3_1, HIGH);
-  digitalWrite(IN4_1, LOW);
-  analogWrite(ENB_1, speed);
-
-  digitalWrite(IN1_2, LOW);
-  digitalWrite(IN2_2, HIGH);
-  analogWrite(ENA_2, speed);
-
-  digitalWrite(IN3_2, HIGH);
-  digitalWrite(IN4_2, LOW);
-  analogWrite(ENB_2, speed); 
-}
-
-void stopBot() {
-  digitalWrite(IN1_1, LOW);
-  digitalWrite(IN2_1, LOW);
-  digitalWrite(IN3_1, LOW);
-  digitalWrite(IN4_1, LOW);
-  digitalWrite(IN1_2, LOW);
-  digitalWrite(IN2_2, LOW);
-  digitalWrite(IN3_2, LOW);
-  digitalWrite(IN4_2, LOW);
-}  
 
 void readEncoder1(){
   // Read encoder B when ENCA rises
