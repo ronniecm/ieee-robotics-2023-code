@@ -149,8 +149,8 @@ class RealSense:
         #We will create a Robot command object here:
         self.bot = botObject
 
-        self.screen_width = screen_width
-        self.screen_height = screen_height
+        self.screen_width = 640
+        self.screen_height = 480
         self.frame_center = self.screen_width/2
         self.threshold = 200 
 
