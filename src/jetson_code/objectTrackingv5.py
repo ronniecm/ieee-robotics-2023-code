@@ -262,7 +262,7 @@ class RealSense:
         else:
             return False
 
-    def getScore(distance, class_id):
+    def getScore(self, distance, class_id):
         score = 0
         pedestal_weight = 25
         duck_weight = 2
