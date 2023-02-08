@@ -32,9 +32,9 @@
 
 #define ENCPOWER 39
 
-double kP[4] = {15, 12.5, 8, 15};
+double kP[4] = {10,8  ,10,9};
 double kI = 0.0;
-double kD[4] = {0.35, 0.4, 0.3, 0.4};
+double kD[4] = {0,0,0,0};
 double setpoint[4];
 double in[4];
 double out[4];
@@ -49,7 +49,7 @@ unsigned long previousTime[4];
 int prevPos[4];
 double rpmSum[4];
 double finalRpm[4];
-float demand = 0;
+double demand;
 int count = 0;
 
 unsigned long currentMillis;
@@ -80,6 +80,9 @@ void setup() {
   pinMode(ENCB_3, INPUT);
   pinMode(ENCA_4, INPUT);
   pinMode(ENCB_4, INPUT);
+  pidController2.SetMode(AUTOMATIC);
+  pidController3.SetMode(AUTOMATIC);
+  pidController4.SetMode(AUTOMATIC);
 
   pinMode(ENCPOWER, OUTPUT);
   
@@ -89,20 +92,18 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(ENCB_4), readEncoder4, RISING);
 
   pidController1.SetMode(AUTOMATIC);
-  pidController2.SetMode(AUTOMATIC);
-  pidController3.SetMode(AUTOMATIC);
-  pidController4.SetMode(AUTOMATIC);
 
   pidController1.SetSampleTime(10);
   pidController2.SetSampleTime(10);
   pidController3.SetSampleTime(10);
   pidController4.SetSampleTime(10);
 
-  Serial.begin(9600);
+  //Serial.begin(9600);
   digitalWrite(ENCPOWER, HIGH);
 
   Timer1.initialize(1000);
   Timer1.attachInterrupt(calcRPM);
+  demand = 0.0;
 }
 
 
@@ -111,25 +112,22 @@ void loop() {
   if (currentMillis - previousMillis >= 10) {
     previousMillis = currentMillis;
     if (Serial.available() > 0) {
-      char c = Serial.read();
-      if (c == 'a') {
-        demand += 0.1;  
-      }
-      else if (c == 'z') {
-        demand -= 0.1;  
-      }
-      else if (c == 'g') {
-        demand = 0;  
-      }
-      Serial.println(demand);
+      Serial.println("changing speed");
+      int n = Serial.parseInt();
+      demand = (double)n / 10;
+    } else {
+       demand = demand;  
     }
-    mecanumDrive(0.0, demand, 0);
-  }    
+    Serial.println(demand);
+    mecanumDrive(demand, 0, 0);
+  } 
+  /*  
   for(int i = 0; i < 4; i++) {
     Serial.print(finalRpm[i]);
     Serial.print(" ");
   }
   Serial.println();
+  */
 }
 
  
@@ -161,6 +159,11 @@ void mecanumDrive(float x, float y, float rotation) {
   double frontRightRPM = frontRight * 340.0 / 2.0;
   double backLeftRPM = backLeft * 340.0 / 2.0;
   double backRightRPM = backRight * 340.0 / 2.0;
+
+  double fl = abs(frontLeft) * (255 - 50) + 50;
+  double fr = abs(frontRight) * (255-50) + 50;
+  double bl = abs(backLeft) * (255-50) + 50;
+  double br = abs(backRight) * (255-50) + 50;
   
   setpoint[0] = abs(frontLeftRPM);
   setpoint[1] = abs(frontRightRPM);
@@ -189,7 +192,7 @@ void mecanumDrive(float x, float y, float rotation) {
     digitalWrite(IN2_1, LOW);
   }
   analogWriteFrequency(ENA_1, 490);
-  analogWrite(ENA_1, abs(out[0]));
+  analogWrite(ENA_1, fl);
   //analogWrite(ENA_1, 25);
   
   if(frontRight >= 0) {
@@ -200,7 +203,7 @@ void mecanumDrive(float x, float y, float rotation) {
     digitalWrite(IN4_1, HIGH);
   }
   analogWriteFrequency(ENB_1, 490);
-  analogWrite(ENB_1, abs(out[1]));
+  analogWrite(ENB_1, fr);
   //analogWrite(ENB_1, 25);
 
 
@@ -212,7 +215,7 @@ void mecanumDrive(float x, float y, float rotation) {
     digitalWrite(IN4_2, LOW);
   }
   analogWriteFrequency(ENB_2, 490);
-  analogWrite(ENB_2, abs(out[2]));
+  analogWrite(ENB_2, bl);
   //analogWrite(ENB_2, 25);
 
   if(backRight >= 0) {
@@ -223,7 +226,7 @@ void mecanumDrive(float x, float y, float rotation) {
     digitalWrite(IN2_2, LOW);
   }
   analogWriteFrequency(ENA_2, 490);
-  analogWrite(ENA_2, abs(out[3]));
+  analogWrite(ENA_2, br);
   //analogWrite(ENA_2, 25);
 
 }
