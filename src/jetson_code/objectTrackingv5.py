@@ -319,7 +319,7 @@ class RealSense:
             center_pixel_dist = depth_frame.get_distance(int(320),int(240))
 
             
-            if self.detections.isEmpty():
+            if len(self.detections) == 0:
  
                 self.bot.stopBot()
                 
