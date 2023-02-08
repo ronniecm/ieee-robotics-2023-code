@@ -26,7 +26,7 @@
 # Modified by Juan Suquilanda
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 if onJetson:
 
@@ -48,6 +48,7 @@ if onJetson:
 import rospy
 from std_msgs.msg import Int8
 from std_msgs.msg import Float64
+from geometry_msgs.msg import Twist
 
 #This class will serve as the direct communication from jetson to arduino
 #Using this class will allow us to talk to the arduino
@@ -97,13 +98,25 @@ class RobotCommand:
     def ultraLeft(self, msg):
         pass
 
+
         #Now we will set up the subscribers for the ultrasonic sensors
 
 
         #This should be all that we need to run once to make sure that everything is setup okay
         #Now we can make different commands for the robot
     
-    def buildMsg(self, msg_type, msg):
+    def buildMsg(self, x, y, rot):
+        msg = Twist()
+        print("Before params: ", msg)
+        print("Building msg with following params: %s,%s,%s" %(x,y,rot))
+        msg.linear.x = x
+        msg.linear.y = y
+
+        msg.angular.z = rot
+        print("Message Built", msg)
+        print(msg)
+    
+        
         #Put the foward kinematics stuff here
         pass
 
@@ -132,12 +145,12 @@ class RobotCommand:
 #But will use foward kinematics soon 
 
 class RealSense:
-    def __init__(self, botObject):
+    def __init__(self,botObject):
         #We will create a Robot command object here:
         self.bot = botObject
 
-        self.screen_width = 640
-        self.screen_height = 480
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         self.frame_center = self.screen_width/2
         self.threshold = 200 
 
@@ -227,7 +240,6 @@ class RealSense:
             #actions.append(6)
 
    
-
     '''
     REALSENSE CLASS HElPER FUNCTIONS
     '''
@@ -248,7 +260,7 @@ class RealSense:
         else:
             return False
 
-    def getScore(self, distance, class_id):
+    def getScore(distance, class_id):
         score = 0
         pedestal_weight = 25
         duck_weight = 2
@@ -266,8 +278,8 @@ class RealSense:
 
         return score
 
-    def isEmpty(self):
-        if len(self.detections) == 0:
+    def isEmpty():
+        if len(self.detections ) == 0:
             return True
         else:
             return False
@@ -307,7 +319,7 @@ class RealSense:
             center_pixel_dist = depth_frame.get_distance(int(320),int(240))
 
             
-            if len(self.detections) == 0:
+            if self.detections.isEmpty():
  
                 self.bot.stopBot()
                 
@@ -332,7 +344,7 @@ class RealSense:
                     #If we are getting distance then there is something in frame
                     #but we are not guarenteed that it is accurate
                     if dist > 0:
-                        score = self.getScore(dist, class_id)
+                        score = getScore(dist, class_id)
                         #print("CurrentScore" , score)
                         #Score will always be greater than zero here
                         #info = (class_id, score, dist, center_x, actions)
@@ -368,29 +380,28 @@ class RealSense:
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-<<<<<<< HEAD
-    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)    
-    camera = RealSense(bot)
-    camera.run()
-=======
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
     while True:
         bot.stopBot()
+        bot.buildMsg(1, 1, 1)
+        break
         
         
     #camera = RealSense(bot)
     #camera.run()
->>>>>>> 9d5aec63a5ff8366275982e44539e6897635f1bd
 
 
       
 #TODO
 '''
 Look into how to access IMU data:
-Follow link: https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
+Follow links:
+https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
+https://www.youtube.com/watch?v=20htSO0z-F4
 
 Need to make a function that subscribes to Arduino ultrasonic sensors
     They need a function in the void loop that publishes ultra sonic readingsr
+
 
 '''
 
