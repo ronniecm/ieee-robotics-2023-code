@@ -240,7 +240,6 @@ class RealSense:
             #actions.append(6)
 
    
-
     '''
     REALSENSE CLASS HElPER FUNCTIONS
     '''
@@ -278,7 +277,7 @@ class RealSense:
             score = 0
 
         return score
-        
+
     def isEmpty():
         if len(self.detections ) == 0:
             return True
@@ -396,10 +395,13 @@ if __name__ == "__main__":
 #TODO
 '''
 Look into how to access IMU data:
-Follow link: https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
+Follow links:
+https://github.com/IntelRealSense/librealsense/blob/master/doc/t265.md
+https://www.youtube.com/watch?v=20htSO0z-F4
 
 Need to make a function that subscribes to Arduino ultrasonic sensors
     They need a function in the void loop that publishes ultra sonic readingsr
+
 
 '''
 
