@@ -1,3 +1,9 @@
+/*
+Code was adapted and modified from https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/
+Goal is for there to be six ultrasonic sensors around the robot (2 on the left side, 2 on the right side, one on front, one on back)
+and create distance calculations of knowing where the robot is relatie to the gameboard
+*/
+
 //Front Left trig and echo pins and distance
 #define Front_Left_trigPin 11    // Trigger
 #define Front_Left_echoPin 12    // Echo
@@ -47,7 +53,7 @@ void loop() {
   cm_FrontLeft = (duration_FrontLeft/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
   inches_FrontLeft = (duration_FrontLeft/2) / 74;   // Divide by 74 or multiply by 0.0135
   Serial.print(inches_FrontLeft);
-  Serial.println(" Inches Front Left");
+  Serial.println(" Inches at Front Left Sensor");
   delay(1000);
 
 
@@ -63,7 +69,7 @@ void loop() {
   cm_Back_Left = (duration_Back_Left/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
   inches_Back_Left = (duration_Back_Left/2) / 74;   // Divide by 74 or multiply by 0.0135
   Serial.print(inches_Back_Left);
-  Serial.println(" Back Left ");
+  Serial.println(" Inches at Back Left Sensor");
   delay(1000);
 
 
@@ -78,7 +84,7 @@ void loop() {
   cm_Top_Left = (duration_Top_Left/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
   inches_Top_Left = (duration_Top_Left/2) / 74;  
   Serial.print(inches_Top_Left);
-  Serial.println(" Top Left ");
+  Serial.println(" Inches at Top Left Sensor");
   delay(1000);
 
 
