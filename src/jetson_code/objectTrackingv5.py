@@ -26,7 +26,7 @@
 # Modified by Juan Suquilanda
 # Modified by: Jhonny Velasquez
 
-onJetson = False
+onJetson = True
 
 if onJetson:
 
@@ -381,14 +381,11 @@ class RealSense:
 if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
-    while True:
-        bot.stopBot()
-        bot.buildMsg(1, 1, 1)
-        break
+    camera = RealSense(bot)
+    camera.run()
+
         
-        
-    #camera = RealSense(bot)
-    #camera.run()
+
 
 
       
