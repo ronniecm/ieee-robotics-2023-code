@@ -278,6 +278,7 @@ class RealSense:
             score = 0
 
         return score
+        
     def isEmpty():
         if len(self.detections ) == 0:
             return True
@@ -313,7 +314,7 @@ class RealSense:
             self.detections = self.net.Detect(img, overlay=self.args.overlay)
 
             # print the detections
-            print("detected {:d} objects in image".format(len(detections)))
+            print("detected {:d} objects in image".format(len(self.detections)))
 
             #Might need this somewhere else in the code
             center_pixel_dist = depth_frame.get_distance(int(320),int(240))
@@ -336,7 +337,7 @@ class RealSense:
                 score = 0
                 #This will be for case that score is zero
 
-                for d in detections:
+                for d in self.detections:
                     class_id = d.ClassID
                     center_x, center_y = d.Center
                     print("Detection center",d.Center)
