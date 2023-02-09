@@ -16,11 +16,9 @@ and create distance calculations of knowing where the robot is relative to the g
 #define Top_Left_trigPin 6
 #define Top_Left_echoPin 7
 
-
 //Front Right trig and echo pin
 #define Front_Right_trigPin 9
 #define Front_Right_echoPin 8
-
 
 //Back Right trig and echo pin
 #define Back_Right_trigPin 11
@@ -29,8 +27,10 @@ and create distance calculations of knowing where the robot is relative to the g
 //Bottom Right trig and echo pin
 #define Bottom_Right_trigPin 13
 #define Bottom_Right_echoPin 12
-
-
+//Coordinate System data points below
+int starting_x, starting_y;
+int current_x,current_y;
+bool rotation = false;
 void setup() 
 {
   Serial.begin(9600);
@@ -41,19 +41,15 @@ void setup()
   //Back Left
   pinMode(Back_Left_trigPin,OUTPUT);
   pinMode(Back_Left_echoPin,INPUT);
-
   //Top Left
   pinMode(Top_Left_trigPin,OUTPUT);
   pinMode(Top_Left_echoPin,INPUT);
-
   //Front Right
   pinMode(Front_Right_trigPin,OUTPUT);
   pinMode(Front_Right_echoPin,INPUT);
-
   //Back Right
   pinMode(Back_Right_trigPin,OUTPUT);
   pinMode(Back_Right_echoPin,INPUT);
-
   //Bottom Right
   pinMode(Bottom_Right_trigPin,OUTPUT);
   pinMode(Bottom_Right_echoPin,INPUT);
@@ -75,23 +71,92 @@ void loop()
   Serial.println(BaR);
   Serial.println(BoR);
   //now locate the robot based on the ultrasonic measurements to relative gameboard locations
+  if((FL < 3) || (FR < 3))
+  {
+    if(FL<3)
+    {
+      Serial.println("Left Wall");
+    }
+    else
+    {
+      Serial.println("Right Wall");
+    }
+  }
+  if((FL <3) &&(TL <3))
+  {
+    Serial.println("Top Left Corner");
+  }
+  if((FR <3) &&(BoR <3))
+  {
+    Serial.println("Back Right Corner");
+  }
   //Check the allignment of the robot
   alligned(FL,BL,FR,BaR);
   //check the orientation of the robot, if it vertical or horizontal
   orientation(FL,BL,FR,BaR,TL,BoR);
-  // DUCK POND SIDE LOCATIONS
-  if ((FL >= 26 && FL <= 28) && (BL >= 24 && BL <= 28) && (TL <= 8) && (BoR >= 23 && BoR <= 27))
-  {
-    Serial.println("Left duck pond");
+  //Now do the coordinate system:
+  get_startingpos();
+  //get current position and relative to the starting position
+  get_current_position();
+}
+//Now with rotations of the robot must rotate or switch the x and y values
+//Doing 90 degrees rotation
+void rotation()
+{
+  //1) Find current allignment
+  //2) Rotate the current x and y measurements
+  int temp;
+  temp = current_x;
+  current_x = current_y;
+  current_y = temp;
+  if(rotation = false)
+  { 
+    rotation = true;
   }
-  if ((FR >= 35 && FR <= 39) && (BaR >= 35 && BaR <= 39) && (TL <= 20) && (BoR >= 12 && BoR <= 16))
+  else
   {
-    Serial.println("Bottom duck pond");
+    rotation = false;
   }
-  
-
 }
 
+//find new position of the robot relatice to the starting position
+void get_current_position()
+{
+  current_x = get_current_x_pos();//find current positions
+  current_y = get_current_y_pos();
+//include a bounds check of the limits of the board
+//84 is the x axis and dimension is 8ft and the robot is 1ft in dimension (8-1ft)
+//21 is the y axis and dimension is 4ft and the robot is 1ft in dimension (4-1ft)
+  if((current_x < 84)&&(current_y < 21))
+  {
+    //Adjusting for rotation
+    if(rotation == false)
+    {
+      current_x = current_x - starting_x;//find position relative to the starting point
+      current_y = current_y - starting_y;
+    }
+    else
+    {//rotation is present and the x and y values must be switched
+      current_x = current_x - starting_y;//find position relative to the starting point
+      current_y = current_y - starting_x;
+    }
+  }
+ 
+}
+void get_startingpos()
+{
+  //save the initial x and y measurements and save to the coordinate (0,0)
+  starting_x = findFrontLeftDistance() + (RW/2);//RW = robot width
+  starting_y = findTopLeftDistance() + (RW/2);
+}
+int get_current_x_pos()
+{
+  return findFrontLeftDistance() + (RW/2);
+}
+int get_current_y_pos()
+{
+  return findTopLeftDistance()+ (RW/2);
+}
 void orientation(int front_left,int back_left,int front_right,int back_right, int top_left, int bottom_right);
 {//Determines the position of the robot and if it vertical or horizontal
     
@@ -228,5 +293,4 @@ int findBottomRightDistance()
 //  Serial.println(" Inches at Bottom Right Sensor");
   delay(1000);
   return inches_Bottom_Right; 
-
 }
