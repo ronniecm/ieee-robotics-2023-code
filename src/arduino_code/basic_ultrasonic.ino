@@ -27,10 +27,11 @@ and create distance calculations of knowing where the robot is relative to the g
 //Bottom Right trig and echo pin
 #define Bottom_Right_trigPin 13
 #define Bottom_Right_echoPin 12
-//Coordinate System data points below
+//Coordinate System data points below needed for M2
 int starting_x, starting_y;
 int current_x,current_y;
-bool rotation = false;
+//bool rotation = false;
+
 void setup() 
 {
   Serial.begin(9600);
@@ -86,7 +87,7 @@ void loop()
   {
     Serial.println("Top Left Corner");
   }
-  if((FR <3) &&(BoR <3))
+  if((BaR <3) &&(BoR <3))
   {
     Serial.println("Back Right Corner");
   }
@@ -94,11 +95,14 @@ void loop()
   alligned(FL,BL,FR,BaR);
   //check the orientation of the robot, if it vertical or horizontal
   orientation(FL,BL,FR,BaR,TL,BoR);
+  //For M2
   //Now do the coordinate system:
   get_startingpos();
   //get current position and relative to the starting position
   get_current_position();
+  
 }
+/*
 //Now with rotations of the robot must rotate or switch the x and y values
 //Doing 90 degrees rotation
 void rotation()
@@ -118,7 +122,7 @@ void rotation()
     rotation = false;
   }
 }
-
+*/
 //find new position of the robot relatice to the starting position
 void get_current_position()
 {
@@ -129,7 +133,10 @@ void get_current_position()
 //21 is the y axis and dimension is 4ft and the robot is 1ft in dimension (4-1ft)
   if((current_x < 84)&&(current_y < 21))
   {
-    //Adjusting for rotation
+      current_x = current_x - starting_x;//find position relative to the starting point
+      current_y = current_y - starting_y;
+    /*
+    //Adjusting for rotation-for M2
     if(rotation == false)
     {
       current_x = current_x - starting_x;//find position relative to the starting point
@@ -140,22 +147,23 @@ void get_current_position()
       current_x = current_x - starting_y;//find position relative to the starting point
       current_y = current_y - starting_x;
     }
+    */
   }
  
 }
 void get_startingpos()
 {
   //save the initial x and y measurements and save to the coordinate (0,0)
-  starting_x = findFrontLeftDistance() + (RW/2);//RW = robot width
-  starting_y = findTopLeftDistance() + (RW/2);
+  starting_x = findFrontLeftDistance() + (RW/2);//RW = robot width must enter!
+  starting_y = findTopLeftDistance() + (RW/2);//RW = robot width must enter!
 }
 int get_current_x_pos()
 {
-  return findFrontLeftDistance() + (RW/2);
+  return findFrontLeftDistance() + (RW/2);//RW = robot width must enter!
 }
 int get_current_y_pos()
 {
-  return findTopLeftDistance()+ (RW/2);
+  return findTopLeftDistance()+ (RW/2);//RW = robot width must enter!
 }
 void orientation(int front_left,int back_left,int front_right,int back_right, int top_left, int bottom_right);
 {//Determines the position of the robot and if it vertical or horizontal
