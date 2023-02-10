@@ -32,13 +32,20 @@ double rotP, rotI, rotD;
 double rotIn;
 double rotOut;
 double rotSetpoint;
+
 PID rotController(&rotIn, &rotOut, &rotOut, rotP, rotI, rotD, DIRECT);
 
 unsigned long currentMillis;
 unsigned long previousMillis;
 
+double demand;
+
 void setup()
 {
+    drivetrain = new Drivetrain();
+
+    initDrivetrain();
+    
     xController.SetMode(AUTOMATIC);
     xController.SetOutputLimits(-1.0, 1.0);
     xController.SetSampleTime(10);
@@ -54,21 +61,20 @@ void setup()
 
 void loop()
 {
-    /*
-    // Set your setpoint for x y rotation axes
-    xSetpoint = 0.0;
-    ySetpoint = 0.0;
-    zSetpoint = 0.0;
-    */
-   xIn = ultrasonicSensors->getTopLeftDistance();
-   yIn = ultrasonicSensors->getFrontLeftDistance();
-   rotIn = ultrasonicSensors->getTopLeftDistance() - ultrasonicSensors->getBottomLeftDistance();
-
-   xController.Compute();
-   yController.Compute();
-   rotController.Compute();
-
-   drivetrain->mecanumDrive(xOut, yOut, rotOut);
+   currentMillis = millis();
+   while(currentMillis - previousMillis >= 10) {
+     previousMillis = currentMillis;
+     if (Serial.available() > 0) {
+        int n = Serial.parseInt();
+        demand = (double) n / 10.0; 
+     }
+     drivetrain->mecanumDrive(0,demand,0.0);
+     for(int i = 0; i < 4; i++) {
+        Serial.print(drivetrain->getRPM(i));
+        Serial.print(" ");
+     }
+     Serial.println();
+   }
 }
 
 void initDrivetrain()

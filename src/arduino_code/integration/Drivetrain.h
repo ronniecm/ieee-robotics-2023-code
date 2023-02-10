@@ -1,11 +1,13 @@
 #include <PID_v1.h>
 #include <TimerOne.h>
 #include <Encoder.h>
-#include "Arduino.h"
+#include <Arduino.h>
+#include <vector>
 
 class Drivetrain {
 public:
     Drivetrain();
+    ~Drivetrain();
     Encoder* getEnc(int i);
     PID* getController(int i);
     double getRPM(int i);
@@ -19,7 +21,7 @@ private:
     double rpmSum[4];
     double finalRpm[4];
 
-    double kP[4] = {8,8,8,8};
+    double kP[4] = {30,30,30,30};
     double kI = 0.0;
     double kD[4] = {0,0,0,0};
     double in[4];

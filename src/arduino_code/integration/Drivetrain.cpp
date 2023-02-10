@@ -14,7 +14,7 @@
 
 Drivetrain::Drivetrain()
 {
-    enc[0] = new Encoder(22, 23);
+    enc[0] = new Encoder(23,22);
     enc[1] = new Encoder(34, 33);
     enc[2] = new Encoder(1, 2);
     enc[3] = new Encoder(32, 31);
@@ -22,7 +22,17 @@ Drivetrain::Drivetrain()
     for (int i = 0; i < 4; i++)
     {
         speedController[i] = new PID(&in[i], &out[i], &setpoint[i], kP[i], kI, kD[i], DIRECT);
+        speedController[i]->SetMode(AUTOMATIC);
+        speedController[i]->SetSampleTime(10);
     }
+
+    count = 0;
+}
+
+Drivetrain::~Drivetrain()
+{
+    delete[] enc;
+    delete[] speedController;
 }
 
 void Drivetrain::mecanumDrive(float x, float y, float z)
