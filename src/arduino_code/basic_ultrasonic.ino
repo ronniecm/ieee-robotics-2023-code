@@ -97,32 +97,13 @@ void loop()
   orientation(FL,BL,FR,BaR,TL,BoR);
   //For M2
   //Now do the coordinate system:
-  get_startingpos();
+ // get_startingpos();
   //get current position and relative to the starting position
-  get_current_position();
+ // get_current_position();
   
 }
+
 /*
-//Now with rotations of the robot must rotate or switch the x and y values
-//Doing 90 degrees rotation
-void rotation()
-{
-  //1) Find current allignment
-  //2) Rotate the current x and y measurements
-  int temp;
-  temp = current_x;
-  current_x = current_y;
-  current_y = temp;
-  if(rotation = false)
-  { 
-    rotation = true;
-  }
-  else
-  {
-    rotation = false;
-  }
-}
-*/
 //find new position of the robot relatice to the starting position
 void get_current_position()
 {
@@ -135,19 +116,6 @@ void get_current_position()
   {
       current_x = current_x - starting_x;//find position relative to the starting point
       current_y = current_y - starting_y;
-    /*
-    //Adjusting for rotation-for M2
-    if(rotation == false)
-    {
-      current_x = current_x - starting_x;//find position relative to the starting point
-      current_y = current_y - starting_y;
-    }
-    else
-    {//rotation is present and the x and y values must be switched
-      current_x = current_x - starting_y;//find position relative to the starting point
-      current_y = current_y - starting_x;
-    }
-    */
   }
  
 }
@@ -157,15 +125,8 @@ void get_startingpos()
   starting_x = findFrontLeftDistance() + (RW/2);//RW = robot width must enter!
   starting_y = findTopLeftDistance() + (RW/2);//RW = robot width must enter!
 }
-int get_current_x_pos()
-{
-  return findFrontLeftDistance() + (RW/2);//RW = robot width must enter!
-}
-int get_current_y_pos()
-{
-  return findTopLeftDistance()+ (RW/2);//RW = robot width must enter!
-}
-void orientation(int front_left,int back_left,int front_right,int back_right, int top_left, int bottom_right);
+*/
+void orientation(int front_left,int back_left,int front_right,int back_right, int top_left, int bottom_right)
 {//Determines the position of the robot and if it vertical or horizontal
     
   if((front_left||back_left||front_right||back_right) > (top_left||bottom_right))
@@ -177,7 +138,7 @@ void orientation(int front_left,int back_left,int front_right,int back_right, in
    Serial.println("Orientation is Horizontal"); 
   }
 }
-void alligned(int front_left,int back_left,int front_right,int back_right);
+void alligned(int front_left,int back_left,int front_right,int back_right)
 {
   if(front_left > back_left)
   {
@@ -200,6 +161,28 @@ void alligned(int front_left,int back_left,int front_right,int back_right);
     Serial.println("Robot is alligned");
   }
 }
+
+/*
+//Now with rotations of the robot must rotate or switch the x and y values
+//Doing 90 degrees rotation
+void rotation()
+{
+  //1) Find current allignment
+  //2) Rotate the current x and y measurements
+  int temp;
+  temp = current_x;
+  current_x = current_y;
+  current_y = temp;
+  if(rotation = false)
+  { 
+    rotation = true;
+  }
+  else
+  {
+    rotation = false;
+  }
+}
+*/
 //for each of the sensor measurements followed reference listed in comment header
 int findFrontLeftDistance()
 {
