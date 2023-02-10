@@ -126,7 +126,7 @@ void get_startingpos()
   starting_y = findTopLeftDistance() + (RW/2);//RW = robot width must enter!
 }
 */
-void orientation(int front_left,int back_left,int front_right,int back_right, int top_left, int bottom_right);
+void orientation(int front_left,int back_left,int front_right,int back_right, int top_left, int bottom_right)
 {//Determines the position of the robot and if it vertical or horizontal
     
   if((front_left||back_left||front_right||back_right) > (top_left||bottom_right))
@@ -138,7 +138,7 @@ void orientation(int front_left,int back_left,int front_right,int back_right, in
    Serial.println("Orientation is Horizontal"); 
   }
 }
-void alligned(int front_left,int back_left,int front_right,int back_right);
+void alligned(int front_left,int back_left,int front_right,int back_right)
 {
   if(front_left > back_left)
   {
