@@ -120,14 +120,14 @@ class RobotCommand:
     ROS Callback functions for ultrasonics
     '''
 
-    def ultra1(self, msg):
-        print("Front Right Reading: %s" %msg.data)
-        self.ultraFront[1] = msg.data
-        #print("List now contains: " , self.ultraFront)
-
     def ultra0(self, msg):
         print("Front Left Reading: %s" %msg.data)
         self.ultraFront[0] = msg.data
+        #print("List now contains: " , self.ultraFront)
+
+    def ultra1(self, msg):
+        print("Front Right Reading: %s" %msg.data)
+        self.ultraFront[1] = msg.data
         #print("List now contains: " , self.ultraFront)
 
     def ultra2(self, msg):
@@ -149,16 +149,18 @@ class RobotCommand:
         print("Back Left Reading: %s" %msg.data)
         self.ultraBack[1] = msg.data
         #print("List now contains: " , self.ultraBack)
+        
+    def ultra6(self, msg):
+        print("Bottom Left Reading: %s" %msg.data)
+        self.ultraLeft[0] = msg.data
+        #print("List now contains: " , self.ultraLeft)
 
     def ultra7(self, msg):
         print("Top Left Reading: %s" %msg.data)
         self.ultraLeft[1] = msg.data
         #print("List now contains: " , self.ultraLeft)
 
-    def ultra6(self, msg):
-        print("Bottom Left Reading: %s" %msg.data)
-        self.ultraLeft[0] = msg.data
-        #print("List now contains: " , self.ultraLeft)
+   
 
 
     #Now we should have update values for ALL sides in their respective list for each side
@@ -494,10 +496,10 @@ if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
     while True:
-        print("Front", bot.ultraFront)
+        #print("Front", bot.ultraFront)
         print("Back" , bot.ultraBack)
         print("Right", bot.ultraRight)
-        print("Left", bot.ultraLeft)
+        #print("Left", bot.ultraLeft)
         pass
 
     #camera = RealSense(bot)
