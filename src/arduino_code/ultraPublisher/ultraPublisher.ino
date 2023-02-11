@@ -1,65 +1,85 @@
 
 #include "ros.h"
 #include "std_msgs/Float32MultiArray.h"
-
-
-int trigPin = 12;    // Trigger
-int echoPin = 13;    // Echo
+#include "Ultrasonic.h"
 
 
 float inches, duration;
 
+//ROS TOPICS:
+//'/bot/ultraFront'
+//'/bot/ultraRight'
+//'/bot/ultraBack'
+//'/bot/ultraLeft'
+//Each topic includes a tuple of the sensor data for each side of the bot
+
 
 ros::NodeHandle nh;
-std_msgs::Float32MultiArray distMsg;
-ros::Publisher ultra("/bot/ultraFront", &distMsg);
+//Initalize the message type for each topic
+std_msgs::Float32MultiArray distMsgFront;
+std_msgs::Float32MultiArray distMsgRight;
+std_msgs::Float32MultiArray distMsgBack;
+std_msgs::Float32MultiArray distMsgLeft;
 
+ros::Publisher front("/bot/ultraFront", &distMsgFront);
+ros::Publisher right("/bot/ultraRight", &distMsgRight);
+ros::Publisher back("/bot/ultraBack", &distMsgBack);
+ros::Publisher left("/bot/ultraLeft", &distMsgLeft);
 
+Ultrasonic ultraSensors;
 
 void setup() {
   //Serial Port begin
   Serial.begin (9600);
   //Time to init the sensor node
   nh.initNode();
-  distMsg.data_length = 2;
-  //This will initialize the array of Float32MultiArray type
-  distMsg.data = (float *)malloc((sizeof(float))*distMsg.data_length*2);
   
-  nh.advertise(ultra);
+  distMsgFront.data_length = 2;
+  distMsgRight.data_length = 2;
+  distMsgBack.data_length = 2;
+  distMsgLeft.data_length = 2;
+  
+  //This will initialize the array of Float32MultiArray for the tuple message that will be
+  //published to the respective topic
+  distMsgFront.data = (float *)malloc((sizeof(float))*distMsgFront.data_length*2);
+  distMsgRight.data = (float *)malloc((sizeof(float))*distMsgRight.data_length*2);
+  distMsgBack.data = (float *)malloc((sizeof(float))*distMsgBack.data_length*2);
+  distMsgLeft.data = (float *)malloc((sizeof(float))*distMsgLeft.data_length*2);
 
-  //Define inputs and outputs
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
+  //This make the information on the topic available to subscribers
+  nh.advertise(front);
+  nh.advertise(right);
+  nh.advertise(back);
+  nh.advertise(left);
+
 }
  
 void loop() {
+    //We will save corresponding sensor data to the tuple msg
     
-    // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
-    // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
-    digitalWrite(trigPin, LOW);
-    delayMicroseconds(5);
-    digitalWrite(trigPin, HIGH);
-    delayMicroseconds(10);
-    digitalWrite(trigPin, LOW);
- 
-    // Read the signal from the sensor: a HIGH pulse whose
-    // duration is the time (in microseconds) from the sending
-    // of the ping to the reception of its echo off of an object.
-    pinMode(echoPin, INPUT);
-  
-    duration = pulseIn(echoPin, HIGH);
- 
-    // Convert the time into a distance
-    //cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
-    inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
-    distMsg.data[0] = inches;
-    distMsg.data[1] = inches;
+    // --------------------IMPORTANT------------------------
+    //TO KEEP THINGS CONSISTANT 0 index ==> LEFT SENSOR & 1 index ==> RIGHT for each side
     
-    ultra.publish(&distMsg);
+    distMsgFront.data[0] = ultraSensors.getFrontLeftDistance();
+    distMsgFront.data[1] = ultraSensors.getFrontRightDistance();
+   
+    distMsgRight.data[0] = ultraSensors.getTopRightDistance();
+    distMsgRight.data[1] = ultraSensors.getBottomRightDistance();
+
+    distMsgBack.data[0] = ultraSensors.getBackRightDistance();
+    distMsgBack.data[1] = ultraSensors.getBackLeftDistance();
+    
+    distMsgLeft.data[0] = ultraSensors.getBottomLeftDistance();
+    distMsgLeft.data[1] = ultraSensors.getTopLeftDistance();
+
+    front.publish(&distMsgFront);
+    right.publish(&distMsgRight);
+    back.publish(&distMsgBack);
+    left.publish(&distMsgLeft);
     nh.spinOnce();
-    delay(100);
-    //Serial.print(inches);
-    //Serial.print("in FRONT, ");
-    //Serial.println();
+    
+    
+    
+
 
 }
