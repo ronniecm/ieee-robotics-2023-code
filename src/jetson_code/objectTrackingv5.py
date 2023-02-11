@@ -92,10 +92,13 @@ class RobotCommand:
         print(msg.data, "GOT READING!!!!")
         pass
     def ultraRight(self, msg):
+        print(msg.data, "GOT READING!!!!")
         pass
     def ultraBack(self, msg):
+        print(msg.data, "GOT READING!!!!")
         pass
     def ultraLeft(self, msg):
+        print(msg.data, "GOT READING!!!!")
         pass
 
 
@@ -121,24 +124,31 @@ class RobotCommand:
         pass
 
     def goFoward(self):
+        # Move the robot forward
         self.pub.publish(0)
         pass
     def goBackwards(self):
+        # Move the robot backwards
         self.pub.publish(6)
         pass
     def goRight(self):
+        # Move the robot right
         self.pub.publish(2)
         pass
     def goLeft(self):
+        # Move the robot left
         self.pub.publish(3)
         pass
     def rotateLeft(self):
+        # Rotate the robot left
         self.pub.publish(7)
         pass
     def rotateRight(self):
+        # Rotate the robot right
         self.pub.publish(8)
         pass
     def stopBot(self):
+        # Stop the robot
         self.pub.publish(4)
 
 
@@ -330,26 +340,21 @@ class RealSense:
             img = jetson_utils_python.cudaFromNumpy(color_image)
 
             # capture the next image
-            # img = input.Capture()
+            # img = input.Capture()            #For the the case that score dict is never updated we will stop for now
 
             # detect objects in the image (with overlay)
             self.detections = self.net.Detect(img, overlay=self.args.overlay)
 
-            # print the detections
-            print("detected {:d} objects in image".format(len(self.detections)))
-
-            #Might need this somewhere else in the code
-            self.center_pixel_dist = depth_frame.get_distance(int(320),int(240))
-
             #Extracting pixel distance from far right and far left to measure alignment error
             #And then later correct in the checkWalls() function
-            self.left_pixel_dist = depth_frame.get_distance(int(20),int(240))
-            self.right_pixel_dist = depth_frame.get_distance(int(620),int(240))
+            self.left_pixel_dist = depth_frame.get_distance(int(100),int(240))
+            print("Got left pixel distance: ", self.left_pixel_dist)
+            self.right_pixel_dist = depth_frame.get_distance(int(540),int(240))
+            print("Got right pixel distance: ", self.right_pixel_dist)
 
 
             
             if len(self.detections) == 0:
-                
                 #Test to make implementing ultrasonics easier
                 self.checkWalls()
                 #self.bot.stopBot()
@@ -412,6 +417,7 @@ class RealSense:
 if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
+
     camera = RealSense(bot)
     camera.run()
 

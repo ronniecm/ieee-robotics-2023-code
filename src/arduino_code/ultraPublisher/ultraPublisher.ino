@@ -3,15 +3,15 @@
 #include "std_msgs/Float32MultiArray.h"
 
 
-
 int trigPin = 12;    // Trigger
 int echoPin = 13;    // Echo
 
 
 float inches, duration;
 
+
 ros::NodeHandle nh;
-std_msgs::Float64 distMsg;
+std_msgs::Float32MultiArray distMsg;
 ros::Publisher ultra("/bot/ultraFront", &distMsg);
 
 
@@ -21,6 +21,10 @@ void setup() {
   Serial.begin (9600);
   //Time to init the sensor node
   nh.initNode();
+  distMsg.data_length = 2;
+  //This will initialize the array of Float32MultiArray type
+  distMsg.data = (float *)malloc((sizeof(float))*distMsg.data_length*2);
+  
   nh.advertise(ultra);
 
   //Define inputs and outputs
@@ -29,6 +33,7 @@ void setup() {
 }
  
 void loop() {
+    
     // The sensor is triggered by a HIGH pulse of 10 or more microseconds.
     // Give a short LOW pulse beforehand to ensure a clean HIGH pulse:
     digitalWrite(trigPin, LOW);
@@ -47,7 +52,8 @@ void loop() {
     // Convert the time into a distance
     //cm = (duration/2) / 29.1;     // Divide by 29.1 or multiply by 0.0343
     inches = (duration/2) / 74;   // Divide by 74 or multiply by 0.0135
-    distMsg.data = inches;
+    distMsg.data[0] = inches;
+    distMsg.data[1] = inches;
     
     ultra.publish(&distMsg);
     nh.spinOnce();
