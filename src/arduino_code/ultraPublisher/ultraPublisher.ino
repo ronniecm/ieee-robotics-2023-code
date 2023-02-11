@@ -1,4 +1,3 @@
-
 #include "ros.h"
 #include "std_msgs/Float32.h"
 #include "Ultrasonic.h"
@@ -38,7 +37,6 @@
 #define Bottom_Left_echoPin 7
 
 
-float inches, duration;
 
 //ROS TOPICS:
 //'/bot/ultraFront'
@@ -50,88 +48,80 @@ float inches, duration;
 
 ros::NodeHandle nh;
 //Initalize the message type for each topic
-std_msgs::Float32 distMsgFrontRight;
-std_msgs::Float32 distMsgFrontLeft;
-std_msgs::Float32 distMsgTopRight;
-std_msgs::Float32 distMsgBottomRight;
+std_msgs::Float32 distMsgUltra0;
+std_msgs::Float32 distMsgUltra1;
+std_msgs::Float32 distMsgUltra2;
+std_msgs::Float32 distMsgUltra3;
 
-std_msgs::Float32 distMsgBackRight;
-std_msgs::Float32 distMsgBackLeft;
-std_msgs::Float32 distMsgTopLeft;
-std_msgs::Float32 distMsgBottomLeft;
+std_msgs::Float32 distMsgUltra4;
+std_msgs::Float32 distMsgUltra5;
+std_msgs::Float32 distMsgUltra6;
+std_msgs::Float32 distMsgUltra7;
 
-//distMsgFrontRight;
-//distMsgFrontLeft;
-//distMsgTopRight;
-//distMsgBottomRight;
+//distMsgUltra0;
+//distMsgUltra1;
+//distMsgUltra2;
+//distMsgUltra3;
 //
-//distMsgBackRight;
-//distMsgBackLeft;
-//distMsgTopLeft;
-//distMsgBottomLeft;
+//distMsgUltra4;
+//distMsgUltra5;
+//distMsgUltra6;
+//distMsgUltra7;
 
 
-ros::Publisher frontRight("/ultraFrontRight", &distMsgFrontRight);
-ros::Publisher frontLeft("/bot/ultraFrontLeft", &distMsgFrontLeft);
-ros::Publisher topRight("/bot/ultraTopRight", &distMsgTopRight);
-ros::Publisher bottomRight("/bot/ultraBottomRight", &distMsgBottomRight);
+ros::Publisher Ultra0("/bot/ultra0", &distMsgUltra0);
+ros::Publisher Ultra1("/bot/ultra1", &distMsgUltra1);
+ros::Publisher Ultra2("/bot/ultra2", &distMsgUltra2);
+ros::Publisher Ultra3("/bot/ultra3", &distMsgUltra3);
 
-ros::Publisher backRight("/bot/ultraFront", &distMsgBackRight);
-ros::Publisher backLeft("/bot/ultraRight", &distMsgBackLeft);
-ros::Publisher topLeft("/bot/ultraBack", &distMsgTopLeft);
-ros::Publisher bottomLeft("/bot/ultraLeft", &distMsgBottomLeft);
+ros::Publisher Ultra4("/bot/ultra4", &distMsgUltra4);
+ros::Publisher Ultra5("/bot/ultra5", &distMsgUltra5);
+ros::Publisher Ultra6("/bot/ultra6", &distMsgUltra6);
+ros::Publisher Ultra7("/bot/ultra7", &distMsgUltra7);
 
 Ultrasonic ultraSensors;
 
 void setup() {
   //Serial Port begin
-  Serial.begin (9600);
+  Serial.begin(9600);
   //Time to init the sensor node
   nh.initNode();
 
-  //pinmode declarations for ultrasonic sensors
-  pinMode(Front_Left_trigPin,OUTPUT);
-  pinMode(Front_Left_echoPin,INPUT);
+  //pinmode declarations for ultrasonic sensors numbering
+  pinMode(Ultra0_trigPin,OUTPUT);
+  pinMode(Ultra0_echoPin,INPUT);
  
-  //Back Left
-  pinMode(Back_Left_trigPin,OUTPUT);
-  pinMode(Back_Left_echoPin,INPUT);
+  pinMode(Ultra1_trigPin,OUTPUT);
+  pinMode(Ultra1_echoPin,INPUT);
 
-  //Top Left
-  pinMode(Top_Left_trigPin,OUTPUT);
-  pinMode(Top_Left_echoPin,INPUT);
+  pinMode(Ultra2_trigPin,OUTPUT);
+  pinMode(Ultra2_echoPin,INPUT);
   
-  //Front Right
-  pinMode(Front_Right_trigPin,OUTPUT);
-  pinMode(Front_Right_echoPin,INPUT);
+  pinMode(Ultra3_trigPin,OUTPUT);
+  pinMode(Ultra3_echoPin,INPUT);
 
-  //Front Left
-  pinMode(Front_Left_trigPin,OUTPUT);
-  pinMode(Front_Left_echoPin,INPUT);
+  pinMode(Ultra4_trigPin,OUTPUT);
+  pinMode(Ultra4_trigPin,INPUT);
 
-  //Back Right
-  pinMode(Back_Right_trigPin,OUTPUT);
-  pinMode(Back_Right_echoPin,INPUT);
+  pinMode(Ultra5_trigPin,OUTPUT);
+  pinMode(Ultra5_echoPin,INPUT);
 
-  //Bottom Right
-  pinMode(Bottom_Right_trigPin,OUTPUT);
-  pinMode(Bottom_Right_echoPin,INPUT);
+  pinMode(Ultra6_trigPin,OUTPUT);
+  pinMode(Ultra6_echoPin,INPUT);
 
-  //Bottom Left
-  pinMode(Bottom_Left_trigPin,OUTPUT);
-  pinMode(Bottom_Left_echoPin,INPUT);
+  pinMode(Ultra7_trigPin,OUTPUT);
+  pinMode(Ultra7_echoPin,INPUT);
   
  
   //This make the information on the topic available to subscribers
-  nh.advertise(frontRight);
-  nh.advertise(frontLeft);
-  nh.advertise(backRight);
-  nh.advertise(backLeft);
-
-  nh.advertise(topRight);
-  nh.advertise(topLeft);
-  nh.advertise(bottomRight);
-  nh.advertise(bottomLeft);
+  nh.advertise(Ultra0);
+  nh.advertise(Ultra1);
+  nh.advertise(Ultra2);
+  nh.advertise(Ultra3);
+  nh.advertise(Ultra4);
+  nh.advertise(Ultra5);
+  nh.advertise(Ultra6);
+  nh.advertise(Ultra7);
 
 }
  
@@ -141,29 +131,29 @@ void loop() {
     // --------------------IMPORTANT------------------------
     //TO KEEP THINGS CONSISTANT 0 index ==> LEFT SENSOR & 1 index ==> RIGHT for each side
     
-    distMsgFrontLeft.data = ultraSensors.getFrontLeftDistance();
-    distMsgFrontRight.data = ultraSensors.getFrontRightDistance();
+    distMsgUltra0.data = ultraSensors.getUltra0_Distance();
+    distMsgUltra1.data = ultraSensors.getUltra1_Distance();
    
-    distMsgTopRight.data = ultraSensors.getTopRightDistance();
-    distMsgBottomRight.data = ultraSensors.getBottomRightDistance();
+    distMsgUltra2.data = ultraSensors.getUltra2_Distance();
+    distMsgUltra3.data = ultraSensors.getUltra3_Distance();
 
-    distMsgBackRight.data = ultraSensors.getBackRightDistance();
-    distMsgBackLeft.data = ultraSensors.getBackLeftDistance();
+    distMsgUltra4.data = ultraSensors.getUltra4_Distance();
+    distMsgUltra5.data = ultraSensors.getUltra5_Distance();
     
-    distMsgBottomLeft.data = ultraSensors.getBottomLeftDistance();
-    distMsgTopLeft.data = ultraSensors.getTopLeftDistance();
+    distMsgUltra6.data = ultraSensors.getUltra6_Distance();
+    distMsgUltra7.data = ultraSensors.getUltra7_Distance();
 
     nh.spinOnce();
     
-    frontRight.publish(&distMsgFrontRight);
-    frontLeft.publish(&distMsgFrontLeft);
-    backRight.publish(&distMsgBackRight);
-    backLeft.publish(&distMsgBackLeft);
+    Ultra0.publish(&distMsgUltra0);
+    Ultra1.publish(&distMsgUltra1);
+    Ultra2.publish(&distMsgUltra2);
+    Ultra3.publish(&distMsgUltra3);
 
-    topRight.publish(&distMsgTopRight);
-    bottomRight.publish(&distMsgBottomRight);
-    topLeft.publish(&distMsgTopLeft);
-    bottomLeft.publish(&distMsgBottomLeft);
+    Ultra4.publish(&distMsgUltra4);
+    Ultra5.publish(&distMsgUltra5);
+    Ultra6.publish(&distMsgUltra6);
+    Ultra7.publish(&distMsgUltra7);
     
 
 }
