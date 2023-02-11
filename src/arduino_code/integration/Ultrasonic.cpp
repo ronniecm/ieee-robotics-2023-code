@@ -42,31 +42,6 @@ void setup() {
   //Serial Port begin
   Serial.begin(115200);
   //Serial1.begin(115200); 
-  //Define inputs and outputs (Trig and echo pins) of each of the ultrasonic sensors
-  //Front Left
-  pinMode(Front_Left_trigPin,OUTPUT);
-  pinMode(Front_Left_echoPin,INPUT);
- 
-  //Back Left
-  pinMode(Back_Left_trigPin,OUTPUT);
-  pinMode(Back_Left_echoPin,INPUT);
-
-  //Top Left
-  pinMode(Top_Left_trigPin,OUTPUT);
-  pinMode(Top_Left_echoPin,INPUT);
-  
-  //Front Right
-  pinMode(Front_Right_trigPin,OUTPUT);
-  pinMode(Front_Right_echoPin,INPUT);
-
-  //Back Right
-  pinMode(Back_Right_trigPin,OUTPUT);
-  pinMode(Back_Right_echoPin,INPUT);
-
-  //Bottom Right
-  pinMode(Bottom_Right_trigPin,OUTPUT);
-  pinMode(Bottom_Right_echoPin,INPUT);
-
 }
  
 void loop() 
