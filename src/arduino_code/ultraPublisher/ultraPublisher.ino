@@ -3,8 +3,34 @@
 #include "std_msgs/Float32.h"
 #include "Ultrasonic.h"
 
+//Front Left trig and echo pins and distance variables
+#define Front_Left_trigPin 12   // Trigger
+#define Front_Left_echoPin 11   // Echo
+float duration_Front_Left,inches_Front_Left;
 
+//Back Left trig and echo pins and distance variables
+#define Back_Left_trigPin 21
+#define Back_Left_echoPin 20
+float duration_Back_Left,inches_Back_Left;
 
+//Top Left trig and echo pins and distance variables
+#define Top_Left_trigPin 4
+#define Top_Left_echoPin 3
+float duration_Top_Left,inches_Top_Left;
+
+//Front Right trig and echo pins and distance variables
+#define Front_Right_trigPin 23
+#define Front_Right_echoPin 22
+float duration_Front_Right,inches_Front_Right;
+
+//Back Right trig and echo pins and distance variables
+#define Back_Right_trigPin 14
+#define Back_Right_echoPin 13
+float duration_Back_Right,inches_Back_Right;
+//Bottom Right trig and echo pins and distance variables
+#define Bottom_Right_trigPin 10
+#define Bottom_Right_echoPin 9
+float duration_Bottom_Right,inches_Bottom_Right;
 
 float inches, duration;
 
@@ -56,7 +82,30 @@ void setup() {
   Serial.begin (9600);
   //Time to init the sensor node
   nh.initNode();
+
+  //pinmode declarations for ultrasonic sensors
+  pinMode(Front_Left_trigPin,OUTPUT);
+  pinMode(Front_Left_echoPin,INPUT);
+ 
+  //Back Left
+  pinMode(Back_Left_trigPin,OUTPUT);
+  pinMode(Back_Left_echoPin,INPUT);
+
+  //Top Left
+  pinMode(Top_Left_trigPin,OUTPUT);
+  pinMode(Top_Left_echoPin,INPUT);
   
+  //Front Right
+  pinMode(Front_Right_trigPin,OUTPUT);
+  pinMode(Front_Right_echoPin,INPUT);
+
+  //Back Right
+  pinMode(Back_Right_trigPin,OUTPUT);
+  pinMode(Back_Right_echoPin,INPUT);
+
+  //Bottom Right
+  pinMode(Bottom_Right_trigPin,OUTPUT);
+  pinMode(Bottom_Right_echoPin,INPUT);
   
  
   //This make the information on the topic available to subscribers
