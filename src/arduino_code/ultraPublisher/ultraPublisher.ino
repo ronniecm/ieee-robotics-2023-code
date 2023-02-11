@@ -3,7 +3,7 @@
 #include "Ultrasonic.h"
 
 //Ultrasonic Sensor 0 trig and echo pins and distance variables
-#define Ultra0_trigPin 12   // Trigger
+#define Ultra0_trigPin 12   // Trigger PIN
 #define Ultra0_echoPin 11   // Echo
 float duration_Ultra0, cm_Ultra0;
 
