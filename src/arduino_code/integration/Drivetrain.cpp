@@ -30,10 +30,10 @@
 Drivetrain::Drivetrain()
 {
     //First initialize all 4 encoder objects
-    enc[0] = new Encoder(23,22);
-    enc[1] = new Encoder(34, 33);
-    enc[2] = new Encoder(1, 2);
-    enc[3] = new Encoder(32, 31);
+    enc[0] = new Encoder(FL_enc_in1, FL_enc_in2);
+    enc[1] = new Encoder(FR_enc_in1, FR_enc_in2);
+    enc[2] = new Encoder(BL_enc_in1, BL_enc_in2);
+    enc[3] = new Encoder(BR_enc_in1, BR_enc_in2);
 
     //Next initialize all 4 PID speed controllers with proper PID and setpoint values
     for (int i = 0; i < 4; i++)
@@ -63,10 +63,10 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     double backRight = y + x - z;
 
     // map -1.0 to 1.0 range to -100 to 100 RPM
-    double frontLeftRPM = frontLeft * 200.0 / 2.0;
-    double frontRightRPM = frontRight * 200.0 / 2.0;
-    double backLeftRPM = backLeft * 200.0 / 2.0;
-    double backRightRPM = backRight * 200.0 / 2.0;
+    double frontLeftRPM = frontLeft * 100.0;
+    double frontRightRPM = frontRight * 100.0;
+    double backLeftRPM = backLeft * 100.0;
+    double backRightRPM = backRight * 100.0;
 
     /*
     frontLeft = frontLeft * 255;
