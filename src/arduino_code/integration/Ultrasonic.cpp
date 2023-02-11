@@ -73,7 +73,7 @@ float Ultrasonic::findFrontLeftDistance()
   digitalWrite(Front_Left_trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(Front_Left_trigPin, LOW);
-  pinMode(Front_Left_echoPin, INPUT);
+  //pinMode(Front_Left_echoPin, INPUT);
   duration_Front_Left = pulseIn(Front_Left_echoPin, HIGH);
   // Convert the time into a distance
   inches_Front_Left = (duration_Front_Left/2) / 74;   // Divide by 74 or multiply by 0.0135
@@ -92,7 +92,7 @@ float Ultrasonic::findBackLeftDistance()
   digitalWrite(Back_Left_trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(Back_Left_trigPin, LOW);
-  pinMode(Back_Left_echoPin, INPUT);
+  //pinMode(Back_Left_echoPin, INPUT);
   duration_Back_Left = pulseIn(Back_Left_echoPin, HIGH);
   inches_Back_Left = (duration_Back_Left/2) / 74;   // Divide by 74 or multiply by 0.0135
   Serial.print(inches_Back_Left);
@@ -109,7 +109,7 @@ float Ultrasonic::findTopLeftDistance()
   digitalWrite(Top_Left_trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(Top_Left_trigPin,LOW);
-  pinMode(Top_Left_echoPin, INPUT);
+  //pinMode(Top_Left_echoPin, INPUT);
   duration_Top_Left = pulseIn(Top_Left_echoPin, HIGH);
   inches_Top_Left = (duration_Top_Left/2) / 74;  
   Serial.print(inches_Top_Left);
@@ -125,7 +125,7 @@ float Ultrasonic::findFrontRightDistance()
   digitalWrite(Front_Right_trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(Front_Right_trigPin,LOW);
-  pinMode(Front_Right_echoPin, INPUT);
+  //pinMode(Front_Right_echoPin, INPUT);
   duration_Front_Right = pulseIn(Front_Right_echoPin, HIGH);
   inches_Front_Right = (duration_Front_Right/2) / 74;  
   Serial.print(inches_Front_Right);
@@ -141,7 +141,7 @@ float Ultrasonic::findBackRightDistance()
   digitalWrite(Back_Right_trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(Back_Right_trigPin,LOW);
-  pinMode(Back_Right_echoPin, INPUT);
+  //pinMode(Back_Right_echoPin, INPUT);
   duration_Back_Right = pulseIn(Back_Right_echoPin, HIGH);
   inches_Back_Right = (duration_Back_Right/2) / 74;  
   Serial.print(inches_Back_Right);
@@ -157,7 +157,7 @@ float Ultrasonic::findBottomRightDistance()
   digitalWrite(Bottom_Right_trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(Bottom_Right_trigPin,LOW);
-  pinMode(Bottom_Right_echoPin, INPUT);
+  //pinMode(Bottom_Right_echoPin, INPUT);
   duration_Bottom_Right = pulseIn(Bottom_Right_echoPin, HIGH);
   inches_Bottom_Right = (duration_Bottom_Right/2) / 74;  
   Serial.print(inches_Bottom_Right);
