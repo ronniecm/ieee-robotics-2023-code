@@ -1,6 +1,7 @@
 
 #include "ros.h"
-#include "std_msgs/Float64.h"
+#include "std_msgs/Float32MultiArray.h"
+
 
 
 int trigPin = 12;    // Trigger
@@ -8,8 +9,6 @@ int echoPin = 13;    // Echo
 
 
 float inches, duration;
-
-
 
 ros::NodeHandle nh;
 std_msgs::Float64 distMsg;
