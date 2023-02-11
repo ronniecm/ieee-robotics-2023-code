@@ -60,16 +60,34 @@ class RobotCommand:
             rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
             self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), msg_type, queue_size =10)
 
-            rospy.Subscriber('%s/ultraFrontRight' %robot_name, Float32, self.ultraFrontRight)
-            rospy.Subscriber('%s/ultraFrontLeft' %robot_name, Float32, self.ultraFrontLeft)
-            rospy.Subscriber('%s/ultraTopRight' %robot_name, Float32, self.ultraTopRight)
-            rospy.Subscriber('%s/ultraBottomRight' %robot_name, Float32, self.ultraBottomRight)
+            rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
+            rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
+            rospy.Subscriber('%s/ultra2' %robot_name, Float32, self.ultra2)
+            rospy.Subscriber('%s/ultra3' %robot_name, Float32, self.ultra3)
+            rospy.Subscriber('%s/ultra4' %robot_name, Float32, self.ultra4)
+            rospy.Subscriber('%s/ultra5' %robot_name, Float32, self.ultra5)
+            rospy.Subscriber('%s/ultra6' %robot_name, Float32, self.ultra6)
+            rospy.Subscriber('%s/ultra7' %robot_name, Float32, self.ultra7)
 
-            rospy.Subscriber('%s/ultraBackRight' %robot_name, Float32, self.ultraBackRight)
-            rospy.Subscriber('%s/ultraBackLeft' %robot_name, Float32, self.ultraBackLeft)
-            rospy.Subscriber('%s/ultraTopLeft' %robot_name, Float32, self.ultraTopLeft)
-            rospy.Subscriber('%s/ultraBottomLeft' %robot_name, Float32, self.ultraBottomLeft)
+            '''
 
+            -------UlTRA SONIC NAMING DIAGRAM----------
+
+                            FRONT
+
+                     ___0___________1___
+                    |                   |
+                  7 |                   | 2
+                    |                   |
+            LEFT    |                   |   RIGHT
+                    |                   |
+                    |                   | 
+                  6 |                   | 3
+                    |___________________|
+                        5           4
+
+                            BACK
+            '''
 
             print("ROS SETUP OKAY")
 
@@ -102,45 +120,45 @@ class RobotCommand:
     ROS Callback functions for ultrasonics
     '''
 
-    def ultraFrontRight(self, msg):
+    def ultra1(self, msg):
         print("Front Right Reading: %s" %msg.data)
         self.ultraFront[1] = msg.data
-        print("List now contains: " , self.ultraFront)
+        #print("List now contains: " , self.ultraFront)
 
-    def ultraFrontLeft(self, msg):
+    def ultra0(self, msg):
         print("Front Left Reading: %s" %msg.data)
         self.ultraFront[0] = msg.data
-        print("List now contains: " , self.ultraFront)
+        #print("List now contains: " , self.ultraFront)
 
-    def ultraTopRight(self, msg):
+    def ultra2(self, msg):
         print("Top Right Reading: %s" %msg.data)
         self.ultraRight[0] = msg.data
-        print("List now contains: " , self.ultraRight)
+        #print("List now contains: " , self.ultraRight)
 
-    def ultraBottomRight(self, msg):
+    def ultra3(self, msg):
         print("Bottom Right Reading: %s" %msg.data)
         self.ultraRight[1] = msg.data
-        print("List now contains: " , self.ultraRight)
+        #print("List now contains: " , self.ultraRight)
 
-    def ultraBackRight(self, msg):
+    def ultra4(self, msg):
         print("Back Right Reading: %s" %msg.data)
         self.ultraBack[0] = msg.data
-        print("List now contains: " , self.ultraBack)
+        #print("List now contains: " , self.ultraBack)
 
-    def ultraBackLeft(self, msg):
+    def ultra5(self, msg):
         print("Back Left Reading: %s" %msg.data)
         self.ultraBack[1] = msg.data
-        print("List now contains: " , self.ultraBack)
+        #print("List now contains: " , self.ultraBack)
 
-    def ultraTopLeft(self, msg):
+    def ultra7(self, msg):
         print("Top Left Reading: %s" %msg.data)
         self.ultraLeft[1] = msg.data
-        print("List now contains: " , self.ultraLeft)
+        #print("List now contains: " , self.ultraLeft)
 
-    def ultraBottomLeft(self, msg):
+    def ultra6(self, msg):
         print("Bottom Left Reading: %s" %msg.data)
         self.ultraLeft[0] = msg.data
-        print("List now contains: " , self.ultraLeft)
+        #print("List now contains: " , self.ultraLeft)
 
 
     #Now we should have update values for ALL sides in their respective list for each side
@@ -187,7 +205,7 @@ class RobotCommand:
         self.pub.publish(4)
 
 
-    def handleWalls(self)
+    def handleWalls(self):
         '''
         Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
         That list is will be self.ultra<FACE>
@@ -208,7 +226,6 @@ class RobotCommand:
                                             |___________|
                                               1       0   
         '''
-        pass
 
 
 
@@ -477,7 +494,10 @@ if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
     while True:
-        
+        print(bot.ultraFront)
+        print(bot.ultraRight)
+        print(bot.ultraBack)
+        print(bot.ultraLeft)
         pass
 
     #camera = RealSense(bot)
