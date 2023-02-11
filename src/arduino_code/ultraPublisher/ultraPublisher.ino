@@ -18,6 +18,11 @@ float duration_Back_Left,inches_Back_Left;
 #define Top_Left_echoPin 3
 float duration_Top_Left,inches_Top_Left;
 
+//Top Right trig and echo pins and distance variables
+#define Top_Right_trigPin 16
+#define Top_Right_echoPin 15
+float duration_Top_Right,inches_Top_Right;
+
 //Front Right trig and echo pins and distance variables
 #define Front_Right_trigPin 23
 #define Front_Right_echoPin 22
@@ -27,10 +32,16 @@ float duration_Front_Right,inches_Front_Right;
 #define Back_Right_trigPin 14
 #define Back_Right_echoPin 13
 float duration_Back_Right,inches_Back_Right;
+
 //Bottom Right trig and echo pins and distance variables
 #define Bottom_Right_trigPin 10
 #define Bottom_Right_echoPin 9
 float duration_Bottom_Right,inches_Bottom_Right;
+
+//Bottom Left trig and echo pins and distance variables
+#define Bottom_Left_trigPin 8
+#define Bottom_Left_echoPin 7
+float duration_Bottom_Left,inches_Bottom_Left;
 
 float inches, duration;
 
@@ -99,6 +110,10 @@ void setup() {
   pinMode(Front_Right_trigPin,OUTPUT);
   pinMode(Front_Right_echoPin,INPUT);
 
+  //Front Left
+  pinMode(Front_Left_trigPin,OUTPUT);
+  pinMode(Front_Left_echoPin,INPUT);
+
   //Back Right
   pinMode(Back_Right_trigPin,OUTPUT);
   pinMode(Back_Right_echoPin,INPUT);
@@ -106,6 +121,10 @@ void setup() {
   //Bottom Right
   pinMode(Bottom_Right_trigPin,OUTPUT);
   pinMode(Bottom_Right_echoPin,INPUT);
+
+  //Bottom Left
+  pinMode(Bottom_Left_trigPin,OUTPUT);
+  pinMode(Bottom_Left_echoPin,INPUT);
   
  
   //This make the information on the topic available to subscribers
