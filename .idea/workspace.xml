@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="5c0e9bcc-337d-4a11-b385-e166cff0aca4" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/jetson_code/objectTrackingv5.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/jetson_code/objectTrackingv5.py" afterDir="false" />
-    </list>
+    <list default="true" id="5c0e9bcc-337d-4a11-b385-e166cff0aca4" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />

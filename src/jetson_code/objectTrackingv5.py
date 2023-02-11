@@ -226,10 +226,7 @@ class RobotCommand:
                                             |___________|
                                               1       0   
         '''
-<<<<<<< Updated upstream
 
-
-=======
         while(self.ultraBack[0] < 40):
             if((self.ultraRight[0] - self.ultraRight[1]) < 0): #Robot is tilted towards right
                 while(self.ultraRight[0] < self.ultraRight[1]):
@@ -258,7 +255,6 @@ class RobotCommand:
                         #self.goLeft()
         #self.goFoward()
         print("Go Forward")
->>>>>>> Stashed changes
 
 #This will line it self up with object, right now works in x component and then y 
 #But will use foward kinematics soon 
