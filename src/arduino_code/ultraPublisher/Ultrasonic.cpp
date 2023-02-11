@@ -1,49 +1,48 @@
 #include "Ultrasonic.h"
 /*
 Code for ultrasonic distance measurements (HC-SR04) was adapted and modified from https://randomnerdtutorials.com/complete-guide-for-ultrasonic-sensor-hc-sr04/
-Goal is for there to be six ultrasonic sensors around the robot (2 on the left side, 2 on the right side, one on front, one on back)
-and create distance calculations of knowing where the robot is relative to the gameboard using a coordinate system
+Goal is for there to be eight ultrasonic sensors around the robot (2 on each side)
+and create distance calculations of knowing where the robot is relative to the gameboard
 */
+//Ultrasonic Sensor 0 trig and echo pins and distance variables
+#define Ultra0_trigPin 12   // Trigger
+#define Ultra0_echoPin 11   // Echo
+float duration_Ultra0, cm_Ultra0;
 
-//Front Left trig and echo pins and distance variables
-#define Front_Left_trigPin 12   // Trigger
-#define Front_Left_echoPin 11   // Echo
-float duration_Front_Left,inches_Front_Left;
+//Ultrasonic Sensor 1 trig and echo pins and distance variables
+#define Ultra1_trigPin 4
+#define Ultra1_echoPin 3
+float duration_Ultra1, cm_Ultra1;
 
-//Back Left trig and echo pins and distance variables
-#define Back_Left_trigPin 21
-#define Back_Left_echoPin 20
-float duration_Back_Left,inches_Back_Left;
+//Ultrasonic Sensor 2 trig and echo pins and distance variables
+#define Ultra2_trigPin 16
+#define Ultra2_echoPin 15
+float duration_Ultra2, cm_Ultra2;
 
-//Top Left trig and echo pins and distance variables
-#define Top_Left_trigPin 4
-#define Top_Left_echoPin 3
-float duration_Top_Left,inches_Top_Left;
+//Ultrasonic Sensor 3 trig and echo pins and distance variables
+#define Ultra3_trigPin 21
+#define Ultra3_echoPin 20
+float duration_Ultra3, cm_Ultra3;
 
-//Top Left trig and echo pins and distance variables
-#define Top_Right_trigPin 16
-#define Top_Right_echoPin 15
-float duration_Top_Right,inches_Top_Right;
+//Ultrasonic Sensor 4 trig and echo pins and distance variables
+#define Ultra4_trigPin 23
+#define Ultra4_echoPin 22
+float duration_Ultra4, cm_Ultra4;
 
-//Front Right trig and echo pins and distance variables
-#define Front_Right_trigPin 23
-#define Front_Right_echoPin 22
-float duration_Front_Right,inches_Front_Right;
+//Ultrasonic Sensor 5 trig and echo pins and distance variables
+#define Ultra5_trigPin 14
+#define Ultra5_echoPin 13
+float duration_Ultra5, cm_Ultra5;
 
-//Back Right trig and echo pins and distance variables
-#define Back_Right_trigPin 14
-#define Back_Right_echoPin 13
-float duration_Back_Right,inches_Back_Right;
+//Ultrasonic Sensor 6 trig and echo pins and distance variables
+#define Ultra6_trigPin 10
+#define Ultra6_echoPin 9
+float duration_Ultra6, cm_Ultra6;
 
-//Bottom Right trig and echo pins and distance variables
-#define Bottom_Right_trigPin 10
-#define Bottom_Right_echoPin 9
-float duration_Bottom_Right,inches_Bottom_Right;
-
-//Bottom Left trig and echo pins and distance variables
-#define Bottom_Left_trigPin 8
-#define Bottom_Left_echoPin 7
-float duration_Bottom_Left,inches_Bottom_Left;
+//Ultrasonic Sensor 7 trig and echo pins and distance variables
+#define Ultra7_trigPin 8
+#define Ultra7_echoPin 7
+float duration_Ultra7, cm_Ultra7;
 
 //code for teensy 3.2 communication
 //using corresponding Serial1,2, etc based on RX and TX Value
@@ -51,135 +50,133 @@ float duration_Bottom_Left,inches_Bottom_Left;
 
 
 //for each of the sensor measurements followed reference listed in comment header
-float Ultrasonic::getFrontLeftDistance()
+float Ultrasonic::getUltra0_Distance()
 {
-  digitalWrite(Front_Left_trigPin, LOW);
+  digitalWrite(Ultra0_trigPin, LOW);
   delayMicroseconds(5);
-  digitalWrite(Front_Left_trigPin, HIGH);
+  digitalWrite(Ultra0_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Front_Left_trigPin, LOW);
-  //pinMode(Front_Left_echoPin, INPUT);
-  duration_Front_Left = pulseIn(Front_Left_echoPin, HIGH);
-  // Convert the time into a distance
-  inches_Front_Left = (duration_Front_Left/2) / 74;   // Divide by 74 or multiply by 0.0135
-  Serial.print(inches_Front_Left);
-  Serial.println(" Inches at Front Left Sensor");
-
-  return inches_Front_Left;
+  digitalWrite(Ultra0_trigPin, LOW);
+  //pinMode(Ultra0_echoPin, INPUT);
+  duration_Ultra0 = pulseIn(Ultra0_echoPin, HIGH);
+  float temp_inches = (duration_Ultra0/2) / 74;   // Divide by 74 or multiply by 0.0135
+  //convert inches to cm
+  cm_Ultra0 = 2.54 *(temp_inches);
+  Serial.print(cm_Ultra0);
+  Serial.println(" Cm at Ultrasonic 0 ");
+  return cm_Ultra0;
 
 }
 
-float Ultrasonic::getBackLeftDistance()
+float Ultrasonic::getUltra1_Distance()
 {
-//below is back left calculations
-  digitalWrite(Back_Left_trigPin, LOW);
+//Clear the sensor
+  digitalWrite(Ultra1_trigPin, LOW);
   delayMicroseconds(5);
-  digitalWrite(Back_Left_trigPin, HIGH);
+  digitalWrite(Ultra1_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Back_Left_trigPin, LOW);
-  //pinMode(Back_Left_echoPin, INPUT);
-  duration_Back_Left = pulseIn(Back_Left_echoPin, HIGH);
-  inches_Back_Left = (duration_Back_Left/2) / 74;   // Divide by 74 or multiply by 0.0135
-  Serial.print(inches_Back_Left);
-  Serial.println(" Inches at Back Left Sensor");
-
-  return inches_Back_Left;
+  digitalWrite(Ultra1_trigPin, LOW);
+  //pinMode(Ultra1_echoPin, INPUT);
+  duration_Ultra1 = pulseIn(Ultra1_echoPin, HIGH);
+  float temp_inches = (duration_Ultra1/2) / 74;
+  cm_Ultra1 = 2.54*(temp_inches);
+  Serial.print(cm_Ultra1);
+  Serial.println(" Cm at Ultrasonic 1 ");
+  return cm_Ultra1;
 }
 
-float Ultrasonic::getTopLeftDistance()
+float Ultrasonic::getUltra2_Distance()
 {
- //below is Top Left calculations
-  digitalWrite(Top_Left_trigPin,LOW);
+  digitalWrite(Ultra2_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(Top_Left_trigPin, HIGH);
+  digitalWrite(Ultra2_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Top_Left_trigPin,LOW);
-  //pinMode(Top_Left_echoPin, INPUT);
-  duration_Top_Left = pulseIn(Top_Left_echoPin, HIGH);
-  inches_Top_Left = (duration_Top_Left/2) / 74;  
-  Serial.print(inches_Top_Left);
-  Serial.println(" Inches at Top Left Sensor");
-
-  return inches_Top_Left;
+  digitalWrite(Ultra2_trigPin,LOW);
+  //pinMode(Ultra2_echoPin, INPUT);
+  duration_Ultra2 = pulseIn(Ultra2_echoPin, HIGH);
+  float temp_inches = (duration_Ultra2/2) / 74;  
+  cm_Ultra2 = 2.54 *(temp_inches);
+  Serial.print(cm_Ultra2);
+  Serial.println(" Cm at Ultrasonic 2 ");
+  return cm_Ultra2;
 }
 
-float Ultrasonic::getTopRightDistance()
+float Ultrasonic::getUltra3_Distance()
 {
- //below is Top Right calculations
-  digitalWrite(Top_Right_trigPin,LOW);
+  digitalWrite(Ultra3_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(Top_Right_trigPin, HIGH);
+  digitalWrite(Ultra3_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Top_Right_trigPin,LOW);
-  //pinMode(Top_Left_echoPin, INPUT);
-  duration_Top_Left = pulseIn(Top_Right_echoPin, HIGH);
-  inches_Top_Right = (duration_Top_Right/2) / 74;  
-  Serial.print(inches_Top_Right);
-  Serial.println(" Inches at Top Left Sensor");
-
-  return inches_Top_Right;
+  digitalWrite(Ultra3_trigPin,LOW);
+  //pinMode(Ultra3_echoPin, INPUT);
+  duration_Ultra3 = pulseIn(Ultra3_echoPin, HIGH);
+  float temp_inches = (duration_Ultra3/2) / 74; 
+  cm_Ultra3 = 2.54 *(temp_inches);
+  Serial.print(cm_Ultra3);
+  Serial.println(" Cm at Ultrasonic 3 ");
+  return cm_Ultra3;
 }
 
-float Ultrasonic::getFrontRightDistance()
+float Ultrasonic::getUltra4_Distance()
 {
-  digitalWrite(Front_Right_trigPin,LOW);
+  digitalWrite(Ultra4_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(Front_Right_trigPin, HIGH);
+  digitalWrite(Ultra4_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Front_Right_trigPin,LOW);
-  //pinMode(Front_Right_echoPin, INPUT);
-  duration_Front_Right = pulseIn(Front_Right_echoPin, HIGH);
-  inches_Front_Right = (duration_Front_Right/2) / 74;  
-  Serial.print(inches_Front_Right);
-  Serial.println(" Inches at Front Right Sensor");
- 
-  return inches_Front_Right;
+  digitalWrite(Ultra4_trigPin,LOW);
+  //pinMode(Ultra4_echoPin, INPUT);
+  duration_Ultra4 = pulseIn(Ultra4_echoPin, HIGH);
+  float temp_inches = (duration_Ultra4/2) / 74;  
+  cm_Ultra4 = 2.54*(temp_inches);
+  Serial.print(cm_Ultra4);
+  Serial.println(" Cm at Ultrasonic 4 ");
+  return cm_Ultra4;
 }
 
-float Ultrasonic::getBackRightDistance()
+float Ultrasonic::getUltra5_Distance()
 {
-  digitalWrite(Back_Right_trigPin,LOW);
+  digitalWrite(Ultra5_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(Back_Right_trigPin, HIGH);
+  digitalWrite(Ultra5_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Back_Right_trigPin,LOW);
-  //pinMode(Back_Right_echoPin, INPUT);
-  duration_Back_Right = pulseIn(Back_Right_echoPin, HIGH);
-  inches_Back_Right = (duration_Back_Right/2) / 74;  
-  Serial.print(inches_Back_Right);
-  Serial.println(" Inches at Back Right Sensor");
-
-  return inches_Back_Right;
+  digitalWrite(Ultra5_trigPin,LOW);
+  //pinMode(Ultra5_echoPin, INPUT);
+  duration_Ultra5 = pulseIn(Ultra5_echoPin, HIGH);
+  float temp_inches = (duration_Ultra5/2) / 74;  
+  cm_Ultra5 = 2.54*(temp_inches);
+  Serial.print(cm_Ultra5);
+  Serial.println(" Cm at Ultrasonic 5 ");
+  return cm_Ultra5;
 }
 
-float Ultrasonic::getBottomRightDistance()
+float Ultrasonic::getUltra6_Distance()
 {
-  digitalWrite(Bottom_Right_trigPin,LOW);
+  digitalWrite(Ultra6_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(Bottom_Right_trigPin, HIGH);
+  digitalWrite(Ultra6_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Bottom_Right_trigPin,LOW);
-  //pinMode(Bottom_Right_echoPin, INPUT);
-  duration_Bottom_Right = pulseIn(Bottom_Right_echoPin, HIGH);
-  inches_Bottom_Right = (duration_Bottom_Right/2) / 74;  
-  Serial.print(inches_Bottom_Right);
-  Serial.println(" Inches at Bottom Right Sensor");
-
-  return inches_Bottom_Right;
+  digitalWrite(Ultra6_trigPin,LOW);
+  //pinMode(Ultra6_echoPin, INPUT);
+  duration_Ultra6 = pulseIn(Ultra6_echoPin, HIGH);
+  float temp_inches = (duration_Ultra6/2) / 74;  
+  cm_Ultra6 = 2.54*(temp_inches);
+  Serial.print(cm_Ultra6);
+  Serial.println(" Cm at Ultrasonic 6 ");
+  return cm_Ultra6;
 }
 
-float Ultrasonic::getBottomLeftDistance()
+float Ultrasonic::getUltra7_Distance()
 {
-  digitalWrite(Bottom_Left_trigPin,LOW);
+  digitalWrite(Ultra7_trigPin,LOW);
   delayMicroseconds(5);
-  digitalWrite(Bottom_Left_trigPin, HIGH);
+  digitalWrite(Ultra7_trigPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(Bottom_Left_trigPin,LOW);
-  //pinMode(Bottom_Left_echoPin, INPUT);
-  duration_Bottom_Left = pulseIn(Bottom_Left_echoPin, HIGH);
-  inches_Bottom_Left = (duration_Bottom_Left/2) / 74;  
-  Serial.print(inches_Bottom_Left);
-  Serial.println(" Inches at Bottom Right Sensor");
-
-  return inches_Bottom_Left;
+  digitalWrite(Ultra7_trigPin,LOW);
+  //pinMode(Ultra7_echoPin, INPUT);
+  duration_Ultra7 = pulseIn(Ultra7_echoPin, HIGH);
+  float temp_inches = (duration_Ultra7/2) / 74;  
+  cm_Ultra7 = 2.54*(temp_inches);
+  Serial.print(cm_Ultra7);
+  Serial.println(" Cm at Ultrasonic 7 ");
+  return cm_Ultra7;
 }

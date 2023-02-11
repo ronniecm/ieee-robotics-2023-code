@@ -1,49 +1,47 @@
-
 #include "ros.h"
 #include "std_msgs/Float32.h"
 #include "Ultrasonic.h"
 
-//Front Left trig and echo pins and distance variables
-#define Front_Left_trigPin 12   // Trigger
-#define Front_Left_echoPin 11   // Echo
-float duration_Front_Left,inches_Front_Left;
+//Ultrasonic Sensor 0 trig and echo pins and distance variables
+#define Ultra0_trigPin 12   // Trigger
+#define Ultra0_echoPin 11   // Echo
+float duration_Ultra0, cm_Ultra0;
 
-//Back Left trig and echo pins and distance variables
-#define Back_Left_trigPin 21
-#define Back_Left_echoPin 20
-float duration_Back_Left,inches_Back_Left;
+//Ultrasonic Sensor 1 trig and echo pins and distance variables
+#define Ultra1_trigPin 4
+#define Ultra1_echoPin 3
+float duration_Ultra1, cm_Ultra1;
 
-//Top Left trig and echo pins and distance variables
-#define Top_Left_trigPin 4
-#define Top_Left_echoPin 3
-float duration_Top_Left,inches_Top_Left;
+//Ultrasonic Sensor 2 trig and echo pins and distance variables
+#define Ultra2_trigPin 16
+#define Ultra2_echoPin 15
+float duration_Ultra2, cm_Ultra2;
 
-//Top Right trig and echo pins and distance variables
-#define Top_Right_trigPin 16
-#define Top_Right_echoPin 15
-float duration_Top_Right,inches_Top_Right;
+//Ultrasonic Sensor 3 trig and echo pins and distance variables
+#define Ultra3_trigPin 21
+#define Ultra3_echoPin 20
+float duration_Ultra3, cm_Ultra3;
 
-//Front Right trig and echo pins and distance variables
-#define Front_Right_trigPin 23
-#define Front_Right_echoPin 22
-float duration_Front_Right,inches_Front_Right;
+//Ultrasonic Sensor 4 trig and echo pins and distance variables
+#define Ultra4_trigPin 23
+#define Ultra4_echoPin 22
+float duration_Ultra4, cm_Ultra4;
 
-//Back Right trig and echo pins and distance variables
-#define Back_Right_trigPin 14
-#define Back_Right_echoPin 13
-float duration_Back_Right,inches_Back_Right;
+//Ultrasonic Sensor 5 trig and echo pins and distance variables
+#define Ultra5_trigPin 14
+#define Ultra5_echoPin 13
+float duration_Ultra5, cm_Ultra5;
 
-//Bottom Right trig and echo pins and distance variables
-#define Bottom_Right_trigPin 10
-#define Bottom_Right_echoPin 9
-float duration_Bottom_Right,inches_Bottom_Right;
+//Ultrasonic Sensor 6 trig and echo pins and distance variables
+#define Ultra6_trigPin 10
+#define Ultra6_echoPin 9
+float duration_Ultra6, cm_Ultra6;
 
-//Bottom Left trig and echo pins and distance variables
-#define Bottom_Left_trigPin 8
-#define Bottom_Left_echoPin 7
-float duration_Bottom_Left,inches_Bottom_Left;
+//Ultrasonic Sensor 7 trig and echo pins and distance variables
+#define Ultra7_trigPin 8
+#define Ultra7_echoPin 7
+float duration_Ultra7, cm_Ultra7;
 
-float inches, duration;
 
 //ROS TOPICS:
 //'/bot/ultraFront'
@@ -55,88 +53,80 @@ float inches, duration;
 
 ros::NodeHandle nh;
 //Initalize the message type for each topic
-std_msgs::Float32 distMsgFrontRight;
-std_msgs::Float32 distMsgFrontLeft;
-std_msgs::Float32 distMsgTopRight;
-std_msgs::Float32 distMsgBottomRight;
+std_msgs::Float32 distMsgUltra0;
+std_msgs::Float32 distMsgUltra1;
+std_msgs::Float32 distMsgUltra2;
+std_msgs::Float32 distMsgUltra3;
 
-std_msgs::Float32 distMsgBackRight;
-std_msgs::Float32 distMsgBackLeft;
-std_msgs::Float32 distMsgTopLeft;
-std_msgs::Float32 distMsgBottomLeft;
+std_msgs::Float32 distMsgUltra4;
+std_msgs::Float32 distMsgUltra5;
+std_msgs::Float32 distMsgUltra6;
+std_msgs::Float32 distMsgUltra7;
 
-//distMsgFrontRight;
-//distMsgFrontLeft;
-//distMsgTopRight;
-//distMsgBottomRight;
+//distMsgUltra0;
+//distMsgUltra1;
+//distMsgUltra2;
+//distMsgUltra3;
 //
-//distMsgBackRight;
-//distMsgBackLeft;
-//distMsgTopLeft;
-//distMsgBottomLeft;
+//distMsgUltra4;
+//distMsgUltra5;
+//distMsgUltra6;
+//distMsgUltra7;
 
 
-ros::Publisher frontRight("/ultraFrontRight", &distMsgFrontRight);
-ros::Publisher frontLeft("/bot/ultraFrontLeft", &distMsgFrontLeft);
-ros::Publisher topRight("/bot/ultraTopRight", &distMsgTopRight);
-ros::Publisher bottomRight("/bot/ultraBottomRight", &distMsgBottomRight);
+ros::Publisher Ultra0("/bot/ultra0", &distMsgUltra0);
+ros::Publisher Ultra1("/bot/ultra1", &distMsgUltra1);
+ros::Publisher Ultra2("/bot/ultra2", &distMsgUltra2);
+ros::Publisher Ultra3("/bot/ultra3", &distMsgUltra3);
 
-ros::Publisher backRight("/bot/ultraFront", &distMsgBackRight);
-ros::Publisher backLeft("/bot/ultraRight", &distMsgBackLeft);
-ros::Publisher topLeft("/bot/ultraBack", &distMsgTopLeft);
-ros::Publisher bottomLeft("/bot/ultraLeft", &distMsgBottomLeft);
+ros::Publisher Ultra4("/bot/ultra4", &distMsgUltra4);
+ros::Publisher Ultra5("/bot/ultra5", &distMsgUltra5);
+ros::Publisher Ultra6("/bot/ultra6", &distMsgUltra6);
+ros::Publisher Ultra7("/bot/ultra7", &distMsgUltra7);
 
 Ultrasonic ultraSensors;
 
 void setup() {
   //Serial Port begin
-  Serial.begin (9600);
+  Serial.begin(9600);
   //Time to init the sensor node
   nh.initNode();
 
-  //pinmode declarations for ultrasonic sensors
-  pinMode(Front_Left_trigPin,OUTPUT);
-  pinMode(Front_Left_echoPin,INPUT);
+  //pinmode declarations for ultrasonic sensors numbering
+  pinMode(Ultra0_trigPin,OUTPUT);
+  pinMode(Ultra0_echoPin,INPUT);
  
-  //Back Left
-  pinMode(Back_Left_trigPin,OUTPUT);
-  pinMode(Back_Left_echoPin,INPUT);
+  pinMode(Ultra1_trigPin,OUTPUT);
+  pinMode(Ultra1_echoPin,INPUT);
 
-  //Top Left
-  pinMode(Top_Left_trigPin,OUTPUT);
-  pinMode(Top_Left_echoPin,INPUT);
+  pinMode(Ultra2_trigPin,OUTPUT);
+  pinMode(Ultra2_echoPin,INPUT);
   
-  //Front Right
-  pinMode(Front_Right_trigPin,OUTPUT);
-  pinMode(Front_Right_echoPin,INPUT);
+  pinMode(Ultra3_trigPin,OUTPUT);
+  pinMode(Ultra3_echoPin,INPUT);
 
-  //Front Left
-  pinMode(Front_Left_trigPin,OUTPUT);
-  pinMode(Front_Left_echoPin,INPUT);
+  pinMode(Ultra4_trigPin,OUTPUT);
+  pinMode(Ultra4_trigPin,INPUT);
 
-  //Back Right
-  pinMode(Back_Right_trigPin,OUTPUT);
-  pinMode(Back_Right_echoPin,INPUT);
+  pinMode(Ultra5_trigPin,OUTPUT);
+  pinMode(Ultra5_echoPin,INPUT);
 
-  //Bottom Right
-  pinMode(Bottom_Right_trigPin,OUTPUT);
-  pinMode(Bottom_Right_echoPin,INPUT);
+  pinMode(Ultra6_trigPin,OUTPUT);
+  pinMode(Ultra6_echoPin,INPUT);
 
-  //Bottom Left
-  pinMode(Bottom_Left_trigPin,OUTPUT);
-  pinMode(Bottom_Left_echoPin,INPUT);
+  pinMode(Ultra7_trigPin,OUTPUT);
+  pinMode(Ultra7_echoPin,INPUT);
   
  
   //This make the information on the topic available to subscribers
-  nh.advertise(frontRight);
-  nh.advertise(frontLeft);
-  nh.advertise(backRight);
-  nh.advertise(backLeft);
-
-  nh.advertise(topRight);
-  nh.advertise(topLeft);
-  nh.advertise(bottomRight);
-  nh.advertise(bottomLeft);
+  nh.advertise(Ultra0);
+  nh.advertise(Ultra1);
+  nh.advertise(Ultra2);
+  nh.advertise(Ultra3);
+  nh.advertise(Ultra4);
+  nh.advertise(Ultra5);
+  nh.advertise(Ultra6);
+  nh.advertise(Ultra7);
 
 }
  
@@ -146,29 +136,29 @@ void loop() {
     // --------------------IMPORTANT------------------------
     //TO KEEP THINGS CONSISTANT 0 index ==> LEFT SENSOR & 1 index ==> RIGHT for each side
     
-    distMsgFrontLeft.data = ultraSensors.getFrontLeftDistance();
-    distMsgFrontRight.data = ultraSensors.getFrontRightDistance();
+    distMsgUltra0.data = ultraSensors.getUltra0_Distance();
+    distMsgUltra1.data = ultraSensors.getUltra1_Distance();
    
-    distMsgTopRight.data = ultraSensors.getTopRightDistance();
-    distMsgBottomRight.data = ultraSensors.getBottomRightDistance();
+    distMsgUltra2.data = ultraSensors.getUltra2_Distance();
+    distMsgUltra3.data = ultraSensors.getUltra3_Distance();
 
-    distMsgBackRight.data = ultraSensors.getBackRightDistance();
-    distMsgBackLeft.data = ultraSensors.getBackLeftDistance();
+    distMsgUltra4.data = ultraSensors.getUltra4_Distance();
+    distMsgUltra5.data = ultraSensors.getUltra5_Distance();
     
-    distMsgBottomLeft.data = ultraSensors.getBottomLeftDistance();
-    distMsgTopLeft.data = ultraSensors.getTopLeftDistance();
+    distMsgUltra6.data = ultraSensors.getUltra6_Distance();
+    distMsgUltra7.data = ultraSensors.getUltra7_Distance();
 
     nh.spinOnce();
     
-    frontRight.publish(&distMsgFrontRight);
-    frontLeft.publish(&distMsgFrontLeft);
-    backRight.publish(&distMsgBackRight);
-    backLeft.publish(&distMsgBackLeft);
+    Ultra0.publish(&distMsgUltra0);
+    Ultra1.publish(&distMsgUltra1);
+    Ultra2.publish(&distMsgUltra2);
+    Ultra3.publish(&distMsgUltra3);
 
-    topRight.publish(&distMsgTopRight);
-    bottomRight.publish(&distMsgBottomRight);
-    topLeft.publish(&distMsgTopLeft);
-    bottomLeft.publish(&distMsgBottomLeft);
+    Ultra4.publish(&distMsgUltra4);
+    Ultra5.publish(&distMsgUltra5);
+    Ultra6.publish(&distMsgUltra6);
+    Ultra7.publish(&distMsgUltra7);
     
 
 }
