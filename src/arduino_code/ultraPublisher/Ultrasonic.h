@@ -3,6 +3,7 @@
 class Ultrasonic
 {
 public:
+//Distance measurements
     float getUltra0_Distance();
     float getUltra1_Distance();
     float getUltra2_Distance();

@@ -2,41 +2,45 @@
 #include "std_msgs/Float32.h"
 #include "Ultrasonic.h"
 
-//Front Left trig and echo pins and distance variables
-#define Front_Left_trigPin 12   // Trigger
-#define Front_Left_echoPin 11   // Echo
+//Ultrasonic Sensor 0 trig and echo pins and distance variables
+#define Ultra0_trigPin 12   // Trigger
+#define Ultra0_echoPin 11   // Echo
+float duration_Ultra0, cm_Ultra0;
 
-//Back Left trig and echo pins and distance variables
-#define Back_Left_trigPin 21
-#define Back_Left_echoPin 20
+//Ultrasonic Sensor 1 trig and echo pins and distance variables
+#define Ultra1_trigPin 4
+#define Ultra1_echoPin 3
+float duration_Ultra1, cm_Ultra1;
 
-//Top Left trig and echo pins and distance variables
-#define Top_Left_trigPin 4
-#define Top_Left_echoPin 3
+//Ultrasonic Sensor 2 trig and echo pins and distance variables
+#define Ultra2_trigPin 16
+#define Ultra2_echoPin 15
+float duration_Ultra2, cm_Ultra2;
 
-//Top Right trig and echo pins and distance variables
-#define Top_Right_trigPin 16
-#define Top_Right_echoPin 15
+//Ultrasonic Sensor 3 trig and echo pins and distance variables
+#define Ultra3_trigPin 21
+#define Ultra3_echoPin 20
+float duration_Ultra3, cm_Ultra3;
 
-//Front Right trig and echo pins and distance variables
-#define Front_Right_trigPin 23
-#define Front_Right_echoPin 22
+//Ultrasonic Sensor 4 trig and echo pins and distance variables
+#define Ultra4_trigPin 23
+#define Ultra4_echoPin 22
+float duration_Ultra4, cm_Ultra4;
 
+//Ultrasonic Sensor 5 trig and echo pins and distance variables
+#define Ultra5_trigPin 14
+#define Ultra5_echoPin 13
+float duration_Ultra5, cm_Ultra5;
 
-//Back Right trig and echo pins and distance variables
-#define Back_Right_trigPin 14
-#define Back_Right_echoPin 13
+//Ultrasonic Sensor 6 trig and echo pins and distance variables
+#define Ultra6_trigPin 10
+#define Ultra6_echoPin 9
+float duration_Ultra6, cm_Ultra6;
 
- 
-//Bottom Right trig and echo pins and distance variables
-#define Bottom_Right_trigPin 10
-#define Bottom_Right_echoPin 9
-
-//Bottom Left trig and echo pins and distance variables
-#define Bottom_Left_trigPin 8
-#define Bottom_Left_echoPin 7
-
-
+//Ultrasonic Sensor 7 trig and echo pins and distance variables
+#define Ultra7_trigPin 8
+#define Ultra7_echoPin 7
+float duration_Ultra7, cm_Ultra7;
 
 //ROS TOPICS:
 //'/bot/ultraFront'
