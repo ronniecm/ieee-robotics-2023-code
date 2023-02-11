@@ -159,7 +159,7 @@ void Drivetrain::calcRPM()
         //finally to retrieve the RPM value multiply that value by 60,000 and set the prevPos[i] to the currPos saved earlier
         //every 10 calls to this functions, the samples are averaged and saved into finalRpm array
         int currPos = enc[i]->read();
-        int deltaPos = currPos - prevPos[i];
+        double deltaPos = currPos - prevPos[i];
         double revs = deltaPos / TICKS_PER_REV;
         double rpmCalc = revs * 60000;
         prevPos[i] = currPos;
