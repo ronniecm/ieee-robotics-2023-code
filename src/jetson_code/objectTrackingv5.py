@@ -26,7 +26,7 @@
 # Modified by Juan Suquilanda
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 if onJetson:
 
@@ -47,7 +47,7 @@ if onJetson:
 
 import rospy
 from std_msgs.msg import Int8
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 
 #This class will serve as the direct communication from jetson to arduino
@@ -60,10 +60,16 @@ class RobotCommand:
             rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
             self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), msg_type, queue_size =10)
 
-            rospy.Subscriber('%s/ultraFront' %robot_name, Float64, self.ultraFront)
-            rospy.Subscriber('%s/ultraRight' %robot_name, Float64, self.ultraRight)
-            rospy.Subscriber('%s/ultraBack' %robot_name, Float64, self.ultraBack)
-            rospy.Subscriber('%s/ultraLeft' %robot_name, Float64, self.ultraLeft)
+            rospy.Subscriber('%s/ultraFrontRight' %robot_name, Float32, self.ultraFrontRight)
+            rospy.Subscriber('%s/ultraFrontLeft' %robot_name, Float32, self.ultraFrontLeft)
+            rospy.Subscriber('%s/ultraTopRight' %robot_name, Float32, self.ultraTopRight)
+            rospy.Subscriber('%s/ultraBottomRight' %robot_name, Float32, self.ultraBottomRight)
+
+            rospy.Subscriber('%s/ultraBackRight' %robot_name, Float32, self.ultraBackRight)
+            rospy.Subscriber('%s/ultraBackLeft' %robot_name, Float32, self.ultraBackLeft)
+            rospy.Subscriber('%s/ultraTopLeft' %robot_name, Float32, self.ultraTopLeft)
+            rospy.Subscriber('%s/ultraBottomLeft' %robot_name, Float32, self.ultraBottomLeft)
+
 
             print("ROS SETUP OKAY")
 
@@ -82,31 +88,63 @@ class RobotCommand:
         self.prevDectect = False
         self.reversedActions = []
         
-
+        #Initializeing ultrasonic distance measurements, This will prob go in a new CLASS
+        #This also may be able to be saved as an array intead of individual
+        #This where we make tuples
+        
+        self.ultraFront = [0.0, 0.0]
+        self.ultraRight = [0.0, 0.0]
+        self.ultraBack = [0.0, 0.0]
+        self.ultraLeft = [0.0, 0.0]
+        
     
     '''
-    ROS Callback functions
+    ROS Callback functions for ultrasonics
     '''
 
-    def ultraFront(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
-    def ultraRight(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
-    def ultraBack(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
-    def ultraLeft(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
+    def ultraFrontRight(self, msg):
+        print("Front Right Reading: %s" %msg.data)
+        self.ultraFront[1] = msg.data
+        print("List now contains: " , self.ultraFront)
+
+    def ultraFrontLeft(self, msg):
+        print("Front Left Reading: %s" %msg.data)
+        self.ultraFront[0] = msg.data
+        print("List now contains: " , self.ultraFront)
+
+    def ultraTopRight(self, msg):
+        print("Top Right Reading: %s" %msg.data)
+        self.ultraRight[0] = msg.data
+        print("List now contains: " , self.ultraRight)
+
+    def ultraBottomRight(self, msg):
+        print("Bottom Right Reading: %s" %msg.data)
+        self.ultraRight[1] = msg.data
+        print("List now contains: " , self.ultraRight)
+
+    def ultraBackRight(self, msg):
+        print("Back Right Reading: %s" %msg.data)
+        self.ultraBack[0] = msg.data
+        print("List now contains: " , self.ultraBack)
+
+    def ultraBackLeft(self, msg):
+        print("Back Left Reading: %s" %msg.data)
+        self.ultraBack[1] = msg.data
+        print("List now contains: " , self.ultraBack)
+
+    def ultraTopLeft(self, msg):
+        print("Top Left Reading: %s" %msg.data)
+        self.ultraLeft[1] = msg.data
+        print("List now contains: " , self.ultraLeft)
+
+    def ultraBottomLeft(self, msg):
+        print("Bottom Left Reading: %s" %msg.data)
+        self.ultraLeft[0] = msg.data
+        print("List now contains: " , self.ultraLeft)
 
 
-        #Now we will set up the subscribers for the ultrasonic sensors
-
-
-        #This should be all that we need to run once to make sure that everything is setup okay
-        #Now we can make different commands for the robot
+    #Now we should have update values for ALL sides in their respective list for each side
+        
     
     def buildMsg(self, x, y, rot):
         msg = Twist()
@@ -119,9 +157,6 @@ class RobotCommand:
         print("Message Built", msg)
         print(msg)
     
-        
-        #Put the foward kinematics stuff here
-        pass
 
     def goFoward(self):
         # Move the robot forward
@@ -150,6 +185,29 @@ class RobotCommand:
     def stopBot(self):
         # Stop the robot
         self.pub.publish(4)
+
+
+    def handleWalls(self)
+        '''
+        Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
+        That list is will be self.ultra<FACE>
+        So if I wanted to get sensor readings from the sensor on the front left I would call self.ultraFront[0]
+        
+        0 index corresponds to a left sensor on a face and 1 corresponds to the right sensor on the face
+
+        Make sure this indexing is consistant througout ALL error correction calculations otherwise there were will unintentional erros
+        This is how indexing should work such that function work the same for all sides and no need to repeat any calculations
+        If this not working make sure to check the call ultrasonic callback functions to make sure the distances are being indexed correcly I 
+        may have messed up !!
+                                               -Front-
+                                            __0_______1__
+                                          1 |           |0
+                                            |           |
+                                            |           |
+                                          0 |           |1
+                                            |___________|
+                                              1       0   
+        '''
 
 
 
@@ -417,9 +475,12 @@ class RealSense:
 if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
+    while True:
+        
+        pass
 
-    camera = RealSense(bot)
-    camera.run()
+    #camera = RealSense(bot)
+    #camera.run()
 
         
 
