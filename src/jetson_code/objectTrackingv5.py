@@ -172,39 +172,51 @@ class RobotCommand:
         print("Building msg with following params: %s,%s,%s" %(x,y,rot))
         msg.linear.x = x
         msg.linear.y = y
-
+        msg.linear.z = 0.0
+        
+        msg.angular.x = 0
+        msg.angular.y = 0
         msg.angular.z = rot
         print("Message Built", msg)
         print(msg)
+        return msg
     
+    #List of basic commands that can be used as geometry twist messages
 
     def goFoward(self):
         # Move the robot forward
-        self.pub.publish(0)
-        pass
+        msg = self.buildMsg(1.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        
     def goBackwards(self):
         # Move the robot backwards
-        self.pub.publish(6)
-        pass
+        msg = self.buildMsg(-1.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        
     def goRight(self):
         # Move the robot right
-        self.pub.publish(2)
-        pass
+        msg = self.buildMsg(0, 1.0, 0.0)
+        self.pub.publish(msg)
+        
     def goLeft(self):
         # Move the robot left
-        self.pub.publish(3)
-        pass
+        msg = self.buildMsg(0.0, -1.0, 0.0)
+        self.pub.publish(msg)
+
     def rotateLeft(self):
         # Rotate the robot left
-        self.pub.publish(7)
-        pass
+        msg = self.buildMsg(0.0, 0.0, -3.14)
+        self.pub.publish(msg)
+
     def rotateRight(self):
         # Rotate the robot right
-        self.pub.publish(8)
-        pass
+        msg = self.buildMsg(0.0, 0.0, 3.14)
+        self.pub.publish(msg)
+        
     def stopBot(self):
         # Stop the robot
-        self.pub.publish(4)
+        msg = self.buildMsg(0.0, 0.0, 0.0)
+        self.pub.publish(msg)
 
 
     def handleWalls(self):
@@ -518,11 +530,11 @@ class RealSense:
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
+    bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
     while True:
-        bot.handleWalls()
-        pass
-
+        bot.rotateLeft()
+        
+        
     #camera = RealSense(bot)
     #camera.run()
 
