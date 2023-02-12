@@ -228,6 +228,9 @@ class RobotCommand:
                                             |___________|
                                               1       0   
         '''
+
+
+        
         print(self.ultraBack[0])
         print(self.ultraRight[1])
         while(self.ultraBack[0] < 75):
@@ -251,34 +254,6 @@ class RobotCommand:
             print("Go Forward")
         
 
-        while(self.ultraBack[0] < 40):
-            if((self.ultraRight[0] - self.ultraRight[1]) < 0): #Robot is tilted towards right
-                while(self.ultraRight[0] < self.ultraRight[1]):
-                    print("Rotate Left")
-                    #self.rotateLeft()
-            if((self.ultraRight[1] - self.ultraRight[0]) < 0):  # Robot is tilted towards left
-                while (self.ultraRight[1] < self.ultraRight[0]):
-                    print("Rotate Right")
-                    #self.rotateRight()
-            if((self.ultraBack[0] - self.ultraBack[1]) < 0):  # Robot is tilted towards right
-                while (self.ultraBack[0] < self.ultraBack[1]):
-                    print("Rotate Left")
-                    #self.rotateLeft()
-            if((self.ultraBack[1] - self.ultraBack[0]) < 0):  # Robot is tilted towards left
-                while (self.ultraBack[1] < self.ultraBack[0]):
-                    print("Rotate Right")
-                    #self.rotateRight()
-            if (self.ultraRight[0] == self.ultraRight[1]):
-                if (self.ultraRight[0] > 2):
-                    while (self.ultraRight[1] != 2):
-                        print("Go Right")
-                        #self.goRight()
-                if (self.ultraRight[0] < 2):
-                    while (self.ultraRight[0] != 2):
-                        print("Go Left")
-                        #self.goLeft()
-        #self.goFoward()
-        print("Go Forward")
 
 #This will line it self up with object, right now works in x component and then y 
 #But will use foward kinematics soon 
