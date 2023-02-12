@@ -228,6 +228,28 @@ class RobotCommand:
                                             |___________|
                                               1       0   
         '''
+        print(self.ultraBack[0])
+        print(self.ultraRight[1])
+        while(self.ultraBack[0] < 75):
+            if(((self.ultraRight[0] - self.ultraRight[1]) < (-2.00))): #Robot is tilted towards right
+                while(self.ultraRight[0] < self.ultraRight[1]):
+                    print("Rotate Left")
+                    #self.rotateLeft()
+            if((self.ultraRight[0] - self.ultraRight[1]) > 2.00):  # Robot is tilted to((self.ultraRight[0] - self.ultraRight[1]) < 0.5)wards left
+                while (self.ultraRight[1] < self.ultraRight[0]):
+                    print("Rotate Right")
+                    #self.rotateRight()
+            if((self.ultraBack[0] - self.ultraBack[1]) < (-2.00)):  # Robot is tilted towards right
+                while (self.ultraBack[0] < self.ultraBack[1]):
+                    print("Rotate Left")
+                    #self.rotateLeft()
+            if((self.ultraBack[0] - self.ultraBack[1]) > 2.00):  # Robot is tilted towards left
+                while (self.ultraBack[1] < self.ultraBack[0]):
+                    print("Rotate Right")
+                    #self.rotateRight()
+        #self.goFoward()
+            print("Go Forward")
+        
 
 
 
@@ -496,10 +518,7 @@ if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
     while True:
-        #print("Front", bot.ultraFront)
-        print("Back" , bot.ultraBack)
-        print("Right", bot.ultraRight)
-        #print("Left", bot.ultraLeft)
+        bot.handleWalls()
         pass
 
     #camera = RealSense(bot)
