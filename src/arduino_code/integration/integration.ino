@@ -1,17 +1,17 @@
 #include "Drivetrain.h"
 #include "Ultrasonic.h"
 
-#define FL_in1 14
-#define FL_in2 15
+#define FL_in1 22
+#define FL_in2 23
 
 #define FR_in1 36
 #define FR_in2 37
 
-#define BL_in1 5
-#define BL_in2 4
+#define BL_in1 2
+#define BL_in2 3
 
-#define BR_in1 24
-#define BR_in2 6
+#define BR_in1 28
+#define BR_in2 29
 
 Drivetrain *drivetrain;
 Ultrasonic *ultrasonicSensors;
