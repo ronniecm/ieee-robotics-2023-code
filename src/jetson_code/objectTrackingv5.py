@@ -532,7 +532,10 @@ if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
     while True:
-        bot.rotateLeft()
+        print("Front", bot.ultraFront)
+        print("Right", bot.ultraRight)
+        print("Back", bot.ultraBack)
+        print("Left", bot.ultraLeft)
         
         
     #camera = RealSense(bot)
