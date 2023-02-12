@@ -183,7 +183,7 @@ class RobotCommand:
     
     #List of basic commands that can be used as geometry twist messages
 
-    def goFoward(self):
+    def goForward(self):
         # Move the robot forward
         msg = self.buildMsg(1.0, 0.0, 0.0)
         self.pub.publish(msg)
@@ -195,7 +195,7 @@ class RobotCommand:
         
     def goRight(self):
         # Move the robot right
-        msg = self.buildMsg(0, 1.0, 0.0)
+        msg = self.buildMsg(0.0, 1.0, 0.0)
         self.pub.publish(msg)
         
     def goLeft(self):
@@ -532,7 +532,7 @@ if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
     while True:
-        bot.rotateLeft()
+        bot.stopBot()
         
         
     #camera = RealSense(bot)
