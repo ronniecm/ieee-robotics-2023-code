@@ -5,42 +5,41 @@
 //Ultrasonic Sensor 0 trig and echo pins and distance variables
 #define Ultra0_trigPin 5    // Trigger
 #define Ultra0_echoPin 6    // Echo
-float duration_Ultra0, cm_Ultra0;
+
 
 //Ultrasonic Sensor 1 trig and echo pins and distance variables
 #define Ultra1_trigPin 4
 #define Ultra1_echoPin 3
-float duration_Ultra1, cm_Ultra1;
+
 
 //Ultrasonic Sensor 2 trig and echo pins and distance variables
 #define Ultra2_trigPin 21 
 #define Ultra2_echoPin 20 
-float duration_Ultra2, cm_Ultra2; 
+
 
 //Ultrasonic Sensor 3 trig and echo pins and distance variables
 #define Ultra3_trigPin 16
 #define Ultra3_echoPin 15
-float duration_Ultra3, cm_Ultra3;
+
 
 //Ultrasonic Sensor 4 trig and echo pins and distance variable
 #define Ultra4_trigPin 14 
 #define Ultra4_echoPin 13 
-float duration_Ultra4, cm_Ultra4;
+
 
 //Ultrasonic Sensor 5 trig and echo pins and distance variables
 #define Ultra5_trigPin 12
 #define Ultra5_echoPin 11
-float duration_Ultra5, cm_Ultra5;
+
 
 //Ultrasonic Sensor 6 trig and echo pins and distance variables
 #define Ultra6_trigPin 10
 #define Ultra6_echoPin 9
-float duration_Ultra6, cm_Ultra6;
+
 
 //Ultrasonic Sensor 7 trig and echo pins and distance variables
 #define Ultra7_trigPin 8
 #define Ultra7_echoPin 7
-float duration_Ultra7, cm_Ultra7;
 
 
 
