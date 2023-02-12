@@ -33,7 +33,7 @@ void mecanumDriveCallBack(const geometry_msgs::Twist& cmd_msg)
 {
   cmd_x = cmd_msg.linear.x;
   cmd_y = cmd_msg.linear.y;
-  cmd_z = cmd_msg.linear.z;
+  cmd_z = cmd_msg.angular.z;
   
 }
 

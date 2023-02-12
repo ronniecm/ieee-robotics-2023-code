@@ -200,6 +200,7 @@ class RobotCommand:
         
     def goLeft(self):
         # Move the robot left
+
         msg = self.buildMsg(0.0, -1.0, 0.0)
         self.pub.publish(msg)
 
@@ -245,25 +246,31 @@ class RobotCommand:
         
         print(self.ultraBack[0])
         print(self.ultraRight[1])
+
         while(self.ultraBack[0] < 75):
             if(((self.ultraRight[0] - self.ultraRight[1]) < (-2.00))): #Robot is tilted towards right
                 while(self.ultraRight[0] < self.ultraRight[1]):
                     print("Rotate Left")
-                    #self.rotateLeft()
+                    self.rotateLeft()
+
             if((self.ultraRight[0] - self.ultraRight[1]) > 2.00):  # Robot is tilted to((self.ultraRight[0] - self.ultraRight[1]) < 0.5)wards left
                 while (self.ultraRight[1] < self.ultraRight[0]):
                     print("Rotate Right")
-                    #self.rotateRight()
+                    self.rotateRight()
+
             if((self.ultraBack[0] - self.ultraBack[1]) < (-2.00)):  # Robot is tilted towards right
                 while (self.ultraBack[0] < self.ultraBack[1]):
                     print("Rotate Left")
-                    #self.rotateLeft()
+                    self.rotateLeft()
+
             if((self.ultraBack[0] - self.ultraBack[1]) > 2.00):  # Robot is tilted towards left
                 while (self.ultraBack[1] < self.ultraBack[0]):
                     print("Rotate Right")
-                    #self.rotateRight()
+                    self.rotateRight()
+
         #self.goFoward()
             print("Go Forward")
+            self.goFoward()
         
 
 
@@ -410,26 +417,7 @@ class RealSense:
         else:
             return False
 
-    #Realsense stops detecting around 0.15 so we will do 1 cm before that
-    def checkWalls(self):
 
-        if self.right_pixel_dist <= .20 or self.left_pixel_dist <= 0.20:
-            error = self.right_pixel_dist - self.left_pixel_dist
-            print("Right Distance: %f" %self.right_pixel_dist)
-            print("Left Distance: %f" %self.left_pixel_dist)
-
-            print("Distance Error to walls: %f" %error)
-            
-            #For now we will allow half a centimeter of error. Need to test to make erros smaller
-            if abs(error) >= 0 or abs(error) < 0.5:
-                "Error Corrected!"
-                return
-            else:
-                #The sign of the error determines what directions to rotate in
-                if error < 0:
-                    self.bot.rotateLeft()
-                if error > 0:
-                    self.bot.rotateRight()
     '''
     This is like the main loop
     '''
@@ -532,11 +520,8 @@ if __name__ == "__main__":
     #Takes in camera dimensions
     bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
     while True:
-        print("Front", bot.ultraFront)
-        print("Right", bot.ultraRight)
-        print("Back", bot.ultraBack)
-        print("Left", bot.ultraLeft)
-        
+        bot.handleWalls()
+    
         
     #camera = RealSense(bot)
     #camera.run()
