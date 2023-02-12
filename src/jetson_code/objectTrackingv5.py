@@ -120,14 +120,14 @@ class RobotCommand:
     ROS Callback functions for ultrasonics
     '''
 
-    def ultra1(self, msg):
-        print("Front Right Reading: %s" %msg.data)
-        self.ultraFront[1] = msg.data
-        #print("List now contains: " , self.ultraFront)
-
     def ultra0(self, msg):
         print("Front Left Reading: %s" %msg.data)
         self.ultraFront[0] = msg.data
+        #print("List now contains: " , self.ultraFront)
+
+    def ultra1(self, msg):
+        print("Front Right Reading: %s" %msg.data)
+        self.ultraFront[1] = msg.data
         #print("List now contains: " , self.ultraFront)
 
     def ultra2(self, msg):
@@ -149,16 +149,18 @@ class RobotCommand:
         print("Back Left Reading: %s" %msg.data)
         self.ultraBack[1] = msg.data
         #print("List now contains: " , self.ultraBack)
+        
+    def ultra6(self, msg):
+        print("Bottom Left Reading: %s" %msg.data)
+        self.ultraLeft[0] = msg.data
+        #print("List now contains: " , self.ultraLeft)
 
     def ultra7(self, msg):
         print("Top Left Reading: %s" %msg.data)
         self.ultraLeft[1] = msg.data
         #print("List now contains: " , self.ultraLeft)
 
-    def ultra6(self, msg):
-        print("Bottom Left Reading: %s" %msg.data)
-        self.ultraLeft[0] = msg.data
-        #print("List now contains: " , self.ultraLeft)
+   
 
 
     #Now we should have update values for ALL sides in their respective list for each side
@@ -170,39 +172,51 @@ class RobotCommand:
         print("Building msg with following params: %s,%s,%s" %(x,y,rot))
         msg.linear.x = x
         msg.linear.y = y
-
+        msg.linear.z = 0.0
+        
+        msg.angular.x = 0
+        msg.angular.y = 0
         msg.angular.z = rot
         print("Message Built", msg)
         print(msg)
+        return msg
     
+    #List of basic commands that can be used as geometry twist messages
 
     def goFoward(self):
         # Move the robot forward
-        self.pub.publish(0)
-        pass
+        msg = self.buildMsg(1.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        
     def goBackwards(self):
         # Move the robot backwards
-        self.pub.publish(6)
-        pass
+        msg = self.buildMsg(-1.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        
     def goRight(self):
         # Move the robot right
-        self.pub.publish(2)
-        pass
+        msg = self.buildMsg(0, 1.0, 0.0)
+        self.pub.publish(msg)
+        
     def goLeft(self):
         # Move the robot left
-        self.pub.publish(3)
-        pass
+        msg = self.buildMsg(0.0, -1.0, 0.0)
+        self.pub.publish(msg)
+
     def rotateLeft(self):
         # Rotate the robot left
-        self.pub.publish(7)
-        pass
+        msg = self.buildMsg(0.0, 0.0, -3.14)
+        self.pub.publish(msg)
+
     def rotateRight(self):
         # Rotate the robot right
-        self.pub.publish(8)
-        pass
+        msg = self.buildMsg(0.0, 0.0, 3.14)
+        self.pub.publish(msg)
+        
     def stopBot(self):
         # Stop the robot
-        self.pub.publish(4)
+        msg = self.buildMsg(0.0, 0.0, 0.0)
+        self.pub.publish(msg)
 
 
     def handleWalls(self):
@@ -227,6 +241,30 @@ class RobotCommand:
                                               1       0   
         '''
 
+
+        
+        print(self.ultraBack[0])
+        print(self.ultraRight[1])
+        while(self.ultraBack[0] < 75):
+            if(((self.ultraRight[0] - self.ultraRight[1]) < (-2.00))): #Robot is tilted towards right
+                while(self.ultraRight[0] < self.ultraRight[1]):
+                    print("Rotate Left")
+                    #self.rotateLeft()
+            if((self.ultraRight[0] - self.ultraRight[1]) > 2.00):  # Robot is tilted to((self.ultraRight[0] - self.ultraRight[1]) < 0.5)wards left
+                while (self.ultraRight[1] < self.ultraRight[0]):
+                    print("Rotate Right")
+                    #self.rotateRight()
+            if((self.ultraBack[0] - self.ultraBack[1]) < (-2.00)):  # Robot is tilted towards right
+                while (self.ultraBack[0] < self.ultraBack[1]):
+                    print("Rotate Left")
+                    #self.rotateLeft()
+            if((self.ultraBack[0] - self.ultraBack[1]) > 2.00):  # Robot is tilted towards left
+                while (self.ultraBack[1] < self.ultraBack[0]):
+                    print("Rotate Right")
+                    #self.rotateRight()
+        #self.goFoward()
+            print("Go Forward")
+        
 
 
 #This will line it self up with object, right now works in x component and then y 
@@ -492,14 +530,11 @@ class RealSense:
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
+    bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
     while True:
-        print("Front", bot.ultraFront)
-        print("Back" , bot.ultraBack)
-        print("Right", bot.ultraRight)
-        print("Left", bot.ultraLeft)
-        pass
-
+        bot.rotateLeft()
+        
+        
     #camera = RealSense(bot)
     #camera.run()
 
