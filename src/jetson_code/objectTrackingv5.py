@@ -38,7 +38,7 @@ if onJetson:
 
     import numpy as np
     import cv2
-    import pyrealsense2 as rs
+    #import pyrealsense2 as rs
 
 
     from jetson_inference import detectNet
@@ -60,8 +60,8 @@ class RobotCommand:
             rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
             self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), msg_type, queue_size =10)
 
-            rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
-            rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
+            #rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
+            #rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
             rospy.Subscriber('%s/ultra2' %robot_name, Float32, self.ultra2)
             rospy.Subscriber('%s/ultra3' %robot_name, Float32, self.ultra3)
             rospy.Subscriber('%s/ultra4' %robot_name, Float32, self.ultra4)
@@ -69,6 +69,7 @@ class RobotCommand:
             rospy.Subscriber('%s/ultra6' %robot_name, Float32, self.ultra6)
             rospy.Subscriber('%s/ultra7' %robot_name, Float32, self.ultra7)
             rospy.Subscriber('/obj_detect', Int8, self.obj_detect)
+            rospy.Subscriber('/yaw', Float32, self.yaw)
 
             '''
 
@@ -116,14 +117,18 @@ class RobotCommand:
         self.ultraBack = [0.0, 0.0]
         self.ultraLeft = [0.0, 0.0]
         self.objDetect = 0
+        self.yawAngle = 0.0
         
     
     '''
     ROS Callback functions for ultrasonics
     '''
+    def yaw(self, msg):
+        self.yawAngle = msg.data
+        #rint("Reading: %s" %msg.data)
     def obj_detect(self, msg):
         self.objDetect = msg.data
-        #rint("Reading: %s" %msg.data)
+        #rint("Reading: %s" %msg.data)SYNC_SEC
 
     def ultra0(self, msg):
         ##print("Front Left Reading: %s" %msg.data)
@@ -136,7 +141,7 @@ class RobotCommand:
         ##print("List now contains: " , self.ultraFront)
 
     def ultra2(self, msg):
-        ##print("Top Right Reading: %s" %msg.data)
+        #print("Top Right Reading: %s" %msg.data)
         self.ultraRight[0] = msg.data 
         '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.data) > 3:
             self.ultraRight[0] = msg.data 
@@ -225,18 +230,19 @@ class RobotCommand:
 
     # Rotate the robot left
     def rotateLeft(self):
-        msg = self.buildMsg(0.0, 0.0, -3.14)
+        msg = self.buildMsg(0.0, 0.0, -0.25)
         self.pub.publish(msg)
 
     def rotateRight(self):
         # Rotate the robot right
-        msg = self.buildMsg(0.0, 0.0, 3.14)
+        msg = self.buildMsg(0.0, 0.0, 0.25)
         self.pub.publish(msg)
         
     def stopBot(self):
         # Stop the robot
         msg = self.buildMsg(0.0, 0.0, 0.0)
         self.pub.publish(msg)
+        time.sleep(0.5)
 
 
     def handleWalls(self):
@@ -518,52 +524,111 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
     #Takes in camera dimensions
+    
+    
     bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
     bot.stopBot()
     #delay program for 5 seconds
-    time.sleep(5)
+    #time.sleep(5)
+    print("turn on motors")
 
-    while not within1inch(bot.ultraRight[0], 15.0, 2) and not within1inch(bot.ultraRight[1], 15.0, 2):
+
+    '''
+    msg =bot.buildMsg(1, 5, 0)
+    while True:
+        bot.pub.publish(msg)
+    '''
+    
+        
+        
+    
+    while not within1inch(bot.ultraRight[0], 15.0, 2):
         bot.goRight()
 
     bot.stopBot()
 
     while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
-        bot.goBackwards()
-
-    bot.stopBot()
-
-    while not within1inch(bot.ultraBack[0], 20.0, 1):
         bot.goFoward()
 
     bot.stopBot()
 
-    while bot.ultraLeft[0] > 15.0 and bot.ultraLeft[1] > 15.0:
-        pos = (bot.ultraRight[0] + bot.ultraRight[1])/2
-        while not within1inch(bot.ultraRight[0], pos + 20.0, 2) and not within1inch(bot.ultraRight[1], pos + 20.0, 2):
-            print("go left")
-            bot.goLeft()
-        
-        bot.stopBot()
-
-        while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
-            print("go forward")
-            bot.goBackwards() 
-        
-        bot.stopBot()
-
-        while not within1inch(bot.ultraBack[0], 20.0, 1):
-            print("go back")
-            bot.goFoward()
-
-        bot.stopBot()
+    while not within1inch(bot.ultraBack[0], 15.0, 2):
+        bot.goBackwards()
 
     bot.stopBot()
-        
-       
+
+    while abs(bot.ultraBack[0] - bot.ultraBack[1]) > 0.75:
+        if bot.ultraBack[0] > bot.ultraBack[1]:
+            bot.rotateRight()
+        else:
+            bot.rotateLeft()
     
+    bot.stopBot()
+
+    while not within1inch(bot.ultraLeft[0], 10.0, 2):
+        pos = bot.ultraRight[0]
         
+        t_end = time.time() + 1.0
+        while time.time() < t_end:
+            bot.goLeft()
+            
+        bot.stopBot()
+        
+        if within1inch(bot.ultraLeft[0], 10.0, 2):
+            break
+
+        while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+            bot.goFoward()
+            
+        bot.stopBot()
+        
+        while not within1inch(bot.ultraBack[0], 15.0, 1) and not within1inch(bot.ultraBack[1], 15.0, 1):
+            bot.goBackwards()
+
+        bot.stopBot()
+
+        while abs(bot.ultraBack[0] - bot.ultraBack[1]) > .75:
+            if bot.ultraBack[0] > bot.ultraBack[1]:
+                bot.rotateRight()
+            else:
+                bot.rotateLeft()
+        
+        bot.stopBot()
     
+    while abs(bot.ultraBack[0] - bot.ultraBack[1]) > .75:
+        if bot.ultraBack[0] > bot.ultraBack[1]:
+            bot.rotateRight()
+        else:
+            bot.rotateLeft()
+
+    while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+        bot.goFoward()
+
+    bot.stopBot()
+
+    angle = bot.yawAngle
+    while bot.yawAngle < angle + 90.0:
+        bot.rotateRight()
+
+    bot.stopBot()
+    
+    while abs(bot.ultraLeft[0] - bot.ultraLeft[1]) > .75:
+        if bot.ultraBack[0] > bot.ultraBack[1]:
+            bot.rotateRight()
+        else:
+            bot.rotateLeft()
+
+    bot.stopBot()
+
+    while not within1inch(bot.ultraLeft[1], 5.0, 1):
+        bot.goLeft()
+    
+    bot.stopBot()
+    
+    while not within1inch(bot.ultraBack[0], 150.0, 1):
+        bot.goFoward()   
+    
+    bot.stopBot()
         
     #camera = RealSense(bot)
     #camera.run()

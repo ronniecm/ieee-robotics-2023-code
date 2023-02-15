@@ -108,14 +108,14 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     if (frontRight >= 0)
     {
         // Clockwise rotation
-        analogWrite(FR_in1, out[1]);
-        analogWrite(FR_in2, 0);
+        analogWrite(FR_in1, 0);
+        analogWrite(FR_in2, out[1]);
     }
     else
     {
         // Counter-clockwise rotation
-        analogWrite(FR_in1, 0);
-        analogWrite(FR_in2, out[1]);
+        analogWrite(FR_in1, out[1]);
+        analogWrite(FR_in2, 0);
     }
 
     // Back left motor

@@ -1,6 +1,7 @@
 #include "ros.h"
 #include "std_msgs/Float32.h"
 #include "Ultrasonic.h"
+#include "TeensyThreads.h"
 
 //Ultrasonic Sensor 0 trig and echo pins and distance variables
 #define Ultra0_trigPin 5    // Trigger
@@ -91,9 +92,7 @@ unsigned long previousMillis = 0;
 
 void setup() {
   //Serial Port begin
-  Serial.begin(9600);
   //Time to init the sensor node
-  nh.getHardware()->setBaud(9600);
   nh.initNode();
 
   //pinmode declarations for ultrasonic sensors numbering
@@ -131,36 +130,38 @@ void setup() {
   nh.advertise(Ultra5);
   nh.advertise(Ultra6);
   nh.advertise(Ultra7);
-
 }
- 
+
+
+
 void loop() {
     //We will save corresponding sensor data to the tuple msg
     
     // --------------------IMPORTANT------------------------
     //TO KEEP THINGS CONSISTANT 0 index ==> LEFT SENSOR & 1 index ==> RIGHT for each side
 
-      previousMillis = currentMillis;
+      currentMillis = millis();      
       
-      //distMsgUltra0.data = ultraSensors.getUltra0_Distance();
-      //Ultra0.publish(&distMsgUltra0);      
       distMsgUltra2.data = ultraSensors.getUltra2_Distance();
       Ultra2.publish(&distMsgUltra2);
       
       distMsgUltra3.data = ultraSensors.getUltra3_Distance();
       Ultra3.publish(&distMsgUltra3);
-      
+
       distMsgUltra4.data = ultraSensors.getUltra4_Distance();
       Ultra4.publish(&distMsgUltra4);
-      
+
       distMsgUltra5.data = ultraSensors.getUltra5_Distance();
       Ultra5.publish(&distMsgUltra5);
-      
+
       distMsgUltra6.data = ultraSensors.getUltra6_Distance();
       Ultra6.publish(&distMsgUltra6);
-      
+
       distMsgUltra7.data = ultraSensors.getUltra7_Distance();
-      Ultra7.publish(&distMsgUltra7);
-      
+      Ultra7.publish(&distMsgUltra7);  
+
       nh.spinOnce();
+      unsigned long duration = millis() - currentMillis;
+      Serial.println(duration); 
 }
+
