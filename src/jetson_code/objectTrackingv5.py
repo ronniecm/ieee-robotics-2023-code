@@ -571,6 +571,8 @@ if __name__ == "__main__":
         t_end = time.time() + 1.0
         while time.time() < t_end:
             bot.goLeft()
+            if within1inch(bot.ultraLeft[0], 10.0, 2):
+                break
             
         bot.stopBot()
         
