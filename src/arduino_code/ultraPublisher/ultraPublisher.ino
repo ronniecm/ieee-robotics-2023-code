@@ -74,8 +74,8 @@ std_msgs::Float32 distMsgUltra7;
 //distMsgUltra7;
 
 
-ros::Publisher Ultra0("/bot/ultra0", &distMsgUltra0);
-ros::Publisher Ultra1("/bot/ultra1", &distMsgUltra1);
+//ros::Publisher Ultra0("/bot/ultra0", &distMsgUltra0);
+//ros::Publisher Ultra1("/bot/ultra1", &distMsgUltra1);
 ros::Publisher Ultra2("/bot/ultra2", &distMsgUltra2);
 ros::Publisher Ultra3("/bot/ultra3", &distMsgUltra3);
 
@@ -86,18 +86,22 @@ ros::Publisher Ultra7("/bot/ultra7", &distMsgUltra7);
 
 Ultrasonic ultraSensors;
 
+unsigned long currentMillis = 0;
+unsigned long previousMillis = 0;
+
 void setup() {
   //Serial Port begin
   Serial.begin(9600);
   //Time to init the sensor node
+  nh.getHardware()->setBaud(9600);
   nh.initNode();
 
   //pinmode declarations for ultrasonic sensors numbering
-  pinMode(Ultra0_trigPin,OUTPUT);
-  pinMode(Ultra0_echoPin,INPUT);
+  //pinMode(Ultra0_trigPin,OUTPUT);
+  //pinMode(Ultra0_echoPin,INPUT);
  
-  pinMode(Ultra1_trigPin,OUTPUT);
-  pinMode(Ultra1_echoPin,INPUT);
+  //pinMode(Ultra1_trigPin,OUTPUT);
+  //pinMode(Ultra1_echoPin,INPUT);
 
   pinMode(Ultra2_trigPin,OUTPUT);
   pinMode(Ultra2_echoPin,INPUT);
@@ -119,8 +123,8 @@ void setup() {
   
  
   //This make the information on the topic available to subscribers
-  nh.advertise(Ultra0);
-  nh.advertise(Ultra1);
+  //nh.advertise(Ultra0);
+  //nh.advertise(Ultra1);
   nh.advertise(Ultra2);
   nh.advertise(Ultra3);
   nh.advertise(Ultra4);
@@ -135,30 +139,28 @@ void loop() {
     
     // --------------------IMPORTANT------------------------
     //TO KEEP THINGS CONSISTANT 0 index ==> LEFT SENSOR & 1 index ==> RIGHT for each side
-    
-    distMsgUltra0.data = ultraSensors.getUltra0_Distance();
-    distMsgUltra1.data = ultraSensors.getUltra1_Distance();
-   
-    distMsgUltra2.data = ultraSensors.getUltra2_Distance();
-    distMsgUltra3.data = ultraSensors.getUltra3_Distance();
 
-    distMsgUltra4.data = ultraSensors.getUltra4_Distance();
-    distMsgUltra5.data = ultraSensors.getUltra5_Distance();
-    
-    distMsgUltra6.data = ultraSensors.getUltra6_Distance();
-    distMsgUltra7.data = ultraSensors.getUltra7_Distance();
-
-    nh.spinOnce();
-    
-    Ultra0.publish(&distMsgUltra0);
-    Ultra1.publish(&distMsgUltra1);
-    Ultra2.publish(&distMsgUltra2);
-    Ultra3.publish(&distMsgUltra3);
-
-    Ultra4.publish(&distMsgUltra4);
-    Ultra5.publish(&distMsgUltra5);
-    Ultra6.publish(&distMsgUltra6);
-    Ultra7.publish(&distMsgUltra7);
-    
-
+      previousMillis = currentMillis;
+      
+      //distMsgUltra0.data = ultraSensors.getUltra0_Distance();
+      //Ultra0.publish(&distMsgUltra0);      
+      distMsgUltra2.data = ultraSensors.getUltra2_Distance();
+      Ultra2.publish(&distMsgUltra2);
+      
+      distMsgUltra3.data = ultraSensors.getUltra3_Distance();
+      Ultra3.publish(&distMsgUltra3);
+      
+      distMsgUltra4.data = ultraSensors.getUltra4_Distance();
+      Ultra4.publish(&distMsgUltra4);
+      
+      distMsgUltra5.data = ultraSensors.getUltra5_Distance();
+      Ultra5.publish(&distMsgUltra5);
+      
+      distMsgUltra6.data = ultraSensors.getUltra6_Distance();
+      Ultra6.publish(&distMsgUltra6);
+      
+      distMsgUltra7.data = ultraSensors.getUltra7_Distance();
+      Ultra7.publish(&distMsgUltra7);
+      
+      nh.spinOnce();
 }

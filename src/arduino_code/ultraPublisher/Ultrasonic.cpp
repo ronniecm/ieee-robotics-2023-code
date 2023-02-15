@@ -19,6 +19,7 @@ float duration_Ultra1, cm_Ultra1;
 #define Ultra2_echoPin 20 
 float duration_Ultra2, cm_Ultra2;
 
+
 //Ultrasonic Sensor 3 trig and echo pins and distance variables
 #define Ultra3_trigPin 16
 #define Ultra3_echoPin 15
