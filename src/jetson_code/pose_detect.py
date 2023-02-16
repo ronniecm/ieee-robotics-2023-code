@@ -2,6 +2,7 @@ import cv2 as cv
 from math import atan2, cos, sin, sqrt, pi
 import numpy as np
 import sys
+import os
 
 # Python script to demonstrate working of PCA
 # To be used for pedestal orientatation 
@@ -9,8 +10,6 @@ import sys
 # *** Works best when objects are on dark background ***
 
 # Modified from: https://automaticaddison.com/how-to-determine-the-orientation-of-an-object-using-opencv/
-
-
 
 # Modified by: Jhonny Velasquez
 # Last Modified: 02-02-2023
@@ -108,6 +107,9 @@ def main():
 
     # pscv.imshow('Input Image', img)
 
+    # Downsample img
+    img = cv.resize(img, (0, 0), fx=0.6, fy=0.6)
+
     # Convert image to grayscale for contour detection
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
@@ -120,7 +122,7 @@ def main():
     contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
 
     # Filter out contours that are too small or too large
-    min_countour_area = 3700
+    min_countour_area = 1000
     max_countour_area = 100000
 
     # Loop over all the contours
@@ -145,7 +147,7 @@ def main():
     # cv.destroyAllWindows()
 
     # Save the output image to the current directory
-    cv.imwrite("output_img.jpg", img)
+    cv.imwrite("output_pose_img.jpg", img)
 
 if __name__ == "__main__":
     main()
