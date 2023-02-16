@@ -1,5 +1,7 @@
 import pyrealsense2 as rs
 from math import sqrt, degrees, pi, atan2
+import rospy
+from std_msgs.msg import Float32
 
 """
 This script is based on the code from the following sources:
@@ -52,6 +54,10 @@ p = initialize_camera()
 first = True
 alpha = 0.98
 totalgyroangleY = 0
+
+# initialize ROS publisher node
+rospy.init_node('angle_calculation', anonymous=True)
+pub = rospy.Publisher('yaw', Float32, queue_size=1)
 
 try:
 
@@ -107,7 +113,9 @@ try:
         combinedangleZ = totalgyroangleZ * alpha + accel_angle_z * (1-alpha)
         combinedangleY = totalgyroangleY
 
-        print("Angle -  X: " + str(round(combinedangleX,2)) + "   Y: " + str(round(combinedangleY,2)) + "   Z: " + str(round(combinedangleZ,2)))
-
+        #print("Angle -  X: " + str(round(combinedangleX,2)) + "   Y: " + str(round(combinedangleY,2)) + "   Z: " + str(round(combinedangleZ,2)))
+        msg = Float32()
+        msg.data = combinedangleY
+        pub.publish(msg.data)
 finally:
     p.stop()

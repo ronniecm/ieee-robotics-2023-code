@@ -93,63 +93,81 @@ def getOrientation(pts, img):
 
     return angle
 
+
 def main():
-    # Check if there is more than one command line argument
-    if len(sys.argv) != 2:
-        print("Usage: python3 pose_detect.py <image>")
-        exit(0)
+    # Initialize the Raspberry Pi camera
+    camera = PiCamera()
+    camera.resolution = (640, 480)
+    camera.framerate = 30
+    raw_capture = PiRGBArray(camera, size=(640, 480))
 
-    # Load the image using first command line argument
-    img = cv.imread(sys.argv[1])
+    # Warm up the camera
+    print("Warming up camera...")
+    for _ in range(30):
+        camera.capture(raw_capture, format="bgr", use_video_port=True)
+        raw_capture.truncate(0)
 
-    # Was the image there?
-    if img is None:
-        print("Error: File not found")
-        exit(0)
+    print("Camera ready")
 
-    # pscv.imshow('Input Image', img)
+    # Create a window to display the images
+    cv.namedWindow("Pose Detection", cv.WINDOW_NORMAL)
 
-    # Downsample img
-    img = cv.resize(img, (0, 0), fx=0.6, fy=0.6)
+    # Loop over the frames from the camera
+    for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
+        # Get the raw numpy array representing the image
+        img = frame.array
 
-    # Convert image to grayscale for contour detection
-    gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        # Downsample img
+        img = cv.resize(img, (0, 0), fx=0.6, fy=0.6)
 
-    # Convert image to binary
-    _, bw = cv.threshold(gray, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
+        # Convert image to grayscale for contour detection
+        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
 
-    # Find all the contours in the thresholded image (binary image)
-    # Countours in this scenario are a series of continous points 
-    # surrounding an area having uniform color or intensity.
-    contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
+        # Convert image to binary
+        _, bw = cv.threshold(gray, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
 
-    # Filter out contours that are too small or too large
-    min_countour_area = 1000
-    max_countour_area = 100000
+        # Find all the contours in the thresholded image (binary image)
+        # Countours in this scenario are a series of continous points
+        # surrounding an area having uniform color or intensity.
+        contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
 
-    # Loop over all the contours
-    for i, c in enumerate(contours):
+        # Filter out contours that are too small or too large
+        min_countour_area = 1000
+        max_countour_area = 100000
 
-        # Calculate the area of each contour
-        area = cv.contourArea(c)
+        # Loop over all the contours
+        for i, c in enumerate(contours):
 
-        # Ignore contours that are too small or too large
-        # Could be used to filter out noise
-        if area < min_countour_area or area > max_countour_area:
-            continue
+            # Calculate the area of each contour
+            area = cv.contourArea(c)
 
-        # Draw each contour only for visualisation purposes
-        cv.drawContours(img, contours, i, (0, 0, 255), 2)
+            # Ignore contours that are too small or too large
+            # Could be used to filter out noise
+            if area < min_countour_area or area > max_countour_area:
+                continue
 
-        # Find the orientation of each shape
-        getOrientation(c, img)
+            # Draw each contour only for visualisation purposes
+            cv.drawContours(img, contours, i, (0, 0, 255), 2)
 
-    # cv.imshow('Output Image', img)
-    # cv.waitKey(0)
-    # cv.destroyAllWindows()
+            # Find the orientation of each shape
+            getOrientation(c, img)
 
-    # Save the output image to the current directory
-    cv.imwrite("output_pose_img.jpg", img)
+        # Display the image
+        cv.imshow("Pose Detection", img)
+
+        # Wait for a key press
+        key = cv.waitKey(1) & 0xFF
+
+        # Clear the stream in preparation for the next frame
+        raw_capture.truncate(0)
+
+        # If the `q` key was pressed, break from the loop
+        if key == ord("q"):
+            break
+
+    # Release the camera and close the window
+    camera.close()
+    cv.destroyAllWindows()
 
 if __name__ == "__main__":
     main()

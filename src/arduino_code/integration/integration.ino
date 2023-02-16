@@ -1,20 +1,43 @@
 #include "Drivetrain.h"
-#include "Ultrasonic.h"
+#include "ros.h"
+#include "geometry_msgs/Twist.h"
 
-#define FL_in1 14
-#define FL_in2 15
+//Setting up the ros node for wheel commands
+ros::NodeHandle nh;
+//Thie type of message is geometry_msgs::Twist
+geometry_msgs::Twist msg;
+
+
+#define FL_in1 22
+#define FL_in2 23
 
 #define FR_in1 36
 #define FR_in2 37
 
-#define BL_in1 5
-#define BL_in2 4
+#define BL_in1 2
+#define BL_in2 3
 
-#define BR_in1 24
-#define BR_in2 6
+#define BR_in1 28
+#define BR_in2 29
 
 Drivetrain *drivetrain;
-Ultrasonic *ultrasonicSensors;
+
+
+//These will be the inputs to the mecanumDrive function
+float cmd_x;
+float cmd_y;
+float cmd_z;
+
+//This will be the callback function for wheel commands from jetson
+void mecanumDriveCallBack(const geometry_msgs::Twist& cmd_msg)
+{
+  cmd_x = cmd_msg.linear.x;
+  cmd_y = cmd_msg.linear.y;
+  cmd_z = cmd_msg.angular.z;
+  
+}
+
+ros::Subscriber <geometry_msgs::Twist> sub("/bot/cmd_vel", mecanumDriveCallBack);
 
 double xP, xI, xD;
 double xIn;
@@ -45,6 +68,9 @@ void setup()
     drivetrain = new Drivetrain();
 
     initDrivetrain();
+    //Ros setup node & subscribe to topic
+    nh.initNode();
+    nh.subscribe(sub);
     
     xController.SetMode(AUTOMATIC);
     xController.SetOutputLimits(-1.0, 1.0);
@@ -68,14 +94,18 @@ void loop()
         int n = Serial.parseInt();
         demand = (double) n / 10.0; 
      }
-     drivetrain->mecanumDrive(0,demand,0.0);
+     //Mecanum drive now a function of twist msgs
+     drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
      for(int i = 0; i < 4; i++) {
         Serial.print(drivetrain->getRPM(i));
         Serial.print(" ");
      }
      Serial.println();
    }
+
+   nh.spinOnce();
 }
+
 
 void initDrivetrain()
 {
@@ -90,33 +120,6 @@ void initDrivetrain()
 
     Timer1.initialize(1000);
     Timer1.attachInterrupt(calcRPM);
-}
-
-void setupUltrasonics()
-{
-  //Front Left
-  pinMode(Front_Left_trigPin,OUTPUT);
-  pinMode(Front_Left_echoPin,INPUT);
- 
-  //Back Left
-  pinMode(Back_Left_trigPin,OUTPUT);
-  pinMode(Back_Left_echoPin,INPUT);
-
-  //Top Left
-  pinMode(Top_Left_trigPin,OUTPUT);
-  pinMode(Top_Left_echoPin,INPUT);
-  
-  //Front Right
-  pinMode(Front_Right_trigPin,OUTPUT);
-  pinMode(Front_Right_echoPin,INPUT);
-
-  //Back Right
-  pinMode(Back_Right_trigPin,OUTPUT);
-  pinMode(Back_Right_echoPin,INPUT);
-
-  //Bottom Right
-  pinMode(Bottom_Right_trigPin,OUTPUT);
-  pinMode(Bottom_Right_echoPin,INPUT);
 }
 
 void calcRPM()

@@ -38,7 +38,7 @@ if onJetson:
 
     import numpy as np
     import cv2
-    import pyrealsense2 as rs
+    #import pyrealsense2 as rs
 
 
     from jetson_inference import detectNet
@@ -47,7 +47,7 @@ if onJetson:
 
 import rospy
 from std_msgs.msg import Int8
-from std_msgs.msg import Float64
+from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 
 #This class will serve as the direct communication from jetson to arduino
@@ -60,17 +60,43 @@ class RobotCommand:
             rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
             self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), msg_type, queue_size =10)
 
-            rospy.Subscriber('%s/ultraFront' %robot_name, Float64, self.ultraFront)
-            rospy.Subscriber('%s/ultraRight' %robot_name, Float64, self.ultraRight)
-            rospy.Subscriber('%s/ultraBack' %robot_name, Float64, self.ultraBack)
-            rospy.Subscriber('%s/ultraLeft' %robot_name, Float64, self.ultraLeft)
+            #rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
+            #rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
+            rospy.Subscriber('%s/ultra2' %robot_name, Float32, self.ultra2)
+            rospy.Subscriber('%s/ultra3' %robot_name, Float32, self.ultra3)
+            rospy.Subscriber('%s/ultra4' %robot_name, Float32, self.ultra4)
+            rospy.Subscriber('%s/ultra5' %robot_name, Float32, self.ultra5)
+            rospy.Subscriber('%s/ultra6' %robot_name, Float32, self.ultra6)
+            rospy.Subscriber('%s/ultra7' %robot_name, Float32, self.ultra7)
+            rospy.Subscriber('/obj_detect', Int8, self.obj_detect)
+            rospy.Subscriber('/yaw', Float32, self.yaw)
 
-            print("ROS SETUP OKAY")
+            '''
+
+            -------UlTRA SONIC NAMING DIAGRAM----------
+
+                            FRONT
+
+                     ___0___________1___
+                    |                   |
+                  7 |                   | 2
+                    |                   |
+            LEFT    |                   |   RIGHT
+                    |                   |
+                    |                   | 
+                  6 |                   | 3
+                    |___________________|
+                        5           4
+
+                            BACK
+            '''
+
+            #print("ROS SETUP OKAY")
 
         except:
-            print("SOMETHING ROS RELATED FUCKED UP")
+            #print("SOMETHING ROS RELATED FUCKED UP")
             pass
-            #print("Could no set up ROS topic: %s/%s" %(robot_name, command_topic))
+            ##print("Could no set up ROS topic: %s/%s" %(robot_name, command_topic))
 
            
 
@@ -82,75 +108,170 @@ class RobotCommand:
         self.prevDectect = False
         self.reversedActions = []
         
-
+        #Initializeing ultrasonic distance measurements, This will prob go in a new CLASS
+        #This also may be able to be saved as an array intead of individual
+        #This where we make tuples
+        
+        self.ultraFront = [0.0, 0.0]
+        self.ultraRight = [0.0, 0.0]
+        self.ultraBack = [0.0, 0.0]
+        self.ultraLeft = [0.0, 0.0]
+        self.objDetect = 0
+        self.yawAngle = 0.0
+        
     
     '''
-    ROS Callback functions
+    ROS Callback functions for ultrasonics
     '''
+    def yaw(self, msg):
+        self.yawAngle = msg.data
+        #rint("Reading: %s" %msg.data)
+    def obj_detect(self, msg):
+        self.objDetect = msg.data
+        #rint("Reading: %s" %msg.data)SYNC_SEC
 
-    def ultraFront(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
-    def ultraRight(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
-    def ultraBack(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
-    def ultraLeft(self, msg):
-        print(msg.data, "GOT READING!!!!")
-        pass
+    def ultra0(self, msg):
+        ##print("Front Left Reading: %s" %msg.data)
+        self.ultraFront[0] = msg.data
+        ##print("List now contains: " , self.ultraFront)
+
+    def ultra1(self, msg):
+        ##print("Front Right Reading: %s" %msg.data)
+        self.ultraFront[1] = msg.data
+        ##print("List now contains: " , self.ultraFront)
+
+    def ultra2(self, msg):
+        #print("Top Right Reading: %s" %msg.data)
+        self.ultraRight[0] = msg.data 
+        '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.data) > 3:
+            self.ultraRight[0] = msg.data 
+        elif abs(self.ultraRight[0] - msg.data) <= 3:
+            self.ultraRight[0] = msg.data
+        else:
+            self.ultraRight[0] = self.ultraRight[0]
+
+        print("List now contains: " , self.ultraRight)'''
+
+    def ultra3(self, msg):
+        ##print("Bottom Right Reading: %s" %msg.data)
+        self.ultraRight[1] = msg.data 
+        '''if self.ultraRight[1] == 0.0 and abs(self.ultraRight[1] - msg.data) > 3:
+            self.ultraRight[1] = msg.data 
+        elif abs(self.ultraRight[1] - msg.data) <= 3:
+            self.ultraRight[1] = msg.data
+        else:
+            self.ultraRight[1] = self.ultraRight[1]
+        print("List now contains: " , self.ultraRight)'''
+
+    def ultra4(self, msg):
+        ##print("Back Right Reading: %s" %msg.data)
+        #if abs(self.ultraBack[0] - msg.data) < 3:
+        self.ultraBack[0] = msg.data 
+        ##print("List now contains: " , self.ultraBack)
+
+    def ultra5(self, msg):
+        ##print("Back Left Reading: %s" %msg.data)
+        #if abs(self.ultraBack[1] - msg.data) < 3:
+        self.ultraBack[1] = msg.data 
+        ##print("List now contains: " , self.ultraBack)
+        
+    def ultra6(self, msg):
+        ##print("Bottom Left Reading: %s" %msg.data)
+        #if abs(self.ultraLeft[0] - msg.data) < 3:
+        self.ultraLeft[0] = msg.data 
+        ##print("List now contains: " , self.ultraLeft)
+
+    def ultra7(self, msg):
+        ##print("Top Left Reading: %s" %msg.data)
+        #if abs(self.ultraLeft[1] - msg.data) < 3:
+        self.ultraLeft[1] = msg.data 
+        ##print("List now contains: " , self.ultraLeft)
 
 
-        #Now we will set up the subscribers for the ultrasonic sensors
-
-
-        #This should be all that we need to run once to make sure that everything is setup okay
-        #Now we can make different commands for the robot
+    #Now we should have update values for ALL sides in their respective list for each side
+        
     
     def buildMsg(self, x, y, rot):
         msg = Twist()
-        print("Before params: ", msg)
-        print("Building msg with following params: %s,%s,%s" %(x,y,rot))
+        #print("Before params: ", msg)
+        #print("Building msg with following params: %s,%s,%s" %(x,y,rot))
         msg.linear.x = x
         msg.linear.y = y
-
-        msg.angular.z = rot
-        print("Message Built", msg)
-        print(msg)
-    
+        msg.linear.z = 0.0
         
-        #Put the foward kinematics stuff here
-        pass
+        msg.angular.x = 0
+        msg.angular.y = 0
+        msg.angular.z = rot
+        #print("Message Built", msg)
+        #print(msg)
+        return msg
+    
+    #List of basic commands that can be used as geometry twist messages
 
     def goFoward(self):
         # Move the robot forward
-        self.pub.publish(0)
-        pass
+        msg = self.buildMsg(1.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        
     def goBackwards(self):
         # Move the robot backwards
-        self.pub.publish(6)
-        pass
+        msg = self.buildMsg(-1.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        
     def goRight(self):
         # Move the robot right
-        self.pub.publish(2)
-        pass
+        msg = self.buildMsg(0, 1.0, 0.0)
+        self.pub.publish(msg)
+        
     def goLeft(self):
         # Move the robot left
-        self.pub.publish(3)
-        pass
+        msg = self.buildMsg(0.0, -1.0, 0.0)
+        self.pub.publish(msg)
+
+    # Rotate the robot left
     def rotateLeft(self):
-        # Rotate the robot left
-        self.pub.publish(7)
-        pass
+        msg = self.buildMsg(0.0, 0.0, -0.25)
+        self.pub.publish(msg)
+
     def rotateRight(self):
         # Rotate the robot right
-        self.pub.publish(8)
-        pass
+        msg = self.buildMsg(0.0, 0.0, 0.25)
+        self.pub.publish(msg)
+        
     def stopBot(self):
         # Stop the robot
-        self.pub.publish(4)
+        msg = self.buildMsg(0.0, 0.0, 0.0)
+        self.pub.publish(msg)
+        time.sleep(0.5)
 
+
+    def handleWalls(self):
+        '''
+        Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
+        That list is will be self.ultra<FACE>
+        So if I wanted to get sensor readings from the sensor on the front left I would call self.ultraFront[0]
+        
+        0 index corresponds to a left sensor on a face and 1 corresponds to the right sensor on the face
+
+        Make sure this indexing is consistant througout ALL error correction calculations otherwise there were will unintentional erros
+        This is how indexing should work such that function work the same for all sides and no need to repeat any calculations
+        If this not working make sure to check the call ultrasonic callback functions to make sure the distances are being indexed correcly I 
+        may have messed up !!
+                                               -Front-
+                                            __0_______1__
+                                          1 |           |0
+                                            |           |
+                                            |           |
+                                          0 |           |1
+                                            |___________|
+                                              1       0   
+        '''
+
+
+        
+        #print(self.ultraRight[0])
+        #print(self.ultraRight[1])
+        
 
 
 #This will line it self up with object, right now works in x component and then y 
@@ -175,14 +296,14 @@ class RealSense:
         parser.add_argument("output_URI", type=str, default="", nargs='?', help="URI of the output stream")
         parser.add_argument("--network", type=str, default="ssd-mobilenet-v2", help="pre-trained model to load (see below for options)")
         parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
-        parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
+        parser.add_argument("--threshold", type=float, default=1.0, help="minimum detection threshold to use") 
 
         is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
         try:
 	        self.args = parser.parse_known_args()[0]
         except:
-	        print("")
+	        #print("")
 	        parser.print_help()
 	        sys.exit(0)
 
@@ -214,11 +335,11 @@ class RealSense:
         #Now we extract tuple date    
         class_id, score, dist, center_x = max_score_tuple
     
-        print('Aligning with ', class_id)
+        #print('Aligning with ', class_id)
     
         #This is a goal state
         if dist < 0.17:
-            print("MADE IT TO OBJECT!!!")
+            #print("MADE IT TO OBJECT!!!")
             i = 0
             while(i <1):
                 i+=1
@@ -228,7 +349,7 @@ class RealSense:
             while(j<2500):
                 j+=1
             #we will stop for little so that we can remove the object/load caresol
-                print("REMOVE PEDESTAL")
+                #print("REMOVE PEDESTAL")
                 self.bot.stopBot()
 
             return
@@ -260,11 +381,6 @@ class RealSense:
             return True
         else:
             return False
-    def centerToRight(self, center_x):
-        if center_x >= self.frame_center + self.threshold/2:
-            return True
-        else:
-            return False
 
     def centerToLeft(self, center_x):
         if center_x <= self.frame_center - self.threshold/2:
@@ -291,31 +407,12 @@ class RealSense:
         return score
 
     def isEmpty():
-        if len(self.detections ) == 0:
+        if len(self.detections) == 0:
             return True
         else:
             return False
 
-    #Realsense stops detecting around 0.15 so we will do 1 cm before that
-    def checkWalls(self):
 
-        if self.right_pixel_dist <= .20 or self.left_pixel_dist <= 0.20:
-            error = self.right_pixel_dist - self.left_pixel_dist
-            print("Right Distance: %f" %self.right_pixel_dist)
-            print("Left Distance: %f" %self.left_pixel_dist)
-
-            print("Distance Error to walls: %f" %error)
-            
-            #For now we will allow half a centimeter of error. Need to test to make erros smaller
-            if abs(error) >= 0 or abs(error) < 0.5:
-                "Error Corrected!"
-                return
-            else:
-                #The sign of the error determines what directions to rotate in
-                if error < 0:
-                    self.bot.rotateLeft()
-                if error > 0:
-                    self.bot.rotateRight()
     '''
     This is like the main loop
     '''
@@ -334,7 +431,7 @@ class RealSense:
             
             # Rotate image 90 degrees counterclockwise
             #color_imageRotated = cv2.rotate(color_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
-            #print("Frame shape", color_imageRotated.shape)
+            ##print("Frame shape", color_imageRotated.shape)
 
             # Convert the color numpy array to a CUDA image for inference
             img = jetson_utils_python.cudaFromNumpy(color_image)
@@ -348,9 +445,9 @@ class RealSense:
             #Extracting pixel distance from far right and far left to measure alignment error
             #And then later correct in the checkWalls() function
             self.left_pixel_dist = depth_frame.get_distance(int(100),int(240))
-            print("Got left pixel distance: ", self.left_pixel_dist)
+            #print("Got left pixel distance: ", self.left_pixel_dist)
             self.right_pixel_dist = depth_frame.get_distance(int(540),int(240))
-            print("Got right pixel distance: ", self.right_pixel_dist)
+            #print("Got right pixel distance: ", self.right_pixel_dist)
 
 
             
@@ -359,7 +456,7 @@ class RealSense:
                 self.checkWalls()
                 #self.bot.stopBot()
                 
-                #elif center_pixel_dist >= 0.5:
+                #elif center_pixel_dist >= 1.0:
                     #when we detect something closeby we will stop rotating and move foward
                     #eventually we will encounter something that is close enough to home in on
                     #pub.publish(0)
@@ -375,13 +472,13 @@ class RealSense:
                 for d in self.detections:
                     class_id = d.ClassID
                     center_x, center_y = d.Center
-                    print("Detection center",d.Center)
+                    #print("Detection center",d.Center)
                     dist = depth_frame.get_distance(int(center_x),int(center_y))
                     #If we are getting distance then there is something in frame
                     #but we are not guarenteed that it is accurate
                     if dist > 0:
                         score = self.getScore(dist, class_id)
-                        #print("CurrentScore" , score)
+                        ##print("CurrentScore" , score)
                         #Score will always be greater than zero here
                         #info = (class_id, score, dist, center_x, actions)
                         info = (class_id, score, dist, center_x)
@@ -396,10 +493,10 @@ class RealSense:
                     self.bot.stopBot()
                 else:
                     # Return the greatest key in the scores dictionary
-                    #print("There are: ", len(scores), " scores")
-                    #print("All Scores: ", scores)
+                    ##print("There are: ", len(scores), " scores")
+                    ##print("All Scores: ", scores)
                     max_score = max(scores.keys())
-                    #print("Max Scores: ", max_score)
+                    ##print("Max Scores: ", max_score)
                     self.homeing(scores[max_score])
             
             # render the image
@@ -414,12 +511,129 @@ class RealSense:
             if not self.output.IsStreaming():
                 break
 
+# Check if n is within threshold of target
+def within1inch(n, target, threshold=1):
+    # Convert threshold to centimeters
+    threshold = threshold * 2.54
+
+    if n >= target - threshold and n <= target + threshold:
+        return True
+    else:
+        return False
+
+
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("bot","talker","cmd_vel", Int8, queue_size = 10)
+    
+    
+    bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
+    bot.stopBot()
+    #delay program for 5 seconds
+    #time.sleep(5)
+    print("turn on motors")
 
-    camera = RealSense(bot)
-    camera.run()
+
+    '''
+    msg =bot.buildMsg(1, 5, 0)
+    while True:
+        bot.pub.publish(msg)
+    '''
+    
+        
+        
+    
+    while not within1inch(bot.ultraRight[0], 15.0, 2):
+        bot.goRight()
+
+    bot.stopBot()
+
+    while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+        bot.goFoward()
+
+    bot.stopBot()
+
+    while not within1inch(bot.ultraBack[0], 15.0, 2):
+        bot.goBackwards()
+
+    bot.stopBot()
+
+    while abs(bot.ultraBack[0] - bot.ultraBack[1]) > 0.75:
+        if bot.ultraBack[0] > bot.ultraBack[1]:
+            bot.rotateRight()
+        else:
+            bot.rotateLeft()
+    
+    bot.stopBot()
+
+    while not within1inch(bot.ultraLeft[0], 10.0, 2):
+        pos = bot.ultraRight[0]
+        
+        t_end = time.time() + 1.0
+        while time.time() < t_end:
+            bot.goLeft()
+            if within1inch(bot.ultraLeft[0], 10.0, 2):
+                break
+            
+        bot.stopBot()
+        
+        if within1inch(bot.ultraLeft[0], 10.0, 2):
+            break
+
+        while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+            bot.goFoward()
+            
+        bot.stopBot()
+        
+        while not within1inch(bot.ultraBack[0], 15.0, 1) and not within1inch(bot.ultraBack[1], 15.0, 1):
+            bot.goBackwards()
+
+        bot.stopBot()
+
+        while abs(bot.ultraBack[0] - bot.ultraBack[1]) > .75:
+            if bot.ultraBack[0] > bot.ultraBack[1]:
+                bot.rotateRight()
+            else:
+                bot.rotateLeft()
+        
+        bot.stopBot()
+    
+    while abs(bot.ultraBack[0] - bot.ultraBack[1]) > .75:
+        if bot.ultraBack[0] > bot.ultraBack[1]:
+            bot.rotateRight()
+        else:
+            bot.rotateLeft()
+
+    while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+        bot.goFoward()
+
+    bot.stopBot()
+
+    angle = bot.yawAngle
+    while bot.yawAngle < angle + 90.0:
+        bot.rotateRight()
+
+    bot.stopBot()
+    
+    while abs(bot.ultraLeft[0] - bot.ultraLeft[1]) > .75:
+        if bot.ultraBack[0] > bot.ultraBack[1]:
+            bot.rotateRight()
+        else:
+            bot.rotateLeft()
+
+    bot.stopBot()
+
+    while not within1inch(bot.ultraLeft[1], 5.0, 1):
+        bot.goLeft()
+    
+    bot.stopBot()
+    
+    while not within1inch(bot.ultraBack[0], 150.0, 1):
+        bot.goFoward()   
+    
+    bot.stopBot()
+        
+    #camera = RealSense(bot)
+    #camera.run()
 
         
 

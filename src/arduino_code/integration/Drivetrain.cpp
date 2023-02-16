@@ -1,27 +1,27 @@
 #include "Drivetrain.h"
 
 // Front left motor pin definition
-#define FL_in1 14
-#define FL_in2 15
-#define FL_enc_in1 23
-#define FL_enc_in2 22
+#define FL_in1 22 
+#define FL_in2 23
+#define FL_enc_in1 20
+#define FL_enc_in2 21
 
 // Front right motor pin definition
 #define FR_in1 36
 #define FR_in2 37
 #define FR_enc_in1 34
-#define FR_enc_in2 33
+#define FR_enc_in2 35
 
 // Back left motor pin definition
-#define BL_in1 5
-#define BL_in2 4
-#define BL_enc_in1 1
-#define BL_enc_in2 2
+#define BL_in1 2
+#define BL_in2 3
+#define BL_enc_in1 4
+#define BL_enc_in2 5
 
 // Back right motor pin definition
-#define BR_in1 24
-#define BR_in2 6
-#define BR_enc_in1 32
+#define BR_in1 28
+#define BR_in2 29
+#define BR_enc_in1 30
 #define BR_enc_in2 31
 
 // Measured encoder ticks per single revolution
@@ -108,14 +108,14 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     if (frontRight >= 0)
     {
         // Clockwise rotation
-        analogWrite(FR_in1, out[1]);
-        analogWrite(FR_in2, 0);
+        analogWrite(FR_in1, 0);
+        analogWrite(FR_in2, out[1]);
     }
     else
     {
         // Counter-clockwise rotation
-        analogWrite(FR_in1, 0);
-        analogWrite(FR_in2, out[1]);
+        analogWrite(FR_in1, out[1]);
+        analogWrite(FR_in2, 0);
     }
 
     // Back left motor
