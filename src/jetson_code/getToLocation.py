@@ -289,7 +289,7 @@ class RobotCommand:
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
 
-        yawOffset = self.currYawAngle % self.initYaw
+        
         currYaw = self.currYawAngle
     
         '''
@@ -297,10 +297,12 @@ class RobotCommand:
         counter clockwise decreases yaw. If the mod of of the current 
         '''
         #This means we will have to rotate right
-        if yawOffset < 0:
-            while (self.currYaw < currYaw + abs(yawOffset)):
+        if currYaw < 0:
+            yawOffset = (currYaw % 360) - 360
+            while (self.currYawAngle < currYaw + abs(yawOffset)):
                 self.rotateRight()
-        elif (yawOffset > 0):
+
+        elif (currYaw > 0):
             while(self.currYaw > currYaw - yawOffset):
                 self.rotateLeft()
 
@@ -331,8 +333,6 @@ class RobotCommand:
         #Now we should be at or near location
         
 
-
-        
 
 
 #This will line it self up with object, right now works in x component and then y 
