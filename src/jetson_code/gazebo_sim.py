@@ -21,10 +21,7 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
-
-# Modified by: Ronnie Mohapatra
 # Modified by Juan Suquilanda
-# Modified by: Jhonny Velasquez
 
 onJetson = False
 
@@ -49,6 +46,7 @@ import rospy
 from std_msgs.msg import Int8
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Range
 
 #This class will serve as the direct communication from jetson to arduino
 #Using this class will allow us to talk to the arduino
@@ -62,12 +60,12 @@ class RobotCommand:
 
             #rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
             #rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
-            rospy.Subscriber('%s/ultra2' %robot_name, Float32, self.ultra2)
-            rospy.Subscriber('%s/ultra3' %robot_name, Float32, self.ultra3)
-            rospy.Subscriber('%s/ultra4' %robot_name, Float32, self.ultra4)
-            rospy.Subscriber('%s/ultra5' %robot_name, Float32, self.ultra5)
-            rospy.Subscriber('%s/ultra6' %robot_name, Float32, self.ultra6)
-            rospy.Subscriber('%s/ultra7' %robot_name, Float32, self.ultra7)
+            rospy.Subscriber('%s/ultra2' %robot_name, Range, self.ultra2)
+            rospy.Subscriber('%s/ultra3' %robot_name, Range, self.ultra3)
+            rospy.Subscriber('%s/ultra4' %robot_name, Range, self.ultra4)
+            rospy.Subscriber('%s/ultra5' %robot_name, Range, self.ultra5)
+            rospy.Subscriber('%s/ultra6' %robot_name, Range, self.ultra6)
+            rospy.Subscriber('%s/ultra7' %robot_name, Range, self.ultra7)
             rospy.Subscriber('/obj_detect', Int8, self.obj_detect)
             rospy.Subscriber('/yaw', Float32, self.yaw)
 
@@ -128,66 +126,57 @@ class RobotCommand:
     '''
     def yaw(self, msg):
         self.currYawAngle = msg.data
-        #rint("Reading: %s" %msg.data)
+        #rint("Reading: %s" %msg.range)
     def obj_detect(self, msg):
-        self.objDetect = msg.data
-        #rint("Reading: %s" %msg.data)SYNC_SEC
+        self.objDetect = msg.range * 100.0
+        #rint("Reading: %s" %msg.range)SYNC_SEC
 
-    def ultra0(self, msg):
-        ##print("Front Left Reading: %s" %msg.data)
-        self.ultraFront[0] = msg.data
-        ##print("List now contains: " , self.ultraFront)
-
-    def ultra1(self, msg):
-        ##print("Front Right Reading: %s" %msg.data)
-        self.ultraFront[1] = msg.data
-        ##print("List now contains: " , self.ultraFront)
 
     def ultra2(self, msg):
-        #print("Top Right Reading: %s" %msg.data)
-        self.ultraRight[0] = msg.data 
-        '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.data) > 3:
-            self.ultraRight[0] = msg.data 
-        elif abs(self.ultraRight[0] - msg.data) <= 3:
-            self.ultraRight[0] = msg.data
+        #print("Top Right Reading: %s" %msg.range)
+        self.ultraRight[0] = msg.range * 100
+        '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.range) > 3:
+            self.ultraRight[0] = msg.range 
+        elif abs(self.ultraRight[0] - msg.range) <= 3:
+            self.ultraRight[0] = msg.range
         else:
             self.ultraRight[0] = self.ultraRight[0]
 
         print("List now contains: " , self.ultraRight)'''
 
     def ultra3(self, msg):
-        ##print("Bottom Right Reading: %s" %msg.data)
-        self.ultraRight[1] = msg.data 
-        '''if self.ultraRight[1] == 0.0 and abs(self.ultraRight[1] - msg.data) > 3:
-            self.ultraRight[1] = msg.data 
-        elif abs(self.ultraRight[1] - msg.data) <= 3:
-            self.ultraRight[1] = msg.data
+        ##print("Bottom Right Reading: %s" %msg.range)
+        self.ultraRight[1] = msg.range * 100
+        '''if self.ultraRight[1] == 0.0 and abs(self.ultraRight[1] - msg.range) > 3:
+            self.ultraRight[1] = msg.range 
+        elif abs(self.ultraRight[1] - msg.range) <= 3:
+            self.ultraRight[1] = msg.range
         else:
             self.ultraRight[1] = self.ultraRight[1]
         print("List now contains: " , self.ultraRight)'''
 
     def ultra4(self, msg):
-        ##print("Back Right Reading: %s" %msg.data)
-        #if abs(self.ultraBack[0] - msg.data) < 3:
-        self.ultraBack[0] = msg.data 
+        ##print("Back Right Reading: %s" %msg.range)
+        #if abs(self.ultraBack[0] - msg.range) < 3:
+        self.ultraBack[0] = msg.range * 100
         ##print("List now contains: " , self.ultraBack)
 
     def ultra5(self, msg):
-        ##print("Back Left Reading: %s" %msg.data)
-        #if abs(self.ultraBack[1] - msg.data) < 3:
-        self.ultraBack[1] = msg.data 
+        ##print("Back Left Reading: %s" %msg.range)
+        #if abs(self.ultraBack[1] - msg.range) < 3:
+        self.ultraBack[1] = msg.range * 100
         ##print("List now contains: " , self.ultraBack)
         
     def ultra6(self, msg):
-        ##print("Bottom Left Reading: %s" %msg.data)
-        #if abs(self.ultraLeft[0] - msg.data) < 3:
-        self.ultraLeft[0] = msg.data 
+        ##print("Bottom Left Reading: %s" %msg.range)
+        #if abs(self.ultraLeft[0] - msg.range) < 3:
+        self.ultraLeft[0] = msg.range * 100
         ##print("List now contains: " , self.ultraLeft)
 
     def ultra7(self, msg):
-        ##print("Top Left Reading: %s" %msg.data)
-        #if abs(self.ultraLeft[1] - msg.data) < 3:
-        self.ultraLeft[1] = msg.data 
+        ##print("Top Left Reading: %s" %msg.range)
+        #if abs(self.ultraLeft[1] - msg.range) < 3:
+        self.ultraLeft[1] = msg.range * 100
         ##print("List now contains: " , self.ultraLeft)
 
 
@@ -199,7 +188,7 @@ class RobotCommand:
         #print("Before params: ", msg)
         #print("Building msg with following params: %s,%s,%s" %(x,y,rot))
         msg.linear.x = x
-        msg.linear.y = y
+        msg.linear.y = -1*y
         msg.linear.z = 0.0
         
         msg.angular.x = 0
@@ -594,14 +583,10 @@ if __name__ == "__main__":
     #time.sleep(5)
     #Need to wait for yaw angles to actually come in so will prob have to put in a delay somewhere in here
     bot.initStartingConditions()
-    bot.goToLocationC
+   
     print("turn on motors")
     '''
-    while True:
-        print("Right Side Readings: ", bot.ultraRight)
-        print("Back Side Readings: ", bot.ultraBack)
-        print("Left Side Readings: ", bot.ultraLeft)
-        #bot.goRight()
+    bot.goToLocationC()
 
     
 
