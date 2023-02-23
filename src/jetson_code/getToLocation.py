@@ -21,10 +21,7 @@
 # DEALINGS IN THE SOFTWARE.
 #
 
-
-# Modified by: Ronnie Mohapatra
 # Modified by Juan Suquilanda
-# Modified by: Jhonny Velasquez
 
 onJetson = False
 
@@ -36,7 +33,7 @@ if onJetson:
 
     # import pyrealsense2 as rs
 
-    import numpy as np
+    
     import cv2
     #import pyrealsense2 as rs
 
@@ -45,10 +42,12 @@ if onJetson:
     from jetson_utils import videoSource, videoOutput, logUsage
     import jetson_utils_python
 import time
+import numpy as np
 import rospy
 from std_msgs.msg import Int8
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Range
 
 #This class will serve as the direct communication from jetson to arduino
 #Using this class will allow us to talk to the arduino
@@ -118,7 +117,7 @@ class RobotCommand:
         self.ultraLeft = [0.0, 0.0]
         self.objDetect = 0
         self.currYawAngle = 0.0 - 180.0 #This will ensure our starting yaw will be 0 degees easier calculations
-        self.initBoardWidth = 0.0
+        self.initBoardWidth = 230.0
         self.initYaw = 0.0
         self.botWidth = 30.0
         
@@ -128,78 +127,78 @@ class RobotCommand:
     '''
     def yaw(self, msg):
         self.currYawAngle = msg.data
-        #rint("Reading: %s" %msg.data)
+        #rint("Reading: %s" %msg.range)
     def obj_detect(self, msg):
-        self.objDetect = msg.data
-        #rint("Reading: %s" %msg.data)SYNC_SEC
+        self.objDetect = msg.range * 100.0
+        #rint("Reading: %s" %msg.range)SYNC_SEC
 
-    def ultra0(self, msg):
-        ##print("Front Left Reading: %s" %msg.data)
-        self.ultraFront[0] = msg.data
-        ##print("List now contains: " , self.ultraFront)
-
-    def ultra1(self, msg):
-        ##print("Front Right Reading: %s" %msg.data)
-        self.ultraFront[1] = msg.data
-        ##print("List now contains: " , self.ultraFront)
 
     def ultra2(self, msg):
-        #print("Top Right Reading: %s" %msg.data)
-        self.ultraRight[0] = msg.data 
-        '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.data) > 3:
-            self.ultraRight[0] = msg.data 
-        elif abs(self.ultraRight[0] - msg.data) <= 3:
-            self.ultraRight[0] = msg.data
+        #print("Top Right Reading: %s" %msg.range)
+        self.ultraRight[0] = msg.range * 100
+        '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.range) > 3:
+            self.ultraRight[0] = msg.range 
+        elif abs(self.ultraRight[0] - msg.range) <= 3:
+            self.ultraRight[0] = msg.range
         else:
             self.ultraRight[0] = self.ultraRight[0]
 
         print("List now contains: " , self.ultraRight)'''
 
     def ultra3(self, msg):
-        ##print("Bottom Right Reading: %s" %msg.data)
-        self.ultraRight[1] = msg.data 
-        '''if self.ultraRight[1] == 0.0 and abs(self.ultraRight[1] - msg.data) > 3:
-            self.ultraRight[1] = msg.data 
-        elif abs(self.ultraRight[1] - msg.data) <= 3:
-            self.ultraRight[1] = msg.data
+        ##print("Bottom Right Reading: %s" %msg.range)
+        self.ultraRight[1] = msg.range * 100
+        '''if self.ultraRight[1] == 0.0 and abs(self.ultraRight[1] - msg.range) > 3:
+            self.ultraRight[1] = msg.range 
+        elif abs(self.ultraRight[1] - msg.range) <= 3:
+            self.ultraRight[1] = msg.range
         else:
             self.ultraRight[1] = self.ultraRight[1]
         print("List now contains: " , self.ultraRight)'''
 
     def ultra4(self, msg):
-        ##print("Back Right Reading: %s" %msg.data)
-        #if abs(self.ultraBack[0] - msg.data) < 3:
-        self.ultraBack[0] = msg.data 
+        ##print("Back Right Reading: %s" %msg.range)
+        #if abs(self.ultraBack[0] - msg.range) < 3:
+        self.ultraBack[0] = msg.range * 100
         ##print("List now contains: " , self.ultraBack)
 
     def ultra5(self, msg):
-        ##print("Back Left Reading: %s" %msg.data)
-        #if abs(self.ultraBack[1] - msg.data) < 3:
-        self.ultraBack[1] = msg.data 
+        ##print("Back Left Reading: %s" %msg.range)
+        #if abs(self.ultraBack[1] - msg.range) < 3:
+        self.ultraBack[1] = msg.range * 100
         ##print("List now contains: " , self.ultraBack)
         
     def ultra6(self, msg):
-        ##print("Bottom Left Reading: %s" %msg.data)
-        #if abs(self.ultraLeft[0] - msg.data) < 3:
-        self.ultraLeft[0] = msg.data 
+        ##print("Bottom Left Reading: %s" %msg.range)
+        #if abs(self.ultraLeft[0] - msg.range) < 3:
+        self.ultraLeft[0] = msg.range * 100
         ##print("List now contains: " , self.ultraLeft)
 
     def ultra7(self, msg):
-        ##print("Top Left Reading: %s" %msg.data)
-        #if abs(self.ultraLeft[1] - msg.data) < 3:
-        self.ultraLeft[1] = msg.data 
+        ##print("Top Left Reading: %s" %msg.range)
+        #if abs(self.ultraLeft[1] - msg.range) < 3:
+        self.ultraLeft[1] = msg.range * 100
         ##print("List now contains: " , self.ultraLeft)
 
 
     #Now we should have update values for ALL sides in their respective list for each side
         
     
-    def buildMsg(self, x, y, rot):
+    def buildMsg(self, x, y, rot, speed = 1):
         msg = Twist()
-        #print("Before params: ", msg)
-        #print("Building msg with following params: %s,%s,%s" %(x,y,rot))
-        msg.linear.x = x
-        msg.linear.y = y
+        
+        print("Building msg with following params: %s,%s,%s" %(x,y,rot))
+
+        #We will need toprint("Before params: ", msg) make a unit vector for this this will normalize to 1
+        mag = np.sqrt(pow(x,2) + pow(y,2))
+
+        if mag == 0.0:
+            factor = 1
+        else:
+            factor = 1/mag
+        
+        msg.linear.x = x*factor * speed
+        msg.linear.y = -1*y*factor * speed
         msg.linear.z = 0.0
         
         msg.angular.x = 0
@@ -216,36 +215,39 @@ class RobotCommand:
         msg = self.buildMsg(1.0, 0.0, 0.0)
         self.pub.publish(msg)
         
-    def goBackwards(self):
+    def goBackwards(self, speed = 1):
         # Move the robot backwards
-        msg = self.buildMsg(-1.0, 0.0, 0.0)
+        msg = self.buildMsg(-1.0*speed, 0.0, 0.0)
         self.pub.publish(msg)
         
-    def goRight(self):
+    def goRight(self, speed = 1):
         # Move the robot right
-        msg = self.buildMsg(0, 1.0, 0.0)
+        msg = self.buildMsg(0, 1.0*speed, 0.0)
         self.pub.publish(msg)
         
-    def goLeft(self):
+    def goLeft(self, speed = 1):
         # Move the robot left
-        msg = self.buildMsg(0.0, -1.0, 0.0)
+        msg = self.buildMsg(0.0, -1.0*speed, 0.0)
         self.pub.publish(msg)
 
     # Rotate the robot left
-    def rotateLeft(self):
-        msg = self.buildMsg(0.0, 0.0, -0.25)
+    def rotateLeft(self, speed = 1):
+        msg = self.buildMsg(0.0, 0.0, -1.0*speed)
         self.pub.publish(msg)
 
-    def rotateRight(self):
+    def rotateRight(self, speed = 1):
         # Rotate the robot right
-        msg = self.buildMsg(0.0, 0.0, 0.25)
+        msg = self.buildMsg(0.0, 0.0, 1*speed)
         self.pub.publish(msg)
         
-    def stopBot(self):
+    def stopBot(self, time = 0):
         # Stop the robot
         msg = self.buildMsg(0.0, 0.0, 0.0)
         self.pub.publish(msg)
-        time.sleep(0.5)
+        if time == 0:
+            pass
+        else:
+            time.sleep(time)
 
 
 
@@ -274,6 +276,7 @@ class RobotCommand:
         time.sleep(2)
         self.initYaw = self.currYawAngle
         self.initBoardWidth = self.ultraLeft[1] + self.botWidth + self.ultraRight[0]
+        print("Initial Board Width", self.initBoardWidth)
         
     #Creating a function that will get robot to known statue locations labled A, B, C
 
@@ -283,8 +286,8 @@ class RobotCommand:
         #Therefore we will create variables that we would expect to read with the ultrasonic sensors
 
         #TODO measure the actual values and plug into here
-        c_x = 2.0
-        c_y = 4.0
+        c_x = 34.0
+        c_y = 60.0
 
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
@@ -297,6 +300,8 @@ class RobotCommand:
         counter clockwise decreases yaw. If the mod of of the current 
         '''
         #This means we will have to rotate right
+
+        '''
         if currYaw < 0:
             yawOffset = (currYaw % 360) - 360
             while (self.currYawAngle < currYaw + abs(yawOffset)):
@@ -305,15 +310,18 @@ class RobotCommand:
         elif (currYaw > 0):
             while(self.currYaw > currYaw - yawOffset):
                 self.rotateLeft()
+        '''
 
         #Now we should (within1inch(self.ultraright[1], c_y), 2)be in the same orientation we started in and can start moving in the direction we need to go
         #We will need to build a custom message since our location can be anywhere on the board
 
         #We'll take a moment and let values comes in
-        self.stopBot()
-
+        
         #Need to test which sensor from back is more reliable
-        msg_x = -(self.ultraBack[0] - c_x)
+        if self.ultraBack[0] < c_x :
+            msg_x = c_x - self.ultraBack[0]
+        else:
+            msg_x = -(self.ultraBack[0] - c_x)
         msg_y = 0.0
 
 
@@ -324,11 +332,13 @@ class RobotCommand:
             msg_y = self.initBoardWidth - self.ultraLeft[1] - c_y
         
         #Now we should have the vector we need to travel in for robot to get to location
-        msg = self.buildMsg(msg_x, msg_y, 0)
+        msg = self.buildMsg(msg_x, msg_y, 0, 0.25)
 
-        while not within1inch(self.ultraright[1], c_y, 2) or not within1inch(self.ultraright[1], c_y, 2):
+        while not within1inch(self.ultraRight[1], c_y, 3)  :
             self.pub.publish(msg)
-
+        print(" Exit Right: ", self.ultraRight, "Exit Back: ", self.ultraBack)
+    
+    
         self.stopBot()
         #Now we should be at or near location
         
@@ -577,7 +587,6 @@ class RealSense:
 # Check if n is within threshold of target
 def within1inch(n, target, threshold=1):
     # Convert threshold to centimeters
-    threshold = threshold * 2.54
 
     if n >= target - threshold and n <= target + threshold:
         return True
@@ -587,22 +596,21 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("sim","talker","cmd_vel", Twist, queue_size = 10)
+    bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
+    #bot.initStartingConditions()
     '''
     bot.stopBot()
     #delay program for 5 seconds
-    #time.sleep(5)
     #Need to wait for yaw angles to actually come in so will prob have to put in a delay somewhere in here
     bot.initStartingConditions()
-    bot.goToLocationC
+    print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     print("turn on motors")
     '''
-    while True:
-        print("Right Side Readings: ", bot.ultraRight)
-        print("Back Side Readings: ", bot.ultraBack)
-        print("Left Side Readings: ", bot.ultraLeft)
-        #bot.goRight()
-
+    time.sleep(3)
+    print("Going to Location")
+    bot.goToLocationC()
+    
+    print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     
 
 
@@ -631,8 +639,3 @@ Need to make a function that subscribes to Arduino ultrasonic sensors
 
 
     
-
-    
-
-
-        

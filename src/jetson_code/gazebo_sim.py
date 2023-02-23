@@ -196,7 +196,6 @@ class RobotCommand:
             factor = 1
         else:
             factor = 1/mag
-        print("MAG: ", factor)
         
         msg.linear.x = x*factor * speed
         msg.linear.y = -1*y*factor * speed
@@ -320,7 +319,10 @@ class RobotCommand:
         #We'll take a moment and let values comes in
         
         #Need to test which sensor from back is more reliable
-        msg_x = -(self.ultraBack[0] - c_x)
+        if self.ultraBack[0] < c_x :
+            msg_x = c_x - self.ultraBack[0]
+        else:
+            msg_x = -(self.ultraBack[0] - c_x)
         msg_y = 0.0
 
 
@@ -333,7 +335,7 @@ class RobotCommand:
         #Now we should have the vector we need to travel in for robot to get to location
         msg = self.buildMsg(msg_x, msg_y, 0, 0.25)
 
-        while not within1inch(self.ultraRight[1], c_y, 3):
+        while not within1inch(self.ultraRight[1], c_y, 3)  :
             self.pub.publish(msg)
         print(" Exit Right: ", self.ultraRight, "Exit Back: ", self.ultraBack)
     
@@ -586,7 +588,6 @@ class RealSense:
 # Check if n is within threshold of target
 def within1inch(n, target, threshold=1):
     # Convert threshold to centimeters
-    threshold = threshold * 2.54
 
     if n >= target - threshold and n <= target + threshold:
         return True
