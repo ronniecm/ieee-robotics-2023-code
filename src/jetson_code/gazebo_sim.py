@@ -124,7 +124,7 @@ class RobotCommand:
         self.ultraLeft = [0.0, 0.0]
         self.objDetect = 0
         self.currYawAngle = 0.0 - 180.0 #This will ensure our starting yaw will be 0 degees easier calculations
-        self.initBoardWidth = 263.0
+        self.initBoardWidth = 233.0
         self.initYaw = 0.0
         self.botWidth = 30.0
         
@@ -209,12 +209,12 @@ class RobotCommand:
         mag = np.sqrt(pow(x,2) + pow(y,2))
 
         if mag == 0.0:
-            factor = 1
+            norm = 1
         else:
-            factor = 1/mag
+            norm = 1/mag
         
-        msg.linear.x = x*factor * speed
-        msg.linear.y = -1*y*factor * speed
+        msg.linear.x = x*norm * speed
+        msg.linear.y = -1*y*norm * speed
         msg.linear.z = 0.0
         
         msg.angular.x = 0
@@ -265,7 +265,35 @@ class RobotCommand:
         else:
             time.sleep(time)
 
+    #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
+    def alignFront(self, threshhold = 0.75):
+        while abs(self.ultraFront[0] - self.ultraFront[1]) > threshhold:
+            if self.ultraFront[0] > self.ultraFront[1]:
+                self.rotateRight()
+            else:
+                self.rotateLeft()
+
+    def alignRight(self, threshhold = 0.75):
+        while abs(self.ultraRight[0] - self.ultraRight[1]) > threshhold:
+            if self.ultraRight[0] > self.ultraRight[1]:
+                self.rotateRight(0.25)
+            else:
+                self.rotateLeft(0.25)
+
+    def alignBack(self, threshhold = 0.75):
+        while abs(self.ultraBack[0] - self.ultraBack[1]) > threshhold:
+            if self.ultraBack[0] > self.ultraBack[1]:
+                self.rotateRight(0.25)
+            else:
+                self.rotateLeft(0.25)
+
+    def alignLeft(self, threshhold = 0.75):
+        while abs(self.ultraLeft[0] - self.ultraLeft[1]) > threshhold:
+            if self.ultraLeft[0] > self.ultraLeft[1]:
+                self.rotateRight(0.25)
+            else:
+                self.rotateLeft(0.25)
 
     '''
     Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
@@ -302,13 +330,14 @@ class RobotCommand:
         #Therefore we will create variables that we would expect to read with the ultrasonic sensors
 
         #TODO measure the actual values and plug into here
-        c_x = 34.0
-        c_y = 60.0
+        #c_x is the value we want to get from the back sensor
+        #c_y is the value we want to get from the right sensor
+        c_x = 30.0
+        c_y = 64.0
 
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
 
-        
         currYaw = self.currYawAngle
     
         '''
@@ -327,20 +356,16 @@ class RobotCommand:
             while(self.currYaw > currYaw - yawOffset):
                 self.rotateLeft()
         '''
-        
-
         #Now we should (within1inch(self.ultraright[1], c_y), 2)be in the same orientation we started in and can start moving in the direction we need to go
         #We will need to build a custom message since our location can be anywhere on the board
 
         #We'll take a moment and let values comes in
-        
         #Need to test which sensor from back is more reliable
         if self.ultraBack[0] < c_x :
             msg_x = c_x - self.ultraBack[0]
         else:
             msg_x = -(self.ultraBack[0] - c_x)
         msg_y = 0.0
-
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
         if self.ultraLeft[0] > self.ultraRight[0]:
@@ -354,7 +379,10 @@ class RobotCommand:
         while not within1inch(self.ultraRight[0], c_y, 3)  :
             self.pub.publish(msg)
         print(" Exit Right: ", self.ultraRight, "Exit Back: ", self.ultraBack)
-    
+
+        #Now that we got close we are going to align bot with back
+
+        self.alignBack()
     
         self.stopBot()
         #Now we should be at or near location
