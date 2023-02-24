@@ -25,6 +25,7 @@
 
 onJetson = False
 
+sim = True
 if onJetson:
 
     import sys
@@ -54,19 +55,25 @@ from sensor_msgs.msg import Range
 
 class RobotCommand:
     def __init__(self, robot_name, node_name, command_topic, msg_type, queue_size):
-
+        
+        
         try:
+            if not sim:
+                ultra_msg_type = Float32
+            else:
+                ultra_msg_type = Range
+
             rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
             self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), msg_type, queue_size =10)
 
             #rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
             #rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
-            rospy.Subscriber('%s/ultra2' %robot_name, Range, self.ultra2)
-            rospy.Subscriber('%s/ultra3' %robot_name, Range, self.ultra3)
-            rospy.Subscriber('%s/ultra4' %robot_name, Range, self.ultra4)
-            rospy.Subscriber('%s/ultra5' %robot_name, Range, self.ultra5)
-            rospy.Subscriber('%s/ultra6' %robot_name, Range, self.ultra6)
-            rospy.Subscriber('%s/ultra7' %robot_name, Range, self.ultra7)
+            rospy.Subscriber('%s/ultra2' %robot_name, ultra_msg_type, self.ultra2)
+            rospy.Subscriber('%s/ultra3' %robot_name, ultra_msg_type, self.ultra3)
+            rospy.Subscriber('%s/ultra4' %robot_name, ultra_msg_type, self.ultra4)
+            rospy.Subscriber('%s/ultra5' %robot_name, ultra_msg_type, self.ultra5)
+            rospy.Subscriber('%s/ultra6' %robot_name, ultra_msg_type, self.ultra6)
+            rospy.Subscriber('%s/ultra7' %robot_name, ultra_msg_type, self.ultra7)
             rospy.Subscriber('/obj_detect', Int8, self.obj_detect)
             rospy.Subscriber('/yaw', Float32, self.yaw)
 
@@ -135,49 +142,58 @@ class RobotCommand:
 
     def ultra2(self, msg):
         #print("Top Right Reading: %s" %msg.range)
-        self.ultraRight[0] = msg.range * 100
-        '''if self.ultraRight[0] == 0.0 and abs(self.ultraRight[0] - msg.range) > 3:
-            self.ultraRight[0] = msg.range 
-        elif abs(self.ultraRight[0] - msg.range) <= 3:
-            self.ultraRight[0] = msg.range
+        if sim:
+            self.ultraRight[0] = msg.range * 100
         else:
-            self.ultraRight[0] = self.ultraRight[0]
-
-        print("List now contains: " , self.ultraRight)'''
+            self.ultraRight[0] = msg.data
+        
 
     def ultra3(self, msg):
         ##print("Bottom Right Reading: %s" %msg.range)
-        self.ultraRight[1] = msg.range * 100
-        '''if self.ultraRight[1] == 0.0 and abs(self.ultraRight[1] - msg.range) > 3:
-            self.ultraRight[1] = msg.range 
-        elif abs(self.ultraRight[1] - msg.range) <= 3:
-            self.ultraRight[1] = msg.range
+        if sim:
+            self.ultraRight[1] = msg.range * 100
         else:
-            self.ultraRight[1] = self.ultraRight[1]
-        print("List now contains: " , self.ultraRight)'''
+            self.ultraRight[1] = msg.data
+
+        
 
     def ultra4(self, msg):
         ##print("Back Right Reading: %s" %msg.range)
         #if abs(self.ultraBack[0] - msg.range) < 3:
-        self.ultraBack[0] = msg.range * 100
+        if sim:
+            self.ultraBack[0] = msg.range * 100
+        else:
+            self.ultraBack[0] = msg.data
         ##print("List now contains: " , self.ultraBack)
 
     def ultra5(self, msg):
         ##print("Back Left Reading: %s" %msg.range)
         #if abs(self.ultraBack[1] - msg.range) < 3:
-        self.ultraBack[1] = msg.range * 100
+        if sim:
+            self.ultraBack[1] = msg.range * 100
+        else:
+            self.ultraBack[1] = msg.data
+
         ##print("List now contains: " , self.ultraBack)
         
     def ultra6(self, msg):
         ##print("Bottom Left Reading: %s" %msg.range)
         #if abs(self.ultraLeft[0] - msg.range) < 3:
-        self.ultraLeft[0] = msg.range * 100
+        if sim:
+            self.ultraLeft[0] = msg.range * 100
+        else:
+            self.ultraLeft[0] = msg.data
+            
         ##print("List now contains: " , self.ultraLeft)
 
     def ultra7(self, msg):
         ##print("Top Left Reading: %s" %msg.range)
         #if abs(self.ultraLeft[1] - msg.range) < 3:
-        self.ultraLeft[1] = msg.range * 100
+        if sim:
+            self.ultraLeft[1] = msg.range * 100
+        else:
+            self.ultraLeft[1] = msg.data
+
         ##print("List now contains: " , self.ultraLeft)
 
 
@@ -327,15 +343,15 @@ class RobotCommand:
 
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
-        if self.ultraLeft[0] > self.ultraRight[1]:
-            msg_y = self.ultraRight[1] - c_y
+        if self.ultraLeft[0] > self.ultraRight[0]:
+            msg_y = self.ultraRight[0] - c_y
         else:
             msg_y = self.initBoardWidth - self.ultraLeft[1] - c_y
         
         #Now we should have the vector we need to travel in for robot to get to location
         msg = self.buildMsg(msg_x, msg_y, 0, 0.25)
 
-        while not within1inch(self.ultraRight[1], c_y, 3)  :
+        while not within1inch(self.ultraRight[0], c_y, 3)  :
             self.pub.publish(msg)
         print(" Exit Right: ", self.ultraRight, "Exit Back: ", self.ultraBack)
     
