@@ -613,7 +613,12 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
     #Takes in camera dimensions
-    bot = RobotCommand("sim","talker","cmd_vel", Twist, queue_size = 10)
+
+    if sim:
+        bot = RobotCommand("sim","talker","cmd_vel", Twist, queue_size = 10)
+    else:
+        bot = RobotCommand("bot","talker","cmd_vel", Twist, queue_size = 10)
+
     #bot.initStartingConditions()
     '''
     bot.stopBot()
