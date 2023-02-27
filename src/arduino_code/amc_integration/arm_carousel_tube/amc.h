@@ -14,6 +14,12 @@
 #define servoMIN 103
 #define servoMAX 512
 
+#define upper_limit 39  //upper limit switch
+#define lower_limit 38  //lower limit switch
+
+#define flipMIN 125
+#define flipMAX 530
+
 class Amc {
   public:
     Amc();
@@ -24,7 +30,10 @@ class Amc {
     void dispense();
     void drop_in_action();
     void update_slots(int dir);
-
+    void storeUprightPedestal();
+    void liftArm();
+    void lowerArm();
+    
   private:
     Adafruit_PWMServoDriver* servos;
     Adafruit_PWMServoDriver* steppers;
