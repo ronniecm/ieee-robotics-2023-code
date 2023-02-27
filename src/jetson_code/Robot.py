@@ -57,11 +57,48 @@ class Robot:
         self.initYaw = 0.0
         self.botWidth = 30.0
 
+    #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
+
+    def alignFront(self, threshhold = 0.75):
+        while abs(self.rng.getFront(0) - self.rng.getFront(1)) > threshhold:
+            if self.rng.getFront(0) > self.rng.getFront(1):
+                self.ctrl.rotateLeft()
+            else:
+                self.ctrl.rotateRight()
+        self.ctrl.stopBot()
+
+    def alignRight(self, threshhold = 0.75):
+        while abs(self.rng.getRight(0) - self.rng.getRight(1)) > threshhold:
+            if self.rng.getLeft(0) > self.rng.getRight(1):
+                self.ctrl.rotateLeft(0.25)
+            else:
+                self.ctrl.rotateRight(0.25)
+        self.ctrl.stopBot()
+
+    def alignBack(self, threshhold = 0.75):
+        while abs(self.rng.getBack(0) - self.rng.getBack(1)) > threshhold:
+            if self.rng.getBack(0) > self.rng.getBack(1):
+                self.ctrl.rotateLeft(0.25)
+            else:
+                self.ctrl.rotateRight(0.25)
+        self.ctrl.stopBot()
+
+    def alignLeft(self, threshhold = 0.75):
+        while abs(self.rng.getLeft(0) - self.rng.getLeft(1)) > threshhold:
+            if self.rng.getLeft(0) > self.rng.getLeft(1):
+                self.ctrl.rotateLeft(0.25)
+            else:
+                self.ctrl.rotateRight(0.25)
+        self.ctrl.stopBot()
+
+
     def initStartingConditions(self):
         time.sleep(2)
         self.initYaw = self.currYawAngle
         self.initBoardWidth = self.rng.getLeft(1) + self.botWidth + self.rng.getRight(0)
         print("Initial Board Width", self.initBoardWidth)
+
+    
 
 
     def goToLocationC(self):
@@ -121,7 +158,6 @@ class Robot:
         print("Exit Conditions: Right: ", self.rng.getRight(), " Back: ", self.rng.getBack())
 
         #Now that we got close we are going to align bot with back
-
         
         self.ctrl.stopBot()
         #Now we should be at or near location
@@ -153,9 +189,7 @@ if __name__ == "__main__":
     print("turn on motors")
     '''
     time.sleep(3)
-    #Might have to define this before calling functions needing sensors
-    
-    print("Going to Location")
-    bot.goToLocationC()
+    bot.alignLeft(.25)
+  
 
     

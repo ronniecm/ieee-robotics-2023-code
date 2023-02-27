@@ -14,6 +14,7 @@ import rospy
 from std_msgs.msg import Float32
 from geometry_msgs.msg import Twist
 import numpy as np
+import time
 
 
 class RobotCommand:
@@ -29,9 +30,6 @@ class RobotCommand:
         
     def yaw(self, msg):
         self.currYawAngle = msg.data
-    
-    def obj_detect(self, msg):
-        self.objDetect = msg.range * 100.0
         
     
     def buildMsg(self, x, y, rot, speed = 1):
@@ -93,45 +91,46 @@ class RobotCommand:
         msg = self.buildMsg(0.0, 0.0, 1*speed)
         self.pub.publish(msg)
         
-    def stopBot(self, time = 0):
+    def stopBot(self, delay = 1):
         # Stop the robot
+        currTime = time.time()
         msg = self.buildMsg(0.0, 0.0, 0.0)
-        self.pub.publish(msg)
-        if time == 0:
-            pass
-        else:
-            time.sleep(time)
+        
+        while(time.time() <= currTime + delay):
+            self.pub.publish(msg)
 
-    #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
+    def testCommands(self):
 
-    def alignFront(self, threshhold = 0.75):
-        while abs(self.rng.getFront(0) - self.rng.getFront(1)) > threshhold:
-            if self.rng.getFront(0) > self.rng.getFront(1):
-                self.rotateRight()
-            else:
-                self.rotateLeft()
+        currTime = time.time()
+        while(time.time() < currTime + 1):
+            self.goFoward()
 
-    def alignRight(self, threshhold = 0.75):
-        while abs(self.rng.getRight(0) - self.rng.getRight(1)) > threshhold:
-            if self.rng.getRight(0) > self.rng.getRight(1):
-                self.rotateRight(0.25)
-            else:
-                self.rotateLeft(0.25)
+        currTime = time.time()
+        while(time.time() < currTime + 1):
+            self.goBackwards()
+        
+        currTime = time.time()
+        while(time.time() < currTime + 1):
+            self.goRight()
 
-    def alignBack(self, threshhold = 0.75):
-        while abs(self.rng.getBack(0) - self.rng.getBack(1)) > threshhold:
-            if self.rng.getBack(0) > self.rng.getBack(1):
-                self.rotateRight(0.25)
-            else:
-                self.rotateLeft(0.25)
+        currTime = time.time()
+        while(time.time() < currTime + 1):
+            self.goLeft()
 
-    def alignLeft(self, threshhold = 0.75):
-        while abs(self.rng.getLeft(0) - self.rng.getLeft(1)) > threshhold:
-            if self.rng.getLeft(0) > self.rng.getLeft(1):
-                self.rotateRight(0.25)
-            else:
-                self.rotateLeft(0.25)
+        currTime = time.time()
+        while(time.time() < currTime + 1):
+            self.rotateRight()
 
+        currTime = time.time()
+
+        while(time.time() < currTime + 2):
+            self.rotateLeft()
+
+        self.stopBot(1.0)
+
+
+
+    
     '''
     Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
     That list is will be self.rng.get<FACE>
