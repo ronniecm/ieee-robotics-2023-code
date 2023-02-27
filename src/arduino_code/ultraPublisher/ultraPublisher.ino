@@ -4,23 +4,23 @@
 #include "TeensyThreads.h"
 
 //Ultrasonic Sensor 0 trig and echo pins and distance variables
-#define Ultra0_trigPin 5    // Trigger
-#define Ultra0_echoPin 6    // Echo
+#define Ultra0_trigPin 3    // Trigger
+#define Ultra0_echoPin 2    // Echo
 
 
 //Ultrasonic Sensor 1 trig and echo pins and distance variables
 #define Ultra1_trigPin 4
-#define Ultra1_echoPin 3
+#define Ultra1_echoPin 5
 
 
 //Ultrasonic Sensor 2 trig and echo pins and distance variables
-#define Ultra2_trigPin 21 
-#define Ultra2_echoPin 20 
+#define Ultra2_trigPin 21
+#define Ultra2_echoPin 20
 
 
 //Ultrasonic Sensor 3 trig and echo pins and distance variables
 #define Ultra3_trigPin 16
-#define Ultra3_echoPin 15
+#define Ultra3_echoPin 12
 
 
 //Ultrasonic Sensor 4 trig and echo pins and distance variable
@@ -29,18 +29,18 @@
 
 
 //Ultrasonic Sensor 5 trig and echo pins and distance variables
-#define Ultra5_trigPin 12
-#define Ultra5_echoPin 11
+#define Ultra5_trigPin 11
+#define Ultra5_echoPin 10
 
 
 //Ultrasonic Sensor 6 trig and echo pins and distance variables
-#define Ultra6_trigPin 10
-#define Ultra6_echoPin 9
+#define Ultra6_trigPin 9
+#define Ultra6_echoPin 8
 
 
 //Ultrasonic Sensor 7 trig and echo pins and distance variables
-#define Ultra7_trigPin 8
-#define Ultra7_echoPin 7
+#define Ultra7_trigPin 7
+#define Ultra7_echoPin 6
 
 
 
@@ -164,4 +164,3 @@ void loop() {
       unsigned long duration = millis() - currentMillis;
       Serial.println(duration); 
 }
-
