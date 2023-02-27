@@ -74,7 +74,9 @@ class Robot:
         self.rng.getTofSensors(0)
         self.rng.getTofSensors(1)
 
+
         #We are going to go fowrward until we detect a disturbance for TOF
+        print("Sensor Values", self.rng.getTofSensors())
         while(self.rng.getTofSensors(0) > 11.0 or self.rng.getTofSensors(1) > 11.0):
             self.ctrl.goFoward(.1)
 
@@ -82,22 +84,19 @@ class Robot:
         self.ctrl.stopBot()
 
 
+    def tofAllign(self):
 
+        print("Alligning")
 
-    def tofAlign(self):
+        threshhold = 1
 
-        leftDist = self.rng.getTofSensors(0)
-        rightDist = self.rng.getTofSensors(1)
-
-        error = leftDist - rightDist
-        threshhold = 2
-
-        while (abs(error) > threshhold):
-            if leftDist > rightDist:
-                self.ctrl.goRight(0.1)
+        while (abs(self.rng.getTofSensors(0) - self.rng.getTofSensors(1)) > threshhold):
+            print("Sensor Readings: " ,self.rng.getTofSensors())
+            if self.rng.getTofSensors(0) > self.rng.getTofSensors(1):
+                self.ctrl.goRight(0.05)
             else:
-                self.crtl.goLeft(0.1)
-        self.stopBot()
+                self.ctrl.goLeft(0.05)
+        self.ctrl.stopBot()
 
     def pickup(self):
         pass
@@ -106,9 +105,9 @@ class Robot:
     def alignFront(self, threshhold = 0.75):
         while abs(self.rng.getFront(0) - self.rng.getFront(1)) > threshhold:
             if self.rng.getFront(0) > self.rng.getFront(1):
-                self.ctrl.rotateLeft()
-            else:
                 self.ctrl.rotateRight()
+            else:
+                self.ctrl.rotateLeft()
         self.ctrl.stopBot()
 
     def alignRight(self, threshhold = 0.75):
@@ -231,6 +230,9 @@ if __name__ == "__main__":
     print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     print("turn on motors")
     '''
-    print("Starting Camera")
-    #bot.ctrl.testCommands()    
-    print(bot.rng.getTofSensors(1))
+    time.sleep(3)
+    print("Starting Motors")
+    #bot.ctrl.testCommands()  
+    bot.tofApproach()
+    bot.tofAllign()
+    

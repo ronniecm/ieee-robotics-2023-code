@@ -35,7 +35,7 @@ class RobotCommand:
     def buildMsg(self, x, y, rot, speed = 1):
         msg = Twist()
         
-        print("Building msg with following params: %s,%s,%s" %(x,y,rot))
+        #print("Building msg with following params: %s,%s,%s" %(x,y,rot))
 
         #We will need toprint("Before params: ", msg) make a unit vector for this this will normalize to 1
         mag = np.sqrt(pow(x,2) + pow(y,2))
@@ -61,34 +61,34 @@ class RobotCommand:
     
     #List of basic commands that can be used as geometry twist messages
 
-    def goFoward(self):
+    def goFoward(self,speed = 1):
         # Move the robot forward
-        msg = self.buildMsg(1.0, 0.0, 0.0)
+        msg = self.buildMsg(1.0*speed, 0.0, 0.0, speed)
         self.pub.publish(msg)
         
     def goBackwards(self, speed = 1):
         # Move the robot backwards
-        msg = self.buildMsg(-1.0*speed, 0.0, 0.0)
+        msg = self.buildMsg(-1.0*speed, 0.0, 0.0, speed)
         self.pub.publish(msg)
         
     def goRight(self, speed = 1):
         # Move the robot right
-        msg = self.buildMsg(0, 1.0*speed, 0.0)
+        msg = self.buildMsg(0, 1.0*speed, 0.0, speed)
         self.pub.publish(msg)
         
     def goLeft(self, speed = 1):
         # Move the robot left
-        msg = self.buildMsg(0.0, -1.0*speed, 0.0)
+        msg = self.buildMsg(0.0, -1.0*speed, 0.0, speed)
         self.pub.publish(msg)
 
     # Rotate the robot left
     def rotateLeft(self, speed = 1):
-        msg = self.buildMsg(0.0, 0.0, -1.0*speed)
+        msg = self.buildMsg(0.0, 0.0, -1.0*speed, speed)
         self.pub.publish(msg)
 
     def rotateRight(self, speed = 1):
         # Rotate the robot right
-        msg = self.buildMsg(0.0, 0.0, 1*speed)
+        msg = self.buildMsg(0.0, 0.0, 1*speed, speed)
         self.pub.publish(msg)
         
     def stopBot(self, delay = 1):

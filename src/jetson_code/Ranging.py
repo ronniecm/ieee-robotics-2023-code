@@ -42,6 +42,9 @@ class Ranging:
 
         rospy.Subscriber('%s/tofSensors' %robot_name, Float32MultiArray, self.tofSensors)
 
+        rospy.Subscriber('%s/tof0' %robot_name, ultra_msg_type, self.tof0)
+        rospy.Subscriber('%s/tof1' %robot_name, ultra_msg_type , self.tof1)
+
         '''
         Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
         That list is will be self.rng.get<FACE>
@@ -70,6 +73,14 @@ class Ranging:
         self.ultraLeft = [0.0, 0.0]
 
         self.tofDist = [0.0,  0.0]
+
+
+    def tof0(self, msg):
+        self.tofDist[0] = msg.range*100
+
+    def tof1(self, msg):
+        self.tofDist[1] = msg.range*100
+
 
     def ultra2(self, msg):
         #print("Top Right Reading: %s" %msg.range)
