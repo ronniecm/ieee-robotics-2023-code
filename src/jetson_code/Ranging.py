@@ -16,6 +16,7 @@ real-time  access to ranging data
 import rospy
 from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
+from std_msgs.msg import Float32MultiArray
 
 
 class Ranging:
@@ -38,6 +39,8 @@ class Ranging:
         rospy.Subscriber('%s/ultra5' %robot_name, ultra_msg_type, self.ultra5)
         rospy.Subscriber('%s/ultra6' %robot_name, ultra_msg_type, self.ultra6)
         rospy.Subscriber('%s/ultra7' %robot_name, ultra_msg_type, self.ultra7)
+
+        rospy.Subscriber('%s/tofSensors' %robot_name, Float32MultiArray, self.tofSensors)
 
         '''
         Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
@@ -65,6 +68,8 @@ class Ranging:
         self.ultraRight = [0.0, 0.0]
         self.ultraBack = [0.0, 0.0]
         self.ultraLeft = [0.0, 0.0]
+
+        self.tofDist = [0.0,  0.0]
 
     def ultra2(self, msg):
         #print("Top Right Reading: %s" %msg.range)
@@ -125,6 +130,7 @@ class Ranging:
             -------UlTRA SONIC NAMING DIAGRAM----------
 
                             FRONT
+                        0           1       (TOF)
 
                      ___0___________1___
                     |                   |
@@ -138,7 +144,19 @@ class Ranging:
                         5           4
 
                             BACK
+
             '''
+
+    def tofSensors(self, msg):
+        self.tofDist[0] = msg.data[0]
+        self.tofDist[1] = msg.data[1]
+
+    def getTofSensors(self, i = None):
+        if i is not None:
+            return self.tofDist[i]
+        else:
+            return self.tofDist
+
     def getFront(self,i = None):
         if i is not None:
             return self.ultraFront[i]

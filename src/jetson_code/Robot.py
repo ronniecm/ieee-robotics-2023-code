@@ -70,6 +70,39 @@ class Robot:
 
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
+    def tofApproach(self):
+        self.rng.getTofSensors(0)
+        self.rng.getTofSensors(1)
+
+        #We are going to go fowrward until we detect a disturbance for TOF
+        while(self.rng.getTofSensors(0) > 11.0 or self.rng.getTofSensors(1) > 11.0):
+            self.ctrl.goFoward(.1)
+
+        #As soon as we detect a disturbance stop the bot
+        self.ctrl.stopBot()
+
+
+
+
+    def tofAlign(self):
+
+        leftDist = self.rng.getTofSensors(0)
+        rightDist = self.rng.getTofSensors(1)
+
+        error = leftDist - rightDist
+        threshhold = 2
+
+        while (abs(error) > threshhold):
+            if leftDist > rightDist:
+                self.ctrl.goRight(0.1)
+            else:
+                self.crtl.goLeft(0.1)
+        self.stopBot()
+
+    def pickup(self):
+        pass
+    
+
     def alignFront(self, threshhold = 0.75):
         while abs(self.rng.getFront(0) - self.rng.getFront(1)) > threshhold:
             if self.rng.getFront(0) > self.rng.getFront(1):
@@ -186,8 +219,6 @@ if __name__ == "__main__":
 
 
 
-    
-
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
@@ -201,6 +232,5 @@ if __name__ == "__main__":
     print("turn on motors")
     '''
     print("Starting Camera")
-    while True:
-        bot.gripperClamp.sendMsg(1)
-    bot.ctrl.testCommands()    
+    #bot.ctrl.testCommands()    
+    print(bot.rng.getTofSensors(1))
