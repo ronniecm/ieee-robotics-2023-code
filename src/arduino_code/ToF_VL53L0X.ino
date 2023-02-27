@@ -44,7 +44,7 @@ or make donation using PayPal http://robojax.com/L/?id=64
 // address we will assign if dual sensor is present
 #define LOX1_ADDRESS 0x30
 #define LOX2_ADDRESS 0x31
-int sensor1,sensor2;
+float sensor1,sensor2;
 
 
 // set the pins to shutdown
@@ -138,7 +138,7 @@ void setup() {
   pinMode(SHT_LOX1, OUTPUT);
   pinMode(SHT_LOX2, OUTPUT);
 
-  Serial.println("Shutdown pins inited...");
+  Serial.println("Shutdown pins initiated...");
 
   digitalWrite(SHT_LOX1, LOW);
   digitalWrite(SHT_LOX2, LOW);
