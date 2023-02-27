@@ -28,10 +28,7 @@ class Ranging:
             
         else:
             ultra_msg_type = Float32
-        
-
-        rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
-        
+                
 
         #rospy.Subscriber('%s/ultra0' %robot_name, Float32, self.ultra0)
         #rospy.Subscriber('%s/ultra1' %robot_name, Float32, self.ultra1)
