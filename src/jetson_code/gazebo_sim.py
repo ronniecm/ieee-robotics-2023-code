@@ -25,7 +25,7 @@
 
 onJetson = False
 
-sim = True
+sim = False
 if onJetson:
 
     import sys
@@ -124,7 +124,7 @@ class RobotCommand:
         self.ultraLeft = [0.0, 0.0]
         self.objDetect = 0
         self.currYawAngle = 0.0 - 180.0 #This will ensure our starting yaw will be 0 degees easier calculations
-        self.initBoardWidth = 233.0
+        self.initBoardWidth = 234.0
         self.initYaw = 0.0
         self.botWidth = 30.0
         
@@ -203,7 +203,7 @@ class RobotCommand:
     def buildMsg(self, x, y, rot, speed = 1):
         msg = Twist()
         
-        print("Building msg with following params: %s,%s,%s" %(x,y,rot))
+        #print("Building msg with following params: %s,%s,%s" %(x,y,rot))
 
         #We will need toprint("Before params: ", msg) make a unit vector for this this will normalize to 1
         mag = np.sqrt(pow(x,2) + pow(y,2))
@@ -214,7 +214,7 @@ class RobotCommand:
             norm = 1/mag
         
         msg.linear.x = x*norm * speed
-        msg.linear.y = -1*y*norm * speed
+        msg.linear.y = y*norm * speed
         msg.linear.z = 0.0
         
         msg.angular.x = 0
@@ -332,7 +332,7 @@ class RobotCommand:
         #TODO measure the actual values and plug into here
         #c_x is the value we want to get from the back sensor
         #c_y is the value we want to get from the right sensor
-        c_x = 30.0
+        c_x = 33.0
         c_y = 64.0
 
         #First we are going to make sure that the robot has the same yaw that it had in the begining
@@ -362,27 +362,56 @@ class RobotCommand:
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
         if self.ultraBack[0] < c_x :
+            print("HERE1")
             msg_x = c_x - self.ultraBack[0]
         else:
+            print("HERE2")
             msg_x = -(self.ultraBack[0] - c_x)
+        
         msg_y = 0.0
-
+        
+        print("X_msg", msg_x)
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
-        if self.ultraLeft[0] > self.ultraRight[0]:
-            msg_y = self.ultraRight[0] - c_y
+        if self.ultraLeft[0] > self.ultraRight[1]:
+            msg_y = self.ultraRight[1] - c_y
         else:
             msg_y = self.initBoardWidth - self.ultraLeft[1] - c_y
         
+        print("Y MSG: ",msg_y)
         #Now we should have the vector we need to travel in for robot to get to location
-        msg = self.buildMsg(msg_x, msg_y, 0, 0.25)
 
-        while not within1inch(self.ultraRight[0], c_y, 3)  :
+        '''
+        msg = self.buildMsg(msg_x, msg_y, 0, 0.5)
+
+        while not within1inch(self.ultraRight[1], c_y, 2) or not within1inch(self.ultraBack[0], c_x, 2):
             self.pub.publish(msg)
+        
+        while not within1inch(self.ultraRight[1], c_y, 1):
+            if self.ultraRight[1] > c_y:
+                self.goRight(.1)
+            if self.ultraRight[1] < c_y:
+                self.goLeft(0.1)
+        '''
+        currDist = self.ultraBack[0]
+
+        while not within1inch(self.ultraBack[0], c_x, 2):
+            self.goBackwards()
+        self.stopBot()
+
+        while not within1inch(self.ultraBack[0], c_y, 2):
+            self.goBackwards()
+
+        self.stopBot()
+
+
+        
+        
+
         print(" Exit Right: ", self.ultraRight, "Exit Back: ", self.ultraBack)
 
         #Now that we got close we are going to align bot with back
 
-        self.alignBack()
+        #self.alignBack()
     
         self.stopBot()
         #Now we should be at or near location
@@ -655,15 +684,28 @@ if __name__ == "__main__":
     bot.initStartingConditions()
     print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     print("turn on motors")
-    '''
-    time.sleep(3)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
+    time.sleep(3)
     print("Going to Location")
     bot.goToLocationC()
     
+    while True:
+
+        print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack, "Left: ", bot.ultraLeft)
+
+    '''
+
+    print("turn on motors")
+    time.sleep(3)
+    print("Going to Location")
+    bot.goToLocationC()
     print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
+    while True:
+
+        bot.stopBot()
+    
     
 
-
+    
 
 
       
