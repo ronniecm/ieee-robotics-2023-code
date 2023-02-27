@@ -98,34 +98,35 @@ class RealSense:
 				 threshold=self.args.threshold)
 
 	def filter_detections(self, detections):
-	"""
-	Filter out "double" detections of the same object within the same frame.
-	"""
+		"""
+		Filter out "double" detections of the same object within the same frame.
+		"""
 
-	# For each detection, compare how similar the center pixel is to all other center pixels
-	# and filter out the ones that are too similar, taking care to not compare a detection with itself, as well
-	# as to not make a comparison twice (i.e. i vs j and j vs i)
-	for i in range(len(detections)):
-		for j in range(i + 1, len(detections)):
-			if i != j:
-				# Check that j in range
-				if j >= len(detections):
-					break
 
-				# Get the center of each detection
-				center_i = detections[i].Center
-				center_j = detections[j].Center
+		# For each detection, compare how similar the center pixel is to all other center pixels
+		# and filter out the ones that are too similar, taking care to not compare a detection with itself, as well
+		# as to not make a comparison twice (i.e. i vs j and j vs i)
+		for i in range(len(detections)):
+			for j in range(i + 1, len(detections)):
+				if i != j:
+					# Check that j in range
+					if j >= len(detections):
+						break
 
-				# Calculate the distance between the two centers
-				dist = sqrt((center_i[0] - center_j[0])**2 + (center_i[1] - center_j[1])**2)
-				# If the distance is less than the threshold, remove the detection with the lower score
-				threshold = 10
-				if dist < threshold:
-					
-					if detections[i].Confidence < detections[j].Confidence:
-						detections.pop(i)
-					else:
-						detections.pop(j)
+					# Get the center of each detection
+					center_i = detections[i].Center
+					center_j = detections[j].Center
+
+					# Calculate the distance between the two centers
+					dist = sqrt((center_i[0] - center_j[0])**2 + (center_i[1] - center_j[1])**2)
+					# If the distance is less than the threshold, remove the detection with the lower score
+					threshold = 10
+					if dist < threshold:
+						
+						if detections[i].Confidence < detections[j].Confidence:
+							detections.pop(i)
+						else:
+							detections.pop(j)
 		
 	def run(self):
 		

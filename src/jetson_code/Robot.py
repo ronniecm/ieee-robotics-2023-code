@@ -24,9 +24,9 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
-sim = False
+sim = True
 
 import time
 import numpy as np
@@ -35,22 +35,32 @@ import rospy
 from sensor_msgs.msg import Range
 from Ranging import Ranging
 from RobotCommand import RobotCommand
+from Servos import Servos
 if onJetson:
     from Cameras import RealSense
 
 
 #This will be the main class that inherits everything from every other class
 class Robot:
-    def __init__(self, robot_name, node_name, command_topic, queue_size):
+    def __init__(self, robot_name, node_name, command_topic, queue_size, servos = {}):
+        
+        rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
+
+        if onJetson:
+            self.realSense = RealSense()
+            
+        self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
+        self.rng = Ranging(robot_name, node_name)
         
 
-        if sim:
-            self.ctrl = RobotCommand('sim', node_name, command_topic, queue_size = 10)
-            self.rng = Ranging('sim', node_name)
-        else:
-            self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
-            self.rng = Ranging(robot_name, node_name)
-            self.realSense = RealSense()
+        self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
+        self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
+        self.door = Servos(robot_name, node_name, "door", queue_size = 10)
+        self.elbow = Servos(robot_name, node_name, "elbow", queue_size = 10)
+        self.wrist = Servos(robot_name, node_name, "wrist", queue_size = 10)
+        self.paddle = Servos(robot_name, node_name, "paddle", queue_size = 10)
+        self.lifting = Servos(robot_name, node_name, "lifting", queue_size = 10)
+        self.carousel = Servos(robot_name, node_name, "carousel", queue_size = 10)
 
 
         self.currYawAngle = 0.0 - 180.0 #This will ensure our starting yaw will be 0 degees easier calculations
@@ -174,6 +184,10 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
 
+
+
+    
+
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
@@ -188,8 +202,5 @@ if __name__ == "__main__":
     '''
     print("Starting Camera")
     while True:
-
-        bot.realSense.run()
-  
-
-    
+        bot.gripperClamp.sendMsg(1)
+    bot.ctrl.testCommands()    
