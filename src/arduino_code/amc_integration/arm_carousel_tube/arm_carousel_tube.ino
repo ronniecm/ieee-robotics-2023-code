@@ -6,6 +6,7 @@
 //#include <nRF24L01.h>
 //#include <RF24.h>
 #include "Adafruit_TCS34725.h"
+#include "amc.h"
 
 Adafruit_PWMServoDriver servos = Adafruit_PWMServoDriver(0x40);
 Adafruit_PWMServoDriver steppers = Adafruit_PWMServoDriver(0x41);
@@ -26,7 +27,7 @@ Adafruit_PWMServoDriver steppers = Adafruit_PWMServoDriver(0x41);
 #define upper_limit 39
 #define lower_limit 38
 
-Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_700MS, TCS34725_GAIN_1X);
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 
 char input;
 int deg1 = 0; //pedestal rotate

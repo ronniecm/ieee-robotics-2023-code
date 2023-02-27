@@ -8,14 +8,14 @@ ros::NodeHandle nh;
 geometry_msgs::Twist msg;
 
 
-#define FL_in1 22
-#define FL_in2 23
+#define FL_in1 2
+#define FL_in2 3
 
 #define FR_in1 36
 #define FR_in2 37
 
-#define BL_in1 2
-#define BL_in2 3
+#define BL_in1 22
+#define BL_in2 23
 
 #define BR_in1 28
 #define BR_in2 29

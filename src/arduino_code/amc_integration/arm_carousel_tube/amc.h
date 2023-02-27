@@ -11,12 +11,13 @@
 #include "Adafruit_TCS34725.h"
 #include "Arduino.h"
 
+#define servoMIN 103
+#define servoMAX 512
+
 class Amc {
   public:
     Amc();
     ~Amc();
-    void setup();
-    void loop();
     void activate_paddle();
     void dispense_stack_helper();
     void dispense_helper(int i, int pedestal);
@@ -25,9 +26,9 @@ class Amc {
     void update_slots(int dir);
 
   private:
-    Adafruit_PWMServoDriver servos;
-    Adafruit_PWMServoDriver steppers;
-    //Adafruit_TCS34725 tcs;
+    Adafruit_PWMServoDriver* servos;
+    Adafruit_PWMServoDriver* steppers;
+    Adafruit_TCS34725* tcs;
     char input;
     int deg1;
     int deg2;

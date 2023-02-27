@@ -22,7 +22,7 @@ float duration_Ultra2, cm_Ultra2;
 
 //Ultrasonic Sensor 3 trig and echo pins and distance variables
 #define Ultra3_trigPin 16
-#define Ultra3_echoPin 15
+#define Ultra3_echoPin 12
 float duration_Ultra3, cm_Ultra3;
 
 //Ultrasonic Sensor 4 trig and echo pins and distance variable
@@ -31,18 +31,18 @@ float duration_Ultra3, cm_Ultra3;
 float duration_Ultra4, cm_Ultra4;
 
 //Ultrasonic Sensor 5 trig and echo pins and distance variables
-#define Ultra5_trigPin 12
-#define Ultra5_echoPin 11
+#define Ultra5_trigPin 11
+#define Ultra5_echoPin 10
 float duration_Ultra5, cm_Ultra5;
 
 //Ultrasonic Sensor 6 trig and echo pins and distance variables
-#define Ultra6_trigPin 10
-#define Ultra6_echoPin 9
+#define Ultra6_trigPin 9
+#define Ultra6_echoPin 8
 float duration_Ultra6, cm_Ultra6;
 
 //Ultrasonic Sensor 7 trig and echo pins and distance variables
-#define Ultra7_trigPin 8
-#define Ultra7_echoPin 7
+#define Ultra7_trigPin 7
+#define Ultra7_echoPin 6
 float duration_Ultra7, cm_Ultra7;
 
 //code for teensy 3.2 communication
@@ -63,8 +63,8 @@ float Ultrasonic::getUltra0_Distance()
   float temp_inches = (duration_Ultra0/2) / 74;   // Divide by 74 or multiply by 0.0135
   //convert inches to cm
   cm_Ultra0 = 2.54 *(temp_inches);
-  //Serial.print(cm_Ultra0);
-  //Serial.println(" Cm at Ultrasonic 0 ");
+  Serial.print(cm_Ultra0);
+  Serial.println(" Cm at Ultrasonic 0 ");
   return cm_Ultra0;
 
 }
@@ -81,8 +81,8 @@ float Ultrasonic::getUltra1_Distance()
   duration_Ultra1 = pulseIn(Ultra1_echoPin, HIGH);
   float temp_inches = (duration_Ultra1/2) / 74;
   cm_Ultra1 = 2.54*(temp_inches);
-  //Serial.print(cm_Ultra1);
-  //Serial.println(" Cm at Ultrasonic 1 ");
+  Serial.print(cm_Ultra1);
+  Serial.println(" Cm at Ultrasonic 1 ");
   return cm_Ultra1;
 }
 
@@ -97,8 +97,8 @@ float Ultrasonic::getUltra2_Distance()
   duration_Ultra2 = pulseIn(Ultra2_echoPin, HIGH);
   float temp_inches = (duration_Ultra2/2) / 74;  
   cm_Ultra2 = 2.54 *(temp_inches);
-  //Serial.print(cm_Ultra2);
-  //Serial.println(" Cm at Ultrasonic 2 ");
+  Serial.print(cm_Ultra2);
+  Serial.println(" Cm at Ultrasonic 2 ");
   return cm_Ultra2;
 }
 
@@ -113,8 +113,8 @@ float Ultrasonic::getUltra3_Distance()
   duration_Ultra3 = pulseIn(Ultra3_echoPin, HIGH);
   float temp_inches = (duration_Ultra3/2) / 74; 
   cm_Ultra3 = 2.54 *(temp_inches);
-  //Serial.print(cm_Ultra3);
-  //Serial.println(" Cm at Ultrasonic 3 ");
+  Serial.print(cm_Ultra3);
+  Serial.println(" Cm at Ultrasonic 3 ");
   return cm_Ultra3;
 }
 
@@ -129,8 +129,8 @@ float Ultrasonic::getUltra4_Distance()
   duration_Ultra4 = pulseIn(Ultra4_echoPin, HIGH);
   float temp_inches = (duration_Ultra4/2) / 74;  
   cm_Ultra4 = 2.54*(temp_inches);
-  //Serial.print(cm_Ultra4);
-  //Serial.println(" Cm at Ultrasonic 4 ");
+  Serial.print(cm_Ultra4);
+  Serial.println(" Cm at Ultrasonic 4 ");
   return cm_Ultra4;
 }
 
@@ -145,8 +145,8 @@ float Ultrasonic::getUltra5_Distance()
   duration_Ultra5 = pulseIn(Ultra5_echoPin, HIGH);
   float temp_inches = (duration_Ultra5/2) / 74;  
   cm_Ultra5 = 2.54*(temp_inches);
-  //Serial.print(cm_Ultra5);
-  //Serial.println(" Cm at Ultrasonic 5 ");
+  Serial.print(cm_Ultra5);
+  Serial.println(" Cm at Ultrasonic 5 ");
   return cm_Ultra5;
 }
 
@@ -161,8 +161,8 @@ float Ultrasonic::getUltra6_Distance()
   duration_Ultra6 = pulseIn(Ultra6_echoPin, HIGH);
   float temp_inches = (duration_Ultra6/2) / 74;  
   cm_Ultra6 = 2.54*(temp_inches);
-  //Serial.print(cm_Ultra6);
-  //Serial.println(" Cm at Ultrasonic 6 ");
+  Serial.print(cm_Ultra6);
+  Serial.println(" Cm at Ultrasonic 6 ");
   return cm_Ultra6;
 }
 
@@ -177,7 +177,7 @@ float Ultrasonic::getUltra7_Distance()
   duration_Ultra7 = pulseIn(Ultra7_echoPin, HIGH);
   float temp_inches = (duration_Ultra7/2) / 74;  
   cm_Ultra7 = 2.54*(temp_inches);
-  //Serial.print(cm_Ultra7);
-  //Serial.println(" Cm at Ultrasonic 7 ");
+  Serial.print(cm_Ultra7);
+  Serial.println(" Cm at Ultrasonic 7 ");
   return cm_Ultra7;
 }
