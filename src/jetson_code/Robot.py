@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-#
 
 # Modified by Juan Suquilanda
 # Modified by: Ronnie Mohapatra
@@ -97,9 +96,6 @@ class Robot:
         self.initYaw = self.currYawAngle
         self.initBoardWidth = self.rng.getLeft(1) + self.botWidth + self.rng.getRight(0)
         print("Initial Board Width", self.initBoardWidth)
-
-    
-
 
     def goToLocationC(self):
         #It is important that in the begining of the wround the intial yaw value is saved

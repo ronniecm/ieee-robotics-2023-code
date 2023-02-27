@@ -131,31 +131,5 @@ class RobotCommand:
 
 
     
-    '''
-    Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
-    That list is will be self.rng.get<FACE>
-    So if I wanted to get sensor readings from the sensor on the front left I would call self.rng.getFront(0)
-    
-    0 index corresponds to a left sensor on a face and 1 corresponds to the right sensor on the face
-
-    Make sure this indexing is consistant througout ALL error correction calculations otherwise there were will unintentional erros
-    This is how indexing should work such that function work the same for all sides and no need to repeat any calculations
-    If this not working make sure to check the call ultrasonic callback functions to make sure the distances are being indexed correcly I 
-    may have messed up !!
-                                            -Front-
-                                         _0_______1_
-                                      1 |           | 0
-                                        |           |
-                                        |           |
-                                      0 |           | 1
-                                        |___________|
-                                            1       0   
-    '''
-
-    
-        
-    #Creating a function that will get robot to known statue locations labled A, B, C
-
-    
         
 
