@@ -48,7 +48,7 @@ class Robot:
 
         if onJetson:
             self.realSense = RealSense()
-            
+
         self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
         self.rng = Ranging(robot_name, node_name)
         
@@ -56,7 +56,7 @@ class Robot:
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
         self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
         self.door = Servos(robot_name, node_name, "door", queue_size = 10)
-        self.elbow = Servos(robot_name, node_name, "elbow", queue_size = 10)
+        self.elbow = Servos(robot_name, node_name, "arm", queue_size = 10)
         self.wrist = Servos(robot_name, node_name, "wrist", queue_size = 10)
         self.paddle = Servos(robot_name, node_name, "paddle", queue_size = 10)
         self.lifting = Servos(robot_name, node_name, "lifting", queue_size = 10)
