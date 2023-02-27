@@ -155,3 +155,41 @@ void Amc::update_slots(int dir) {
     slots[0] = temp;
   }
 }
+
+void Amc::lowerArm() {
+
+}
+void Amc::storeUprightPedestal() {
+    //open clamp
+    deg2 = 180;
+    servos->setPWM(1, 0, map( deg2, 0, 180, servoMIN, servoMAX)); //clamp open
+    delay(500);
+    /*
+    //lower arm
+    while(!digitalRead(lower_limit)) {
+        steppers->setPWM(0, 0, 4096);
+    }
+    steppers->setPWM(1, 0, 4096);
+    */
+    //close clamp
+    deg2 = 0;
+    servos->setPWM(1, 0, map( deg2, 0, 180, servoMIN, servoMAX)); //clamp close
+    delay(500);
+    //raise arm
+    /*
+    while(!digitalRead(upper_limit)) {
+        steppers->setPWM(0, 4096, 0);
+    }
+    steppers->setPWM(1, 0, 4096);
+    */
+    //rotate pedestal for dropping in
+    
+    //flip arm back
+    deg4 = 0;
+    servos->setPWM(3, 0, map( deg4, 0, 180,  flipMIN,  flipMAX)); //arm flip
+    delay(1000);
+    //open clamp
+    deg2 = 180;
+    servos->setPWM(1, 0, map( deg2, 0, 180, servoMIN, servoMAX)); //clamp open
+    delay(1000);
+}
