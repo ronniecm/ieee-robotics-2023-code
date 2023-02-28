@@ -35,6 +35,7 @@ class Servos:
         self.servoCmds['gripperClampOpen'] = 0
         self.servoCmds['gripperClampClosed'] = 180
         self.servoCmds['wristDefault'] = 180
+        self.servoCmds['wristAdjust'] = 180
         self.servoCmds['armDown'] = 180
         self.servoCmds['armUp'] = 0
         self.servoCmds['paddleClosed'] = 180
@@ -64,7 +65,8 @@ class Servos:
 
     #This will receive the corresponding key
 
-    def sendMsg(self, msg):
+    def sendMsg(self, msg, wristAdjust = 180):
+        self.servoCmds['wristAdjust'] = wristAdjust
         
         self.pub.publish(self.servoCmds[msg])
 

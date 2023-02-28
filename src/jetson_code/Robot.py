@@ -233,9 +233,9 @@ if __name__ == "__main__":
     time.sleep(3)
     while True:
         currTime = time.time()
-        while(time.time() - currTime < 5):
-            bot.gripperRotate.sendMsg('gripperRotateDefault')
+        while(time.time() - currTime < 3):
+            bot.wrist.sendMsg('wristDefault')
         currTime = time.time()
-        while(time.time() - currTime < 5):
-            bot.gripperRotate.sendMsg('gripperRotate90')
+        while(time.time() - currTime < 3):
+            bot.wrist.sendMsg('wristAdjust', wristAdjust= 3)
 
