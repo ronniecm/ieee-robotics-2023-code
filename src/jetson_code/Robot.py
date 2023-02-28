@@ -26,7 +26,7 @@
 
 onJetson = False
 
-sim = True
+sim = False
 
 import time
 import numpy as np
@@ -56,7 +56,7 @@ class Robot:
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
         self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
         self.door = Servos(robot_name, node_name, "door", queue_size = 10)
-        self.elbow = Servos(robot_name, node_name, "arm", queue_size = 10)
+        self.arm = Servos(robot_name, node_name, "arm", queue_size = 10)
         self.wrist = Servos(robot_name, node_name, "wrist", queue_size = 10)
         self.paddle = Servos(robot_name, node_name, "paddle", queue_size = 10)
         self.lifting = Servos(robot_name, node_name, "lifting", queue_size = 10)
@@ -231,8 +231,12 @@ if __name__ == "__main__":
     print("turn on motors")
     '''
     time.sleep(3)
-    print("Starting Motors")
-    #bot.ctrl.testCommands()  
-    bot.tofApproach()
-    bot.tofAllign()
+    while True:
+        currTime = time.time()
+        while(time.time() - currTime < 5):
+            bot.wrist.sendMsg(90)
+        currTime = time.time()
+        while(time.time() - currTime < 5):
+            bot.wrist.sendMsg(0)
+
     
