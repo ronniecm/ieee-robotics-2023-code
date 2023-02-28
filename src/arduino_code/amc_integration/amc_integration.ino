@@ -3,6 +3,7 @@
 #include "TeensyThreads.h"
 
 #include "std_msgs/Int8.h"
+#include "std_msgs/Int16.h"
 #include "std_msgs/String.h"
 
 Amc* arm;
@@ -26,7 +27,6 @@ std_msgs::Int16 wristCmd;
 std_msgs::Int16 paddleCmd;
 std_msgs::Int16 liftingCmd;
 std_msgs::Int16 carouselCmd;
-std_msgs::Int16 cmd_msg;
 
 int test;
 
@@ -42,48 +42,42 @@ ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 
 void gripperRotateCB(const std_msgs::Int8& cmd_msg)
 {
-
-  arm->gripperRotateCmd(cmd_msg.data);
-  
+  gripperRotateCmd.data = cmd_msg.data;
 }
 
 void gripperClampCB(const std_msgs::Int8& cmd_msg)
 {
-
- arm->gripperClampCmd(cmd_msg.data);
-
+  gripperClampCmd.data = cmd_msg.data;
 }
 
 void doorCB(const std_msgs::Int8& cmd_msg)
 {
-  arm->doorCmd(cmd_msg.data);
+  doorCmd.data = cmd_msg.data;
 }
 
 void armCB(const std_msgs::Int8& cmd_msg)
 {
-  arm->armCmd(cmd_msg.data);
-  
+  armCmd.data = cmd_msg.data;
 }
 
 void wristCB(const std_msgs::Int8& cmd_msg)
 {
-  arm->wristCmd(cmd_msg.data);
+  wristCmd.data = cmd_msg.data;
 }
 
 void paddleCB(const std_msgs::Int8& cmd_msg)
 {
-  arm->paddleCmd(cmd_msg.data);
+  paddleCmd.data = cmd_msg.data;
 }
 
 void liftingCB(const std_msgs::Int8& cmd_msg)
 {
-  arm->liftingCmd(cmd_msg.data);
+  liftingCmd.data = cmd_msg.data;
 }
 
 void carouselCB(const std_msgs::Int8& cmd_msg)
 {
-  arm->carouselCmd(cmd_msg.data);
-
+  carouselCmd.data = cmd_msg.data;
 }
 
 ros::NodeHandle nh;
@@ -135,13 +129,14 @@ void setup()
 
 void loop()
 {
-  arm->gripperRotateCmd(cmd_msg.data);
-  arm->gripperClampCmd(cmd_msg.data);
-  arm->doorCmd(cmd_msg.data);
-  arm->armCmd(cmd_msg.data);
-  arm->wristCmd(cmd_msg.data);
-  arm->paddleCmd(cmd_msg.data);
- 
+  arm->gripperRotateCmd(gripperRotateCmd.data);
+  arm->gripperClampCmd(gripperClampCmd.data);
+  arm->doorCmd(doorCmd.data);
+  arm->armCmd(armCmd.data);
+  arm->wristCmd(wristCmd.data);
+  arm->paddleCmd(paddleCmd.data);
+  arm->liftingCmd(liftingCmd.data);
+  arm->carouselCmd(carouselCmd.data);
   
   nh.spinOnce();
   delay(100);
