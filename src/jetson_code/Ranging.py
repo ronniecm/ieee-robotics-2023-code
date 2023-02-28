@@ -16,7 +16,6 @@ real-time  access to ranging data
 import rospy
 from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
-from std_msgs.msg import Float32MultiArray
 
 
 class Ranging:
@@ -40,10 +39,9 @@ class Ranging:
         rospy.Subscriber('%s/ultra6' %robot_name, ultra_msg_type, self.ultra6)
         rospy.Subscriber('%s/ultra7' %robot_name, ultra_msg_type, self.ultra7)
 
-        rospy.Subscriber('%s/tofSensors' %robot_name, Float32MultiArray, self.tofSensors)
 
-        rospy.Subscriber('%s/tof0' %robot_name, ultra_msg_type, self.tof0)
-        rospy.Subscriber('%s/tof1' %robot_name, ultra_msg_type , self.tof1)
+        rospy.Subscriber('%s/leftTOF' %robot_name, ultra_msg_type, self.tof0)
+        rospy.Subscriber('%s/rightTOF' %robot_name, ultra_msg_type , self.tof1)
 
         '''
         Each face of the robot has a list assigned to it. You can access the sensors on that face through a list
@@ -76,10 +74,10 @@ class Ranging:
 
 
     def tof0(self, msg):
-        self.tofDist[0] = msg.range*100
+        self.tofDist[0] = msg.data
 
     def tof1(self, msg):
-        self.tofDist[1] = msg.range*100
+        self.tofDist[1] = msg.data
 
 
     def ultra2(self, msg):

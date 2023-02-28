@@ -547,7 +547,7 @@ if __name__ == "__main__":
 
     bot.stopBot()
 
-    while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+    while not within1inch(bot.ultraBack[0], 65.0, 1) and not within1inch(bot.ultraBack[1], 65.0, 1):
         bot.goFoward()
 
     bot.stopBot()
@@ -579,7 +579,7 @@ if __name__ == "__main__":
         if within1inch(bot.ultraLeft[0], 10.0, 2):
             break
 
-        while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+        while not within1inch(bot.ultraBack[0], 65.0, 1) and not within1inch(bot.ultraBack[1], 65.0, 1):
             bot.goFoward()
             
         bot.stopBot()
@@ -603,7 +603,7 @@ if __name__ == "__main__":
         else:
             bot.rotateLeft()
 
-    while not within1inch(bot.ultraBack[0], 65.0, 2) and not within1inch(bot.ultraBack[1], 65.0, 2):
+    while not within1inch(bot.ultraBack[0], 65.0, 1) and not within1inch(bot.ultraBack[1], 65.0, 1):
         bot.goFoward()
 
     bot.stopBot()
@@ -622,7 +622,7 @@ if __name__ == "__main__":
 
     bot.stopBot()
 
-    while not within1inch(bot.ultraLeft[1], 5.0, 1):
+    while not within1inch(bot.ultraLeft[1], 10.0, 1):
         bot.goLeft()
     
     bot.stopBot()
