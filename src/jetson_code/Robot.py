@@ -234,7 +234,7 @@ if __name__ == "__main__":
     while True:
         currTime = time.time()
         while(time.time() - currTime < 5):
-            bot.wrist.sendMsg(90)
+            bot.wrist.sendMsg(1)
         currTime = time.time()
         while(time.time() - currTime < 5):
             bot.wrist.sendMsg(0)
