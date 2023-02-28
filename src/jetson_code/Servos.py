@@ -30,10 +30,10 @@ class Servos:
         self.servoCmds = dict()
 
         #Going to make a dictionary that holds servo Starting and End Position
-        self.servoCmds['gripperRotateDefault'] = 0
-        self.servoCmds['gripperRotate90'] = 90
-        self.servoCmds['gripperClampOpen'] = 0
-        self.servoCmds['gripperClampClosed'] = 180
+        self.servoCmds['gripperRotateDefault'] = 90
+        self.servoCmds['gripperRotate90'] = 0
+        self.servoCmds['gripperClampOpen'] = 180
+        self.servoCmds['gripperClampClosed'] = 0
         self.servoCmds['wristDefault'] = 180
         self.servoCmds['wristAdjust'] = 180
         self.servoCmds['armDown'] = 180

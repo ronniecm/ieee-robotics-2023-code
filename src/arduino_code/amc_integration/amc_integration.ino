@@ -81,14 +81,14 @@ void carouselCB(const std_msgs::Int8& cmd_msg)
 }
 
 ros::NodeHandle nh;
-ros::Subscriber <std_msgs::Int8> sub1("/bot/gripperRotate_cmd", &gripperRotateCB);
-ros::Subscriber <std_msgs::Int8> sub2("/bot/gripperClamp_cmd", &gripperClampCB);
-ros::Subscriber <std_msgs::Int8> sub3("/bot/door_cmd", &doorCB);
-ros::Subscriber <std_msgs::Int8> sub4("/bot/arm_cmd", &armCB);
-ros::Subscriber <std_msgs::Int8> sub5("/bot/wrist_cmd", &wristCB);
-ros::Subscriber <std_msgs::Int8> sub6("/bot/paddle_cmd", &paddleCB);
-ros::Subscriber <std_msgs::Int8> sub7("/bot/lifting_cmd", &liftingCB);
-ros::Subscriber <std_msgs::Int8> sub8("/bot/carousel_cmd", &carouselCB);
+ros::Subscriber <std_msgs::Int16> sub1("/bot/gripperRotate_cmd", &gripperRotateCB);
+ros::Subscriber <std_msgs::Int16> sub2("/bot/gripperClamp_cmd", &gripperClampCB);
+ros::Subscriber <std_msgs::Int16> sub3("/bot/door_cmd", &doorCB);
+ros::Subscriber <std_msgs::Int16> sub4("/bot/arm_cmd", &armCB);
+ros::Subscriber <std_msgs::Int16> sub5("/bot/wrist_cmd", &wristCB);
+ros::Subscriber <std_msgs::Int16> sub6("/bot/paddle_cmd", &paddleCB);
+ros::Subscriber <std_msgs::Int16> sub7("/bot/lifting_cmd", &liftingCB);
+ros::Subscriber <std_msgs::Int16> sub8("/bot/carousel_cmd", &carouselCB);
 
 
 void setup()
@@ -114,9 +114,9 @@ void setup()
 
 
   //Default Values for arm servos
-  gripperRotateCmd.data = 0;
+  gripperRotateCmd.data = 90;
   gripperClampCmd.data = 0;
-  wristCmd.data = 180;wristCmd.data = 180;
+  wristCmd.data = 180;
   armCmd.data = 180;
   paddleCmd.data = 180;
   doorCmd.data =100;
