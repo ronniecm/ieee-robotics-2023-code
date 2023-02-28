@@ -8,7 +8,6 @@
 
 import rospy
 from std_msgs.msg import Int16
-from std_msgs.msg import Int8
 
 '''
 Class to control servos, by making servo class one will have the ability to talk/
@@ -23,7 +22,7 @@ class Servos:
         self.pub = rospy.Publisher("%s/%s_cmd" %(robot_name,command_topic), Int16, queue_size =10)
         # This is for the subscriber
         
-        rospy.Subscriber('%s/%s_%s' %(robot_name, command_topic,"callback"), Int8, self.callBack)
+        rospy.Subscriber('%s/%s_%s' %(robot_name, command_topic,"callback"), Int16, self.callBack)
 
         self.actionComplete = False
 
@@ -60,14 +59,10 @@ class Servos:
 
     '''
 
-    
-
-
     #This will receive the corresponding key
 
     def sendMsg(self, msg, wristAdjust = 180):
         self.servoCmds['wristAdjust'] = wristAdjust
-        
         self.pub.publish(self.servoCmds[msg])
 
     def callBack(self, msg):

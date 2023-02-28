@@ -2,22 +2,21 @@
 #include "amc.h"
 #include "TeensyThreads.h"
 
-#include "std_msgs/Int8.h"
+
 #include "std_msgs/Int16.h"
-#include "std_msgs/String.h"
 
 Amc* arm;
 
 //Initalize the message type for each topic
-std_msgs::Int8 gripperRotateMsg;
-std_msgs::Int8 gripperClampMsg;
-std_msgs::Int8 doorMsg;
-std_msgs::Int8 armMsg;
-std_msgs::Int8 wristMsg;
-std_msgs::Int8 paddleMsg;
-std_msgs::Int8 liftingMsg;
-std_msgs::Int8 carouselMsg;
-std_msgs::Int8 cmd_msg;
+std_msgs::Int16 gripperRotateMsg;
+std_msgs::Int16 gripperClampMsg;
+std_msgs::Int16 doorMsg;
+std_msgs::Int16 armMsg;
+std_msgs::Int16 wristMsg;
+std_msgs::Int16 paddleMsg;
+std_msgs::Int16 liftingMsg;
+std_msgs::Int16 carouselMsg;
+std_msgs::Int16 cmd_msg;
 
 std_msgs::Int16 gripperRotateCmd;
 std_msgs::Int16 gripperClampCmd;
@@ -40,42 +39,45 @@ ros::Publisher Lifting("/bot/lifting_callback", &liftingMsg);
 ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 
 
-void gripperRotateCB(const std_msgs::Int8& cmd_msg)
+void gripperRotateCB(const std_msgs::Int16& cmd_msg)
 {
   gripperRotateCmd.data = cmd_msg.data;
 }
 
-void gripperClampCB(const std_msgs::Int8& cmd_msg)
+void gripperClampCB(const std_msgs::Int16& cmd_msg)
 {
   gripperClampCmd.data = cmd_msg.data;
 }
 
-void doorCB(const std_msgs::Int8& cmd_msg)
+void doorCB(const std_msgs::Int16& cmd_msg)
 {
   doorCmd.data = cmd_msg.data;
 }
 
-void armCB(const std_msgs::Int8& cmd_msg)
+void armCB(const std_msgs::Int16& cmd_msg)
 {
+
   armCmd.data = cmd_msg.data;
+  
+  
 }
 
-void wristCB(const std_msgs::Int8& cmd_msg)
+void wristCB(const std_msgs::Int16& cmd_msg)
 {
   wristCmd.data = cmd_msg.data;
 }
 
-void paddleCB(const std_msgs::Int8& cmd_msg)
+void paddleCB(const std_msgs::Int16& cmd_msg)
 {
   paddleCmd.data = cmd_msg.data;
 }
 
-void liftingCB(const std_msgs::Int8& cmd_msg)
+void liftingCB(const std_msgs::Int16& cmd_msg)
 {
   liftingCmd.data = cmd_msg.data;
 }
 
-void carouselCB(const std_msgs::Int8& cmd_msg)
+void carouselCB(const std_msgs::Int16& cmd_msg)
 {
   carouselCmd.data = cmd_msg.data;
 }
@@ -117,7 +119,7 @@ void setup()
   gripperRotateCmd.data = 90;
   gripperClampCmd.data = 0;
   wristCmd.data = 180;
-  armCmd.data = 180;
+  armCmd.data = 0;
   paddleCmd.data = 180;
   doorCmd.data =100;
   
@@ -130,11 +132,24 @@ void setup()
 void loop()
 {
   arm->gripperRotateCmd(gripperRotateCmd.data);
+  GripperRotate.publish(&gripperRotateCmd);
+  
   arm->gripperClampCmd(gripperClampCmd.data);
+  GripperClamp.publish(&gripperRotateCmd);
+
   arm->doorCmd(doorCmd.data);
+  Door.publish(&doorCmd);
+  
   arm->armCmd(armCmd.data);
+  Arm.publish(&armCmd);
+  
   arm->wristCmd(wristCmd.data);
+  Wrist.publish(&wristCmd);
+
   arm->paddleCmd(paddleCmd.data);
+  Paddle.publish(&paddleCmd);
+  
+  
   arm->liftingCmd(liftingCmd.data);
   arm->carouselCmd(carouselCmd.data);
   

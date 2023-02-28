@@ -70,6 +70,9 @@ class Robot:
 
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
+    def initServos(self):
+        self.arm.sendMsg('armDown')
+
     def tofApproach(self):
         self.rng.getTofSensors(0)
         self.rng.getTofSensors(1)
@@ -229,13 +232,27 @@ if __name__ == "__main__":
     bot.initStartingConditions()
     print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     print("turn on motors")
+    currTime = time.time()
+    currTime = time.time()
+        while(time.time() < currTime + 5):
+            bot.arm.sendMsg('armUp')
+
+    
+        
+       time.sleep(3)
     '''
-    time.sleep(3)
+    
     while True:
-        currTime = time.time()
-        while(time.time() - currTime < 3):
-            bot.wrist.sendMsg('wristDefault')
-        currTime = time.time()
-        while(time.time() - currTime < 3):
-            bot.wrist.sendMsg('wristAdjust', wristAdjust= 3)
+        bot.arm.sendMsg('armUp')
+        time.sleep(5)
+        bot.arm.sendMsg('armDown')
+        time.sleep(5)
+
+
+        
+
+ 
+    
+        
+        
 

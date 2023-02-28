@@ -19,7 +19,7 @@ Amc::Amc() {
     steppers->setPWMFreq(1000);
     
     if (tcs->begin()) {
-        Serial.println("Found sensor");
+        //Serial.println("Found sensor");
     }
 
     deg1 = 0; //pedestal rotate
@@ -106,10 +106,7 @@ void Amc::dispense_stack_helper() {
     if (dispense_stack == true && dispensed == false) {
       tube[0] = 0;
       tube[1] = 0;
-      tube[2] = 0;
-      Serial.print("tube: ");
-      for(int i = 0; i < 3; i++){Serial.print(tube[i]);}
-      Serial.println();          
+      tube[2] = 0;        
       dispensed = true;
     } 
 }
@@ -118,10 +115,7 @@ void Amc::dispense_helper(int i, int pedestal) {
   if (i == 0 && stepsLeft == 0) { //drop pedestal
     activate_paddle();
     slots[0] = 0;
-    tube[pedestal - 1] = pedestal;
-    Serial.print("tube: ");
-    for(int i = 0; i < 3; i++){Serial.print(tube[i]);}
-    Serial.println();        
+    tube[pedestal - 1] = pedestal; 
   }        
   else {
     if (i == 1 || i == 2) {
@@ -133,9 +127,7 @@ void Amc::dispense_helper(int i, int pedestal) {
       update_slots(1);
     }  
   }
-      Serial.print("dispense update: ");
-      for(int i = 0; i < 5; i++){Serial.print(slots[i]);}
-      Serial.println();      
+     
 }
 
 void Amc::dispense() {  
@@ -173,9 +165,7 @@ void Amc::drop_in_action() {
     if (stepsLeft == 0) {
       //update array after rotation
       update_slots(1);
-      Serial.print("after ccw turn: ");
-      for(int i = 0; i < 5; i++){Serial.print(slots[i]);}
-      Serial.println();   
+      //Serial.print("after ccw turn: "); 
             
       //get reading for what's in slot 0
       tcs->getRawData(&r, &g, &b, &c);
@@ -183,9 +173,7 @@ void Amc::drop_in_action() {
       if (c > 25000) {slots[0] = 1;} //white
       else if (g > r && g > b) {slots[0] = 2;}     //green
       else {slots[0] = 3;}           //red
-      Serial.print("get reading for slot 0: ");
-      for(int i = 0; i < 5; i++){Serial.print(slots[i]);}
-      Serial.println();          
+         
       drop_in = false;    
     }
   }
