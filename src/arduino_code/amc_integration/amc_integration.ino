@@ -16,18 +16,19 @@ std_msgs::Int8 wristMsg;
 std_msgs::Int8 paddleMsg;
 std_msgs::Int8 liftingMsg;
 std_msgs::Int8 carouselMsg;
+std_msgs::Int8 cmd_msg;
 
-//Will init and create default values for each servo
+std_msgs::Int16 gripperRotateCmd;
+std_msgs::Int16 gripperClampCmd;
+std_msgs::Int16 doorCmd;
+std_msgs::Int16 armCmd;
+std_msgs::Int16 wristCmd;
+std_msgs::Int16 paddleCmd;
+std_msgs::Int16 liftingCmd;
+std_msgs::Int16 carouselCmd;
+std_msgs::Int16 cmd_msg;
 
-int gripperRotateCmd = 0;
-int gripperClampCmd = 180;
-int doorCmd = 100;
-int armCmd = 180;
-int wristCmd = 180;
-int paddleCmd = 180;
-int liftingCmd = 0;
-int carouselCmd = 0;
-
+int test;
 
 ros::Publisher GripperRotate("/bot/gripperRotate_callback", &gripperRotateMsg);
 ros::Publisher GripperClamp("/bot/gripperClamp_callback", &gripperClampMsg);
@@ -41,48 +42,48 @@ ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 
 void gripperRotateCB(const std_msgs::Int8& cmd_msg)
 {
-  gripperClampCmd = cmd_msg.data;  
+
+  arm->gripperRotateCmd(cmd_msg.data);
   
 }
 
 void gripperClampCB(const std_msgs::Int8& cmd_msg)
 {
-  gripperClampCmd = cmd_msg.data;
+
+ arm->gripperClampCmd(cmd_msg.data);
 
 }
 
 void doorCB(const std_msgs::Int8& cmd_msg)
 {
-  doorCmd = cmd_msg.data;
-  
+  arm->doorCmd(cmd_msg.data);
 }
 
 void armCB(const std_msgs::Int8& cmd_msg)
 {
-  armCmd = cmd_msg.data;
+  arm->armCmd(cmd_msg.data);
   
 }
 
 void wristCB(const std_msgs::Int8& cmd_msg)
 {
-  wristCmd = cmd_msg.data;
-  
+  arm->wristCmd(cmd_msg.data);
 }
 
 void paddleCB(const std_msgs::Int8& cmd_msg)
 {
-  paddleCmd = cmd_msg.data;
-  
+  arm->paddleCmd(cmd_msg.data);
 }
 
 void liftingCB(const std_msgs::Int8& cmd_msg)
 {
-  liftingCmd = cmd_msg.data;
+  arm->liftingCmd(cmd_msg.data);
 }
 
 void carouselCB(const std_msgs::Int8& cmd_msg)
 {
-  carouselCmd = cmd_msg.data;
+  arm->carouselCmd(cmd_msg.data);
+
 }
 
 ros::NodeHandle nh;
@@ -98,7 +99,6 @@ ros::Subscriber <std_msgs::Int8> sub8("/bot/carousel_cmd", &carouselCB);
 
 void setup()
 {
-
   arm = new Amc;
   nh.initNode();
   nh.advertise(GripperRotate);
@@ -118,6 +118,16 @@ void setup()
   nh.advertise(Carousel);
   nh.subscribe(sub8);
 
+
+  //Default Values for arm servos
+  gripperRotateCmd.data = 0;
+  gripperClampCmd.data = 0;
+  wristCmd.data = 180;wristCmd.data = 180;
+  armCmd.data = 180;
+  paddleCmd.data = 180;
+  doorCmd.data =100;
+  
+
   pinMode(33, OUTPUT);
   pinMode(38, INPUT);
   pinMode(39, INPUT);
@@ -125,40 +135,14 @@ void setup()
 
 void loop()
 {
-//  gripperRotateMsg.data = 1;
-//  GripperRotate.publish(&gripperRotateMsg);
-//
-//  gripperClampMsg.data = 1;
-//  GripperClamp.publish(&gripperClampMsg);
-//
-//  doorMsg.data = 1;
-//  Door.publish(&doorMsg);
-//
-//  
-
-//
-//  wristMsg.data = 1;
-//  Wrist.publish(&wristMsg);
-//
-//  paddleMsg.data = 1;
-//  Paddle.publish(&paddleMsg);
-//
-//  liftingMsg.data = 1;
-//  Lifting.publish(&liftingMsg);
-//
-//  carouselMsg.data = 1;
-//  Carousel.publish(&carouselMsg);
-
   arm->gripperRotateCmd(cmd_msg.data);
   arm->gripperClampCmd(cmd_msg.data);
   arm->doorCmd(cmd_msg.data);
   arm->armCmd(cmd_msg.data);
   arm->wristCmd(cmd_msg.data);
   arm->paddleCmd(cmd_msg.data);
-  arm->liftingCmd(cmd_msg.data);
-  arm->carouselCmd(cmd_msg.data);
-
-
+ 
+  
   nh.spinOnce();
   delay(100);
   
