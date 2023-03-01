@@ -41,6 +41,7 @@ class Servos:
         self.servoCmds['paddleOpen'] = 0
         self.servoCmds['doorClosed'] = 100
         self.servoCmds['doorOpen'] = 0
+        self.servoCmds['rotateAntiClockwise'] = 0
 
 
     '''
