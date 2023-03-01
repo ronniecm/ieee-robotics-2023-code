@@ -46,7 +46,7 @@ class RobotCommand:
             norm = 1/mag
         
         msg.linear.x = x*norm * speed
-        msg.linear.y = -1*y*norm * speed
+        msg.linear.y = y*norm * speed
         msg.linear.z = 0.0
         
         msg.angular.x = 0
@@ -93,11 +93,12 @@ class RobotCommand:
         
     def stopBot(self, delay = 1):
         # Stop the robot
-        currTime = time.time()
         msg = self.buildMsg(0.0, 0.0, 0.0)
-        
+        self.pub.publish(msg)
+
+        currTime = time.time()
         while(time.time() <= currTime + delay):
-            self.pub.publish(msg)
+            print('stopped')
 
     def testCommands(self):
 

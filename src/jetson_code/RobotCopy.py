@@ -71,18 +71,25 @@ class Robot:
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
     def tofApproach(self):
-        self.rng.getTofSensors(0)
-        self.rng.getTofSensors(1)
-
-
         #We are going to go fowrward until we detect a disturbance for TOF
         print("Sensor Values", self.rng.getTofSensors())
-        while(self.rng.getTofSensors(0) > 11.0 or self.rng.getTofSensors(1) > 11.0):
-            self.ctrl.goFoward(0.5)
-
+        while(self.rng.getTofSensors(0) > 11.0 and self.rng.getTofSensors(1) > 11.0):
+            self.ctrl.goFoward(0.3)
         #As soon as we detect a disturbance stop the bot
-        self.ctrl.stopBot()
+        self.ctrl.stopBot(0)
 
+    def cameraAlign(self):
+        data = self.rng.getObjDetect()
+        while data[0] == 1 and (data[1] < 200 or data[1] > 400):
+            #print(data)
+            if data[1] < 200:
+                self.ctrl.goLeft(0.25)
+            else:
+                self.ctrl.goRight(0.25)
+            data = self.rng.getObjDetect()
+
+        print("stopping")
+        self.ctrl.stopBot()
 
     def tofAllign(self):
 
@@ -93,9 +100,9 @@ class Robot:
         while (abs(self.rng.getTofSensors(0) - self.rng.getTofSensors(1)) > threshhold):
             #print("Sensor Readings: " ,self.rng.getTofSensors())
             if self.rng.getTofSensors(0) > self.rng.getTofSensors(1):
-                self.ctrl.goRight(0.1)
-            else:
                 self.ctrl.goLeft(0.1)
+            else:
+                self.ctrl.goRight(0.1)
         self.ctrl.stopBot()
 
     def pickup(self):
@@ -215,13 +222,10 @@ def within1inch(n, target, threshold=1):
 
 
 if __name__ == "__main__":
-
-
-
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
-        bot = Robot("bot","talker","cmd_vel", queue_size = 10)
+        bot = Robot("bot","talker","cmd_vel", queue_size = 1)
     '''
     bot.stopBot()
     #delay program for 5 seconds
@@ -230,7 +234,15 @@ if __name__ == "__main__":
     print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     print("turn on motors")
     '''
-    time.sleep(3)
+    #time.sleep(3)
+    print("motors on")
+
+    while not bot.rng.getLeft(0) < 10 and not bot.rng.getLeft(1) < 10:
+        while not bot.rng.getObjDetect()[0] == 0:
+            bot.ctrl.goLeft()
+    '''
+    bot.cameraAlign()
     bot.tofApproach()
     bot.tofAllign()
+    '''
     

@@ -43,9 +43,9 @@ import jetson_utils_python
 
 import rospy
 from std_msgs.msg import Int8
-
+from std_msgs.msg import Int32MultiArray
 #setting up the ros node
-pub = rospy.Publisher('obj_detect', Int8, queue_size=10)
+pub = rospy.Publisher('obj_detect', Int32MultiArray, queue_size=10)
 rospy.init_node('object_detect_node', anonymous=True)
 rate =rospy.Rate(10)#!/usr/bin/env python3
 prevDectect = False
@@ -91,7 +91,7 @@ net = detectNet(args.network, sys.argv, args.threshold)
 
 # note: to hard-code the paths to load a model, the following API can be used:
 #
-net = detectNet(model="/home/mdelab/Downloads/ssd-mobilenet.onnx", labels="/home/mdelab/Downloads/labels.txt",
+net = detectNet(model="/home/mdelab/jetson-inference//build/aarch64/bin/ssd-mobilenet-02262023.onnx", labels="/home/mdelab/jetson-inference/build/aarch64/bin/labels.txt",
                  input_blob="input_0", output_cvg="scores", output_bbox="boxes",
                  threshold=args.threshold)
 
@@ -108,10 +108,10 @@ def getScore(distance, class_id):
     if distance == 0:
         return 0
 
-    if class_id < 4 and class_id >= 1:
-        score += pedestal_weight/np.sqrt(distance)
-    elif class_id == 4:
-        score = duck_weight/np.sqrt(distance)
+    if class_id == 1:
+        score += pedestal_weight * np.sqrt(distance)
+    elif class_id == 2:
+        score = duck_weight * np.sqrt(distance)
     else:
         score = 0
 
@@ -184,13 +184,41 @@ def homeing(max_score_tuple):
         #actions.append(6)
         
     
-    #We've reach end goal we can go towards it now
+    #We've reach end goal we can go tow    # img = input.Capture()
 
 def shutdown():
     pub.publish(4)
 
-rospy.on_shutdown(shutdown)
 
+def filter_detections(detections):
+		"""
+		Filter out "double" detections of the same object within the same frame.
+		"""
+		# For each detection, compare how similar the center pixel is to all other center pixels
+		# and filter out the ones that are too similar, taking care to not compare a detection with itself, as well
+		# as to not make a comparison twice (i.e. i vs j and j vs i)
+		for i in range(len(detections)):
+			for j in range(i + 1, len(detections)):
+				if i != j:
+					# Check that j in range
+					if j >= len(detections):
+						break
+
+					# Get the center of each detection
+					center_i = detections[i].Center
+					center_j = detections[j].Center
+
+					# Calculate the distance between the two centers
+					dist = np.sqrt((center_i[0] - center_j[0])**2 + (center_i[1] - center_j[1])**2)
+					# If the distance is less than the threshold, remove the detection with the lower score
+					threshold = 10
+					if dist < threshold:
+						
+						if detections[i].Confidence < detections[j].Confidence:
+							detections.pop(i)
+						else:
+							detections.pop(j)
+                                                        
 # process frames until the user exits
 while True:
     # Real Sense frame data: Wait for a coherent pair of frames: depth and color
@@ -219,10 +247,29 @@ while True:
     print("detected {:d} objects in image".format(len(detections)))
 
     #Might need this somewhere else in the code
-
+    scores = {}
+    filter_detections(detections)
     for d in detections:
-        class_id = d.ClassID
-        pub.publish(class_id)
+        score = 0
+        class_id = int(d.ClassID)
+        center = d.Center
+        depth_value = depth_frame.get_distance(int(center[0]),int(center[1])) * 100
+        if depth_value > 0:
+            ground_distance = np.sqrt(depth_value*depth_value - 13*13)
+            if ground_distance > 7:
+                dist = np.sqrt(ground_distance * ground_distance - 49)
+                
+        score = getScore(center[0], class_id)
+        scores[score] = (class_id, center[0])
+    msg = Int32MultiArray()
+    if len(scores) > 0:
+        max_score = max(scores.keys())
+        target = scores[max_score]
+        msg.data = [int(target[0]), int(target[1])]
+    else:
+        msg.data = [0,0,0]     
+        
+    pub.publish(msg)
     # render the image
     
     output.Render(img)
