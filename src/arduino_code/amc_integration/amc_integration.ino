@@ -1,8 +1,6 @@
 #include "ros.h"
 #include "amc.h"
 #include "TeensyThreads.h"
-
-
 #include "std_msgs/Int16.h"
 
 Amc* arm;
