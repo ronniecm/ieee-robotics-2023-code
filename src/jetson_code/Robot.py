@@ -73,6 +73,28 @@ class Robot:
     def initServos(self):
         self.arm.sendMsg('armDown')
 
+    def pickUprightPedestal(self):
+        print("Arm Down")
+        bot.arm.sendMsg('armDown')
+        time.sleep(2)
+        print('Rotating Default')
+        bot.gripperRotate.sendMsg('gripperRotateDefault')
+        time.sleep(1)
+        print("Opening")
+        bot.gripperClamp.sendMsg('gripperClampOpen')
+        time.sleep(1)
+        print("Closing")
+        bot.gripperClamp.sendMsg('gripperClampClosed')
+        time.sleep(1)
+        print("Arm Going Up")
+        bot.arm.sendMsg('armUp')
+        time.sleep(2)
+        print('Rotating')
+        bot.gripperRotate.sendMsg('gripperRotate90')
+        time.sleep(1)
+        print('Opening')
+        bot.gripperClamp.sendMsg('gripperClampOpen')
+
     def tofApproach(self):
         self.rng.getTofSensors(0)
         self.rng.getTofSensors(1)
@@ -240,14 +262,33 @@ if __name__ == "__main__":
     
         
        time.sleep(3)
-    '''
-    
-    while True:
-        bot.arm.sendMsg('armUp')
-        time.sleep(5)
-        bot.arm.sendMsg('armDown')
-        time.sleep(5)
 
+    bot.gripperClamp.sendMsg('gripperClampOpen')
+    time.sleep(5)
+    bot.gripperClamp.sendMsg('gripperClampClosed')
+    time.sleep(5)
+    bot.gripperRotate.sendMsg('gripperRotateDefault')
+    time.sleep(5)
+    bot.arm.sendMsg('armUp')
+    time.sleep(5)
+    bot.gripperClamp.sendMsg('gripperClampOpen')
+    time.sleep(5)
+    while True:
+        
+        
+        bot.arm.sendMsg('armUp')
+    
+    '''
+    time.sleep(5)
+    bot.pickUprightPedestal()
+
+
+   
+    
+
+
+
+        
 
         
 
