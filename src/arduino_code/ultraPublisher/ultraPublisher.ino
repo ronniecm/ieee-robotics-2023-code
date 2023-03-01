@@ -2,6 +2,8 @@
 #include "std_msgs/Float32.h"
 #include "Ultrasonic.h"
 #include "TeensyThreads.h"
+#include <Adafruit_VL6180X.h>
+#include <Wire.h>
 
 //Ultrasonic Sensor 0 trig and echo pins and distance variables
 #define Ultra0_trigPin 3    // Trigger
@@ -58,22 +60,10 @@ std_msgs::Float32 distMsgUltra0;
 std_msgs::Float32 distMsgUltra1;
 std_msgs::Float32 distMsgUltra2;
 std_msgs::Float32 distMsgUltra3;
-
 std_msgs::Float32 distMsgUltra4;
 std_msgs::Float32 distMsgUltra5;
 std_msgs::Float32 distMsgUltra6;
 std_msgs::Float32 distMsgUltra7;
-
-//distMsgUltra0;
-//distMsgUltra1;
-//distMsgUltra2;
-//distMsgUltra3;
-//
-//distMsgUltra4;
-//distMsgUltra5;
-//distMsgUltra6;
-//distMsgUltra7;
-
 
 //ros::Publisher Ultra0("/bot/ultra0", &distMsgUltra0);
 //ros::Publisher Ultra1("/bot/ultra1", &distMsgUltra1);
@@ -86,6 +76,21 @@ ros::Publisher Ultra6("/bot/ultra6", &distMsgUltra6);
 ros::Publisher Ultra7("/bot/ultra7", &distMsgUltra7);
 
 Ultrasonic ultraSensors;
+
+#define SHUTDOWN_LEFT 27
+#define SHUTDOWN_RIGHT 28
+
+#define LEFT_ADDRESS 0x30
+#define RIGHT_ADDRESS 0x31
+
+Adafruit_VL6180X lSensor = Adafruit_VL6180X();
+Adafruit_VL6180X rSensor = Adafruit_VL6180X();
+
+std_msgs::Float32 leftMsg;
+std_msgs::Float32 rightMsg;
+
+ros::Publisher leftPub("/bot/leftTOF", &leftMsg);
+ros::Publisher rightPub("/bot/rightTOF", &rightMsg);
 
 unsigned long currentMillis = 0;
 unsigned long previousMillis = 0;
@@ -130,6 +135,15 @@ void setup() {
   nh.advertise(Ultra5);
   nh.advertise(Ultra6);
   nh.advertise(Ultra7);
+  pinMode(SHUTDOWN_LEFT, OUTPUT);
+  pinMode(SHUTDOWN_RIGHT, OUTPUT);
+
+  digitalWrite(SHUTDOWN_LEFT, LOW);
+  digitalWrite(SHUTDOWN_RIGHT, LOW);
+
+  setID();
+  nh.advertise(leftPub);
+  nh.advertise(rightPub);
 }
 
 
@@ -160,7 +174,74 @@ void loop() {
       distMsgUltra7.data = ultraSensors.getUltra7_Distance();
       Ultra7.publish(&distMsgUltra7);  
 
+      
+      uint8_t leftStatus = lSensor.readRangeStatus();
+      uint8_t rightStatus = rSensor.readRangeStatus();
+      float leftVal, rightVal;
+      if (leftStatus == VL6180X_ERROR_NONE) {
+        leftVal = lSensor.readRange() * 0.1;
+        leftMsg.data = leftVal;
+        //Serial.print("Left: ");
+        //Serial.print(leftVal);
+        //Serial.println();
+      } else {
+        //Serial.println("PROBLEM WITH LEFT"); 
+      }
+
+     if (rightStatus == VL6180X_ERROR_NONE) {
+        rightVal = rSensor.readRange() * 0.1;
+        rightMsg.data = rightVal;
+        //Serial.print("Right: ");
+        //Serial.print(rSensor.readRange() / 10.0);  
+        //Serial.println();
+      } else {
+        //Serial.println("PROBLEM WITH RIGHT");
+      }
+      leftPub.publish(&leftMsg);
+      rightPub.publish(&rightMsg);
       nh.spinOnce();
-      unsigned long duration = millis() - currentMillis;
-      Serial.println(duration); 
+      delay(10);
+}
+
+void setID() {
+  // all reset
+  digitalWrite(SHUTDOWN_LEFT, LOW);
+  digitalWrite(SHUTDOWN_RIGHT, LOW);
+
+  delay(10);
+
+  // all unreset
+  digitalWrite(SHUTDOWN_LEFT, HIGH);
+  digitalWrite(SHUTDOWN_RIGHT, HIGH);
+
+  delay(10);
+
+  // activating left sensor and reseting right sensor
+  digitalWrite(SHUTDOWN_LEFT, HIGH);
+  digitalWrite(SHUTDOWN_RIGHT, LOW);
+
+
+  // initing Left sensor
+  ////Serial.println("setting up left");
+  if (!lSensor.begin()) {
+    //Serial.println(F("Failed to boot lSensor VL6180X"));
+    while (1);
+  }
+  //Serial.println("Done wiht left");
+  lSensor.setAddress(LEFT_ADDRESS);
+  delay(10);
+
+  // activating rSensor
+  digitalWrite(SHUTDOWN_RIGHT, HIGH);
+  delay(10);
+
+  //initing rSensor
+  if (!rSensor.begin(&Wire1)) {
+    //Serial.println(F("Failed to boot second VL6180X"));
+    while (1);
+  }
+  rSensor.setAddress(RIGHT_ADDRESS);
+  //Serial.println("Done with right");
+  delay(10);
+  //Serial.println("setup complete");
 }
