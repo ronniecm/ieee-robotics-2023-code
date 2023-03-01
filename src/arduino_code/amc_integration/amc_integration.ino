@@ -39,6 +39,7 @@ ros::Publisher Lifting("/bot/lifting_callback", &liftingMsg);
 ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 
 
+
 void gripperRotateCB(const std_msgs::Int16& cmd_msg)
 {
   gripperRotateCmd.data = cmd_msg.data;
@@ -56,10 +57,7 @@ void doorCB(const std_msgs::Int16& cmd_msg)
 
 void armCB(const std_msgs::Int16& cmd_msg)
 {
-
   armCmd.data = cmd_msg.data;
-  
-  
 }
 
 void wristCB(const std_msgs::Int16& cmd_msg)
@@ -114,14 +112,14 @@ void setup()
   nh.advertise(Carousel);
   nh.subscribe(sub8);
 
-
   //Default Values for arm servos
   gripperRotateCmd.data = 90;
   gripperClampCmd.data = 0;
   wristCmd.data = 180;
-  armCmd.data = 0;
+  armCmd.data = 180;
   paddleCmd.data = 180;
   doorCmd.data =100;
+
   
 
   pinMode(33, OUTPUT);
@@ -135,7 +133,7 @@ void loop()
   GripperRotate.publish(&gripperRotateCmd);
   
   arm->gripperClampCmd(gripperClampCmd.data);
-  GripperClamp.publish(&gripperRotateCmd);
+  GripperClamp.publish(&gripperClampCmd);
 
   arm->doorCmd(doorCmd.data);
   Door.publish(&doorCmd);
@@ -149,9 +147,8 @@ void loop()
   arm->paddleCmd(paddleCmd.data);
   Paddle.publish(&paddleCmd);
   
-  
   arm->liftingCmd(liftingCmd.data);
-  arm->carouselCmd(carouselCmd.data);
+  arm->carouselCmd(&carouselCmd.data);
   
   nh.spinOnce();
   delay(100);
