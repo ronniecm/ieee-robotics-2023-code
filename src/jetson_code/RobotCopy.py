@@ -76,7 +76,7 @@ class Robot:
         while(self.rng.getTofSensors(0) > 11.0 and self.rng.getTofSensors(1) > 11.0):
             self.ctrl.goFoward(0.3)
         #As soon as we detect a disturbance stop the bot
-        self.ctrl.stopBot(0)
+        self.ctrl.stopBot()
 
     def cameraAlign(self):
         data = self.rng.getObjDetect()
@@ -237,12 +237,20 @@ if __name__ == "__main__":
     #time.sleep(3)
     print("motors on")
 
-    while not bot.rng.getLeft(0) < 10 and not bot.rng.getLeft(1) < 10:
-        while not bot.rng.getObjDetect()[0] == 0:
-            bot.ctrl.goLeft()
-    '''
-    bot.cameraAlign()
-    bot.tofApproach()
-    bot.tofAllign()
-    '''
+    while not bot.rng.getLeft(0) <= 10 and not bot.rng.getLeft(1) <= 10:
+        while not bot.rng.getLeft(0) <= 10:
+            if bot.rng.getObjDetect()[0] == 1:
+                break
+            bot.ctrl.goLeft(0.5)
+        
+        bot.ctrl.stopBot()
+
+        if bot.rng.getObjDetect()[0] == 1:
+            bot.cameraAlign()
+            bot.tofApproach()
+            bot.tofAllign()
+            while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
+                bot.ctrl.goBackwards(0.5)
+            bot.ctrl.stopBot()
+    
     
