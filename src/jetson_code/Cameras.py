@@ -50,6 +50,7 @@ class RealSense:
 		self.screen_height = 480
 		self.frame_center = self.screen_width/2
 		self.threshold = 200 
+		self.detectData = [0,0,0]
 
 		#parse the command line
 		parser = argparse.ArgumentParser(description="Locate objects in a live camera stream using an object detection DNN.", 
@@ -163,40 +164,27 @@ class RealSense:
 			#Filter out detections that are too close together
 			self.filter_detections(self.detections)
 			
-			if len(self.detections) == 0:
-				#Test to make implementing ultrasonics easier
-				pass
-	  
-
-			else:
-				prevDectect = True
-				#Will keep use scores for key in dict
-				scores = {}
-				inFrame = []
+			for d in self.detections:
 				score = 0
-				#This will be for case that score is zero
+				class_id = int(d.ClassID)
+				center = d.Center
+				depth_value = depth_frame.get_distance(int(center[0]),int(center[1])) * 100
+				if depth_value > 0:
+					ground_distance = np.sqrt(depth_value*depth_value - 13*13)
+					if ground_distance > 7:
+						dist = np.sqrt(ground_distance * ground_distance - 49)
+						
+				score = getScore(center[0], class_id)
+				scores[score] = (class_id, center[0])
+			
+			if len(scores) > 0:
+				max_score = max(scores.keys())
+				target = scores[max_score]
+				self.detectData = [int(target[0]), int(target[1])]
+			else:
+				self.detectData = [0,0,0]
+	
 
-				for d in self.detections:
-					class_id = d.ClassID
-					center_x, center_y = d.Center
-					#print("Detection center",d.Center)
-					dist = depth_frame.get_distance(int(center_x),int(center_y))
-					#If we are getting distance then there is something in frame
-					#but we are not guarenteed that it is accurate
-					if dist > 0:
-						score = self.getScore(dist, class_id)
-						##print("CurrentScore" , score)
-						#Score will always be greater than zero here
-						#info = (class_id, score, dist, center_x, actions)
-						info = (class_id, score, dist, center_x)
-						scores[score] = info
-				#Return the hiest score in the dictionary after looping through all detections and taking there scores
-
-				
-				#now that we have the highest score we will home in on info corresponing to highest score
-
-				#For the the case that score dict is never updated we will stop for now
-				
 			# render the image
 			self.output.Render(img)
 
