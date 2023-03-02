@@ -24,7 +24,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 sim = False
 
@@ -94,9 +94,9 @@ class Robot:
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
-sim = False
+sim = True
 
 import time
 import numpy as np
@@ -375,26 +375,14 @@ if __name__ == "__main__":
     currTime = time.time()
     currTime = time.time()
 
-    bot.gripperClamp.sendMsg('gripperClampOpen')
-    time.sleep(5)
-    bot.gripperClamp.sendMsg('gripperClampClosed')
-    time.sleep(5)
-    bot.gripperRotate.sendMsg('gripperRotateDefault')
-    time.sleep(5)
-    bot.arm.sendMsg('armUp')
-    time.sleep(5)
-    bot.gripperClamp.sendMsg('gripperClampOpen')
-    time.sleep(5)
-    while True:
-       
-        bot.arm.sendMsg('armUp')
-         thread = threading.Thread(target = bot.realSense.run())
-    time.sleep(5)
-    thread.start()
-    
-    '''
-   
-    
     while True:
         print(bot.realSense.getDetectionData())
+    
+    '''
+
+    bot.pickupPathLeft()
+    bot.pickupPathRight()
+   
+    
+    
  
