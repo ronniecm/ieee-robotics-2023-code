@@ -101,7 +101,7 @@ void carouselCB(const std_msgs::Int16& cmd_msg)
 }
 
 ros::Subscriber <std_msgs::Int16> gripperRotate("/bot/gripperRotate_cmd", &gripperRotateCB);
-ros::Subscriber <std_msgs::Int16> gripperClam("/bot/gripperClamp_cmd", &gripperClampCB);
+ros::Subscriber <std_msgs::Int16> gripperClamp("/bot/gripperClamp_cmd", &gripperClampCB);
 ros::Subscriber <std_msgs::Int16> door("/bot/door_cmd", &doorCB);
 ros::Subscriber <std_msgs::Int16> elbow("/bot/arm_cmd", &armCB);
 ros::Subscriber <std_msgs::Int16> wrist("/bot/wrist_cmd", &wristCB);
@@ -167,7 +167,7 @@ void setup()
     
     nh.subscribe(wrist);
     
-    nh.subscribe(spaddle);
+    nh.subscribe(paddle);
     
     nh.subscribe(lifting);
     
