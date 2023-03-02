@@ -86,8 +86,7 @@ ros::Subscriber <std_msgs::Int16> sub4("/bot/arm_cmd", &armCB);
 ros::Subscriber <std_msgs::Int16> sub5("/bot/wrist_cmd", &wristCB);
 ros::Subscriber <std_msgs::Int16> sub6("/bot/paddle_cmd", &paddleCB);
 ros::Subscriber <std_msgs::Int16> sub7("/bot/lifting_cmd", &liftingCB);
-ros::Subscriber <std_msgs::Int16> sub8("/bot/carousel_cmd", &carouselCB);
-
+ros::Subscriber <std_msgs::Int16> sub9("/bot/carousel_cmd", &carouselCB);
 
 void setup()
 {
@@ -108,7 +107,7 @@ void setup()
   nh.advertise(Lifting);
   nh.subscribe(sub7);
   nh.advertise(Carousel);
-  nh.subscribe(sub8);
+  nh.subscribe(sub9);
 
   //Default Values for arm servos
   gripperRotateCmd.data = 90;
@@ -116,9 +115,8 @@ void setup()
   wristCmd.data = 180;
   armCmd.data = 180;
   paddleCmd.data = 180;
-  doorCmd.data =100;
-
-  
+  doorCmd.data = 100;
+  carouselCmd.data = 0;
 
   pinMode(33, OUTPUT);
   pinMode(38, INPUT);
@@ -146,7 +144,9 @@ void loop()
   Paddle.publish(&paddleCmd);
   
   arm->liftingCmd(liftingCmd.data);
-  arm->carouselCmd(&carouselCmd.data);
+  
+  arm->carouselCmd(carouselCmd.data);
+  Carousel.publish(&carouselCmd);
   
   nh.spinOnce();
   delay(100);

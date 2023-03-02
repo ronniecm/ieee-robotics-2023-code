@@ -20,6 +20,7 @@ class Amc {
     Amc();
     ~Amc();
     void activate_paddle();
+    void stepperContinue();
     void dispense_stack_helper();
     void dispense_helper(int i, int pedestal);
     void dispense();

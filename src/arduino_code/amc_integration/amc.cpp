@@ -1,11 +1,12 @@
 #include "amc.h"
 
-#define flipMIN 125
+#define flipMIN 120
 #define flipMAX 530
 #define servoMIN 103
 #define servoMAX 512
 #define upper_limit 39  //upper limit switch
 #define lower_limit 38  //lower limit switch
+#define CarouselPin 33
 
 Amc::Amc() {    
     servos = new Adafruit_PWMServoDriver(0x40);
@@ -19,7 +20,7 @@ Amc::Amc() {
     steppers->setPWMFreq(1000);
     
     if (tcs->begin()) {
-        //Serial.println("Found sensor");
+    //Serial.println("Found sensor");
     }
 
     deg1 = 0; //pedestal rotate
@@ -73,14 +74,10 @@ void Amc::armCmd(int angle)
   servos->setPWM(3, 0, map( angle, 0, 180, flipMIN, flipMAX));
 }
 
-
-
 void Amc::paddleCmd(int angle)
 {
   servos->setPWM(4, 0, map( angle, 0, 180, servoMIN, servoMAX));
 }
-
-
 
 //Stepper motor control
 void Amc::liftingCmd(int angle)
@@ -88,12 +85,57 @@ void Amc::liftingCmd(int angle)
   
 }
 
-void Amc::carouselCmd(int angle)
+void Amc::carouselCmd(int movement)
 {
- 
+    if(movement==1)
+    {
+      stepsLeft += 200;
+      drop_in = true;
+      stepperContinue();
+      drop_in_action();
+      //dispense();
+      //dispense_stack_helper();
+      movement = 0;
+    }
 }
 
+void Amc::stepperContinue()
+{
+    if (stepsLeft > 0) {
+    steppers->setPWM(2, 4096, 0);
+    while (stepsLeft > 0) { 
+    //if (stepsLeft > 0) {  
+      speedControl = stepsLeft % 200;
+      //if (stepsLeft != 0) {Serial.println(speedControl);}      
+      if (speedControl > 75 && speedControl < 125) {carouselSpeed = 10000;}
+      else {carouselSpeed = 1000;}    
 
+      digitalWrite(CarouselPin, HIGH);
+      delayMicroseconds(carouselSpeed);
+      digitalWrite(CarouselPin, LOW);
+      delayMicroseconds(carouselSpeed);    
+      stepsLeft -= 1;      
+    }
+    //Serial.println(stepsLeft);
+  }
+  else if (stepsLeft < 0) {
+    steppers->setPWM(2, 0, 4096);
+    while (stepsLeft < 0) {
+    //if (stepsLeft < 0) {
+      speedControl = stepsLeft % 200;
+      //if (stepsLeft != 0) {Serial.println(speedControl);}      
+      if (speedControl > -125 && speedControl < -75) {carouselSpeed = 10000;}
+      else {carouselSpeed = 1000;}     
+
+      digitalWrite(CarouselPin, HIGH);
+      delayMicroseconds(carouselSpeed);
+      digitalWrite(CarouselPin, LOW);
+      delayMicroseconds(carouselSpeed);    
+      stepsLeft += 1;      
+    }
+    //Serial.println(stepsLeft);
+  } 
+}
 
 void Amc::activate_paddle() {
   servos->setPWM(4, 0, map( 0, 0, 180, servoMIN,  servoMAX)); //paddle
