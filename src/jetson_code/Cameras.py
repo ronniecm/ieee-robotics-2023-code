@@ -32,8 +32,6 @@
 
 import sys
 import argparse
-import time
-import rospy
 import cv2
 import pyrealsense2 as rs
 import numpy as np
@@ -41,6 +39,7 @@ from jetson_inference import detectNet
 from jetson_utils import videoSource, videoOutput, logUsage
 import jetson_utils_python
 from math import sqrt
+import threading
 
 class RealSense:
 	def __init__(self):
@@ -50,9 +49,8 @@ class RealSense:
 		self.screen_height = 480
 		self.frame_center = self.screen_width/2
 		self.threshold = 200 
-		self.detectData = [0,0,0]
+		self.detectionData = [0,0,0]
 
-		#parse the command line
 		parser = argparse.ArgumentParser(description="Locate objects in a live camera stream using an object detection DNN.", 
 								 formatter_class=argparse.RawTextHelpFormatter, 
 								 epilog=detectNet.Usage() + videoSource.Usage() + videoOutput.Usage() + logUsage())
@@ -61,7 +59,7 @@ class RealSense:
 		parser.add_argument("output_URI", type=str, default="", nargs='?', help="URI of the output stream")
 		parser.add_argument("--network", type=str, default="ssd-mobilenet-v2", help="pre-trained model to load (see below for options)")
 		parser.add_argument("--overlay", type=str, default="box,labels,conf", help="detection overlay flags (e.g. --overlay=box,labels,conf)\nvalid combinations are:  'box', 'labels', 'conf', 'none'")
-		parser.add_argument("--threshold", type=float, default=0.5, help="minimum detection threshold to use") 
+		parser.add_argument("--threshold", type=float, default=0.85, help="minimum detection threshold to use") 
 
 		is_headless = ["--headless"] if sys.argv[0].find('console.py') != -1 else [""]
 
@@ -72,7 +70,7 @@ class RealSense:
 			parser.print_help()
 			sys.exit(0)
 		
-		print(self.args)
+		#print(self.args)
 
 		# create video sources and outputs
 		self.pipeline = rs.pipeline()
@@ -97,6 +95,10 @@ class RealSense:
 		self.net = detectNet(model="ssd-mobilenet-02262023.onnx", labels="labels.txt",
 				 input_blob="input_0", output_cvg="scores", output_bbox="boxes",
 				 threshold=self.args.threshold)
+		
+		thread = threading.Thread(target=self.run)
+		thread.start()
+		
 
 	def filter_detections(self, detections):
 		"""
@@ -128,7 +130,13 @@ class RealSense:
 							detections.pop(i)
 						else:
 							detections.pop(j)
-		
+
+	def getObjDetect(self,i = None):
+		if i is not None:
+			return self.detectionData[i]
+		else:
+			return self.detectionData
+
 	def run(self):
 		
 		while True:
@@ -163,7 +171,7 @@ class RealSense:
 
 			#Filter out detections that are too close together
 			self.filter_detections(self.detections)
-			
+			scores = {}
 			for d in self.detections:
 				score = 0
 				class_id = int(d.ClassID)
@@ -176,14 +184,16 @@ class RealSense:
 						
 				score = getScore(center[0], class_id)
 				scores[score] = (class_id, center[0])
+			self.detectionData = []
 			
 			if len(scores) > 0:
 				max_score = max(scores.keys())
 				target = scores[max_score]
-				self.detectData = [int(target[0]), int(target[1])]
+				self.detectionData = [int(target[0]), int(target[1])]
+				
 			else:
-				self.detectData = [0,0,0]
-	
+				self.detectionData = [0,0,0]
+
 
 			# render the image
 			self.output.Render(img)
@@ -191,9 +201,29 @@ class RealSense:
 			# update the title bar
 			self.output.SetStatus("{:s} | Network {:.0f} FPS".format(self.args.network, self.net.GetNetworkFPS()))
 			# print out performance info
-			self.net.PrintProfilerTimes()
+			#self.net.PrintProfilerTimes()
 
 			# exit on input/output EOS
 			if not self.output.IsStreaming():
 				break
+		
+
+def getScore(distance, class_id):
+		score = 0
+
+		pedestal_weight = 25
+		duck_weight = 2
+
+		# Handle case for when distance is 0
+		if distance == 0:
+			return 0
+
+		if class_id == 1:
+			score += pedestal_weight * np.sqrt(distance)
+		elif class_id == 2:
+			score = duck_weight * np.sqrt(distance)
+		else:
+			score = 0
+
+		return score
 
