@@ -27,7 +27,7 @@
 
 onJetson = False
 
-sim = True
+sim = False
 
 import time
 import numpy as np
@@ -72,87 +72,102 @@ class Robot:
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
     def initServos(self):
+        
+        self.lifting.sendMsg('liftUp')
+        time.sleep(3)
         self.arm.sendMsg('armDown')
+        time.sleep(2)
+        self.gripperClamp.sendMsg('gripperClampClosed')
+        time.sleep(1)
+        self.wrist.sendMsg('wristDefault')
 
     #Going to write the function that will make the robot go left and grab objects along the way
     def pickupPathLeft(self):
-
-        while not bot.rng.getLeft(0) <= 10 and not bot.rng.getLeft(1) <= 10:
-            while not bot.rng.getLeft(0) <= 10:
-                if bot.realSense.getObjDetect(0) == 1:
+        while not self.rng.getLeft(0) <= 15 and not self.rng.getLeft(1) <= 15:
+            while not self.rng.getLeft(0) <= 10:
+                if self.rng.getObjDetect()[0]== 1:
                     break
-                bot.ctrl.goLeft(0.5)
+                self.ctrl.goLeft(0.5)
             
-            bot.ctrl.stopBot()
+            self.ctrl.stopBot()
 
-            if bot.rng.getObjDetect()[0] == 1:
-                bot.cameraAlign()
-                bot.tofApproach()
-                bot.tofAllign()
-                while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
-                    bot.ctrl.goBackwards(0.5)
-                bot.ctrl.stopBot()
+            if self.rng.getObjDetect()[0] == 1:
+                self.cameraAlign()
+                self.tofApproach()
+                self.tofAllign()
+                self.ctrl.stopBot(3)
+                self.pickUprightPedestal()
+
+                while not self.rng.getBack(0) <= 30 and not self.rng.getBack(1) <= 30:
+                    self.ctrl.goBackwards(0.5)
+                self.ctrl.stopBot()
+                #self.alignBack()
     
     def pickupPathRight(self):
-        while not bot.rng.getRight(0) <= 10 and not bot.rng.getRight(1) <= 10:
-            while not bot.rng.getRight(0) <= 10:
-                if bot.realSense.getObjDetect(0) == 1:
+        while not self.rng.getRight(0) <= 10 and not self.rng.getRight(1) <= 10:
+            while not self.rng.getRight(0) <= 10:
+                if self.realSense.getObjDetect(0) == 1:
                     break
-                bot.ctrl.goRight(0.5)
+                self.ctrl.goRight(0.5)
             
-            bot.ctrl.stopBot()
+            self.ctrl.stopBot()
 
-            if bot.rng.getObjDetect()[0] == 1:
-                bot.cameraAlign()
-                bot.tofApproach()
-                bot.tofAllign()
-                while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
-                    bot.ctrl.goBackwards(0.5)
-                bot.ctrl.stopBot()
+            if self.rng.getObjDetect()[0] == 1:
+                self.cameraAlign()
+                self.tofApproach()
+                self.tofAllign()
+                while not self.rng.getBack(0) <= 30 and not self.rng.getBack(1) <= 30:
+                    self.ctrl.goBackwards(0.5)
+                self.ctrl.stopBot()
         
     def pickUprightPedestal(self):
         print("Arm Down")
-        bot.arm.sendMsg('armDown')
-        time.sleep(2)
+        self.arm.sendMsg('armDown')
+        time.sleep(3)
         print('Rotating Default')
-        bot.gripperRotate.sendMsg('gripperRotateDefault')
+        self.gripperRotate.sendMsg('gripperRotateDefault')
         time.sleep(1)
         print("Opening")
-        bot.gripperClamp.sendMsg('gripperClampOpen')
-        time.sleep(1)
+        self.gripperClamp.sendMsg('gripperClampOpen')
+        time.sleep(2)
+        print("Lift Down")
+        self.lifting.sendMsg('liftDown')
+        time.sleep(2)
         print("Closing")
-        bot.gripperClamp.sendMsg('gripperClampClosed')
-        time.sleep(1)
+        self.gripperClamp.sendMsg('gripperClampClosed')
+        time.sleep(2)
+        print("Lift Up")
+        self.lifting.sendMsg('liftUp')
+        time.sleep(4)
         print("Arm Going Up")
-        bot.arm.sendMsg('armUp')
+        self.arm.sendMsg('armUp')
         time.sleep(2)
         print('Rotating')
-        bot.gripperRotate.sendMsg('gripperRotate90')
+        self.gripperRotate.sendMsg('gripperRotate90')
         time.sleep(1)
         print('Opening')
-        bot.gripperClamp.sendMsg('gripperClampOpen')
+        self.gripperClamp.sendMsg('gripperClampOpen')
+        time.sleep(1)
+        print('Closing')
+        self.gripperClamp.sendMsg('gripperClampClosed')
 
     def tofApproach(self):
-        self.rng.getTofSensors(0)
-        self.rng.getTofSensors(1)
-
-
         #We are going to go fowrward until we detect a disturbance for TOF
         print("Sensor Values", self.rng.getTofSensors())
-        while(self.rng.getTofSensors(0) > 11.0 or self.rng.getTofSensors(1) > 11.0):
+        while(self.rng.getTofSensors(1) > 12.5):
             self.ctrl.goFoward(.1)
 
         #As soon as we detect a disturbance stop the bot
         self.ctrl.stopBot()
 
     def cameraAlign(self):
-        data = self.realSense.getObjDetect()
-        while data[0] == 1 and (data[1] < 200 or data[1] > 400):
-            if data[1] < 200:
+        data = self.rng.getObjDetect()
+        while data[0] == 1 and (data[1] < 150 or data[1] > 275):
+            if data[1] < 150:
                 self.ctrl.goLeft(0.25)
             else:
                 self.ctrl.goRight(0.25)
-            data = self.realSense.getObjDetect()
+            data = self.rng.getObjDetect()
             
         print("stopping")
         self.ctrl.stopBot()
@@ -162,14 +177,13 @@ class Robot:
 
         print("Alligning")
 
-        threshhold = 1
+        threshhold = 0.1
 
-        while (abs(self.rng.getTofSensors(0) - self.rng.getTofSensors(1)) > threshhold):
-            print("Sensor Readings: " ,self.rng.getTofSensors())
-            if self.rng.getTofSensors(0) > self.rng.getTofSensors(1):
-                self.ctrl.goRight(0.05)
+        while (self.rng.getTofSensors(1) < 4.5 or self.rng.getTofSensors(1) > 7):
+            if self.rng.getTofSensors(1) < 4.5:
+                self.ctrl.goLeft(0.1)
             else:
-                self.ctrl.goLeft(0.05)
+                self.ctrl.goRight(0.1)
         self.ctrl.stopBot()
 
     def pickup(self):
@@ -311,9 +325,12 @@ if __name__ == "__main__":
     
     '''
 
+    #bot.pickupPathLeft()
+    #bot.pickupPathRight()
+    time.sleep(3)
+    print("flip switch")
+    bot.initServos()
     bot.pickupPathLeft()
-    bot.pickupPathRight()
-   
     
     
  

@@ -92,9 +92,9 @@ class RealSense:
 		# self.net = detectNet(self.args.network, sys.argv, self.args.threshold)
 
 		# note: to hard-code the paths to load a model, the following API can be used:
-		self.net = detectNet(model="ssd-mobilenet-02262023.onnx", labels="labels.txt",
-				 input_blob="input_0", output_cvg="scores", output_bbox="boxes",
-				 threshold=self.args.threshold)
+		self.net = detectNet(model="/home/mdelab/jetson-inference//build/aarch64/bin/ssd-mobilenet-02262023.onnx", labels="/home/mdelab/jetson-inference/build/aarch64/bin/labels.txt",
+                 input_blob="input_0", output_cvg="scores", output_bbox="boxes",
+                 threshold=self.args.threshold)
 		
 		thread = threading.Thread(target=self.run)
 		thread.start()
