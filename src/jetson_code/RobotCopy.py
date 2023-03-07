@@ -73,8 +73,8 @@ class Robot:
     def tofApproach(self):
         #We are going to go fowrward until we detect a disturbance for TOF
         print("Sensor Values", self.rng.getTofSensors())
-        while(self.rng.getTofSensors(0) > 11.0 and self.rng.getTofSensors(1) > 11.0):
-            self.ctrl.goFoward(0.3)
+        while self.rng.getTofSensors(0) > 11.0 and self.rng.getTofSensors(1) > 11.0:
+            self.ctrl.goFoward(0.2)
         #As soon as we detect a disturbance stop the bot
         self.ctrl.stopBot()
 
@@ -92,17 +92,14 @@ class Robot:
         self.ctrl.stopBot()
 
     def tofAllign(self):
-
-        print("Alligning")
-
         threshhold = 0.2
 
         while (abs(self.rng.getTofSensors(0) - self.rng.getTofSensors(1)) > threshhold):
             #print("Sensor Readings: " ,self.rng.getTofSensors())
             if self.rng.getTofSensors(0) > self.rng.getTofSensors(1):
-                self.ctrl.goLeft(0.1)
-            else:
                 self.ctrl.goRight(0.1)
+            else:
+                self.ctrl.goLeft(0.1)
         self.ctrl.stopBot()
 
     def pickup(self):
@@ -246,11 +243,16 @@ if __name__ == "__main__":
         bot.ctrl.stopBot()
 
         if bot.rng.getObjDetect()[0] == 1:
+            print('aligning with camera')
             bot.cameraAlign()
+            print('approaching with tof')
             bot.tofApproach()
+            print('aligning with tof')
             bot.tofAllign()
             while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
                 bot.ctrl.goBackwards(0.5)
             bot.ctrl.stopBot()
+
+    bot.ctrl.stopBot()
     
     

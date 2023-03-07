@@ -1,0 +1,338 @@
+<?xml version="1.0"?>
+<robot name="robot_sim" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <xacro:property name="PI" value="3.1415926535897931" />
+
+  <xacro:property name="wheel_radius" value="0.050" />
+  <xacro:property name="wheel_width" value="0.0505" />
+
+  <material name="yellow"><color rgba="0.8 0.8 0.0 1.0" /></material>
+  <material name="black"><color rgba="0.15 0.15 0.15 1.0" /></material>
+  <material name="dark_grey"><color rgba="0.2 0.2 0.2 1.0" /></material>
+  <material name="light_grey"><color rgba="0.4 0.4 0.4 1.0" /></material>
+
+
+  <link name="base_footprint"></link>
+
+  <joint name="base_link_joint" type="fixed">
+    <origin xyz="0 0 0.05" rpy="0 0 0" />
+    <parent link="base_footprint"/>
+    <child link="base_link" />
+  </joint>
+
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />max(n
+      <geometry>
+        <box size ="0.3048 0.3048 0.0635"/>
+      </geometry>
+      <material name="grey" />
+    </visual>3.
+    <collision>
+      <origin xyz="0 0 0"/>
+      <geometry>
+        <box size ="0.3048 0.3048 0.0635"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <!-- Inertia from CAD model, filled box assumption -->
+      <origin xyz="-0.01103 0 0.002" rpy="0 0 0"/>
+      <mass value="2"/>
+      <inertia
+        ixx="0.018819942" ixy="0" ixz="-0.000101519"
+        iyy="0.057333716" iyz="0"
+        izz="0.074201740"/>
+    </inertial>
+  </link>
+
+<!--Wheel Stuff-->
+  <joint name="upper_left_wheel_joint" type="fixed">
+    <origin xyz="0.11 -0.13 -0.075" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="upper_left_wheel" />
+    <axis xyz="0 1 0"/>
+  </joint>
+  
+
+  <link name="upper_left_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/mecanum_wheel_left.STL" scale="0.0007 0.0007 0.0007"/>
+      </geometry>
+      <material name="light_grey" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <mass value="0.3844"/>
+      <!-- Inertia based on cylinder -->
+      <inertia
+        ixx="0.000324824" ixy="0" ixz="0"
+        iyy="0.000480000" iyz="0"
+        izz="0.000324824"/>
+    </inertial>
+  </link>
+
+  <joint name="lower_left_wheel_joint" type="fixed">
+    <origin xyz="-0.11 -0.13 -0.075" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="lower_left_wheel" />
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="lower_left_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/mecanum_wheel_right.STL" scale="0.0007 0.0007 0.0007"/>
+      </geometry>
+      <material name="light_grey" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <mass value="0.3844"/>
+      <!-- Inertia based on cylinder -->
+      <inertia
+        ixx="0.000324824" ixy="0" ixz="0"
+        iyy="0.000480000" iyz="0"
+        izz="0.000324824"/>
+    </inertial>
+  </link>
+
+  <joint name="upper_right_wheel_joint" type="fixed">
+    <origin xyz="0.11 0.13 -0.075" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="upper_right_wheel" />
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="upper_right_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/mecanum_wheel_right.STL" scale="0.0007 0.0007 0.0007"/>
+      </geometry>
+      <material name="light_grey" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <mass value="0.3844"/>
+      <!-- Inertia based on cylinder -->
+      <inertia
+        ixx="0.000324824" ixy="0" ixz="0"
+        iyy="0.000480000" iyz="0"
+        izz="0.000324824"/>
+    </inertial>
+  </link>
+  
+  <joint name="lower_right_wheel_joint" type="fixed">
+    <origin xyz="-0.11 0.13 -0.075" rpy="0 0 0" />
+    <parent link="base_link"/>
+    <child link="lower_right_wheel" />
+    <axis xyz="0 1 0"/>
+  </joint>
+
+  <link name="lower_right_wheel">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/mecanum_wheel_left.STL" scale="0.0007 0.0007 0.0007"/>
+      </geometry>
+      <material name="light_grey" />
+    </visual>
+    <collision>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0"/>
+      <geometry>
+        <cylinder radius="${wheel_radius}" length="${wheel_width}"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
+      <mass value="0.3844"/>
+      <!-- Inertia based on cylinder -->
+      <inertia
+        ixx="0.000324824" ixy="0" ixz="0"
+        iyy="0.000480000" iyz="0"
+        izz="0.000324824"/>
+    </inertial>
+  </link>
+
+
+  <!--Ultra Sonic Stuff-->
+  <joint name="ultra7_joint" type="fixed">
+    <origin xyz="0.05 0.15 -0.085" rpy="0 0 ${PI/2} " />
+    <parent link="base_link"/>
+    <child link="ultra7" />
+  </joint>
+
+  <link name="ultra7">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+  <joint name="ultra6_joint" type="fixed">
+    <origin xyz="-0.05 0.15 -0.085" rpy="0 0 ${PI/2} " />
+    <parent link="base_link"/>
+    <child link="ultra6" />
+  </joint>
+
+  <link name="ultra6">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0 " />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+  <joint name="ultra5_joint" type="fixed">
+    <origin xyz="-0.15 0.06 -0.085" rpy="0 0 ${PI}" />
+    <parent link="base_link"/>
+    <child link="ultra5" />
+  </joint>
+
+  <link name="ultra5">
+    <visual>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+  <joint name="ultra4_joint" type="fixed">
+    <origin xyz="-0.15 -0.06 -.085" rpy="0 0 ${PI}" />
+    <parent link="base_link"/>
+    <child link="ultra4" />
+  </joint>
+
+  <link name="ultra4">
+    <visual>
+      <origin xyz="0 0 0" rpy="${PI/2} 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+
+  <joint name="ultra3_joint" type="fixed">
+    <origin xyz="-0.05 -0.15 -0.085" rpy="0 0 ${-PI/2}" />
+    <parent link="base_link"/>
+    <child link="ultra3" />
+  </joint>
+
+  <link name="ultra3">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+  <joint name="ultra2_joint" type="fixed">
+    <origin xyz="0.05 -0.15 -0.085" rpy="0 0 ${-PI/2}" />
+    <parent link="base_link"/>
+    <child link="ultra2" />
+  </joint>
+
+  <link name="ultra2">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+
+  <!--TOF Sensors-->
+
+  <joint name="tof0_joint" type="fixed">
+    <origin xyz="0.06 0.075 -0.085" rpy="0 0 ${-PI/2}" />
+    <parent link="base_link"/>
+    <child link="tof0" />
+  </joint>
+
+  <link name="tof0">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+
+  <joint name="tof1_joint" type="fixed">
+    <origin xyz="0.06 -0.075 -0.085" rpy="0 0 ${PI/2}" />
+    <parent link="base_link"/>
+    <child link="tof1" />
+  </joint>
+
+  <link name="tof1">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="package://robot_sim/robot_sim_description/meshes/urm04.STL" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="black" />
+    </visual>
+  </link>
+
+
+  <!-- Include URM04 ultrasonic range finders -->
+  <xacro:include filename="$(find robot_sim)/robot_sim_description/urdf/urm04_sensor.xacro"/>
+  <!-- front sensor -->
+  <xacro:urm04_sensor frame_name="ultra2" ros_topic="sim/ultra2" update_rate="10" min_range="0.04" max_range="5.0" horizontal_field_of_view="1.04" vertical_field_of_view="0.04" ray_count="2" />
+  <!-- left sensor -->
+  <xacro:urm04_sensor frame_name="ultra3" ros_topic="sim/ultra3" update_rate="10" min_range="0.04" max_range="5.0" horizontal_field_of_view="1.04" vertical_field_of_view="0.04" ray_count="2" />
+  <!-- right sensor -->
+  <xacro:urm04_sensor frame_name="ultra4" ros_topic="sim/ultra4" update_rate="10" min_range="0.04" max_range="5.0" horizontal_field_of_view="1.04" vertical_field_of_view="0.04" ray_count="2" />
+  <!-- rear sensor -->
+  <xacro:urm04_sensor frame_name="ultra5" ros_topic="sim/ultra5" update_rate="10" min_range="0.04" max_range="5.0" horizontal_field_of_view="1.04" vertical_field_of_view="0.04" ray_count="2" />
+  
+  <!-- front sensor -->
+  <xacro:urm04_sensor frame_name="ultra6" ros_topic="sim/ultra6" update_rate="10" min_range="0.04" max_range="5.0" horizontal_field_of_view="0.004" vertical_field_of_view="0.004" ray_count="2" />
+  <!-- left sensor -->
+  <xacro:urm04_sensor frame_name="ultra7" ros_topic="sim/ultra7" update_rate="10" min_range="0.04" max_range="5.0" horizontal_field_of_view="0.004" vertical_field_of_view="0.004" ray_count="2" />
+
+  <xacro:urm04_sensor frame_name="tof0" ros_topic="sim/tof0" update_rate="10" min_range="0.01" max_range="0.15" horizontal_field_of_view="0.5" vertical_field_of_view="0.04" ray_count="2" />
+  <!-- left sensor -->
+  <xacro:urm04_sensor frame_name="tof1" ros_topic="sim/tof1" update_rate="10" min_range="0.01" max_range="0.15" horizontal_field_of_view="0.5" vertical_field_of_view="0.04" ray_count="2" />
+
+ 
+  <!-- Include controller plugin for Gazebo -->
+  <xacro:include filename="$(find robot_sim)/robot_sim_description/urdf/robot_sim.gazebo" />
+
+</robot>

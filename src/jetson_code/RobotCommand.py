@@ -94,10 +94,10 @@ class RobotCommand:
     def stopBot(self, delay = 1):
         # Stop the robot
         msg = self.buildMsg(0.0, 0.0, 0.0)
-        self.pub.publish(msg)
 
         currTime = time.time()
         while(time.time() <= currTime + delay):
+            self.pub.publish(msg)
             print('stopped')
 
     def testCommands(self):
