@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = False
+onJetson = True
 
 sim = False
 
@@ -322,15 +322,16 @@ if __name__ == "__main__":
 
     while True:
         print(bot.realSense.getDetectionData())
-    
-    '''
 
-    #bot.pickupPathLeft()
-    #bot.pickupPathRight()
     time.sleep(3)
     print("flip switch")
     bot.initServos()
     bot.pickupPathLeft()
+    
+    '''
+
+    while True:
+        print(bot.realSense.getYawAngle())
     
     
  
