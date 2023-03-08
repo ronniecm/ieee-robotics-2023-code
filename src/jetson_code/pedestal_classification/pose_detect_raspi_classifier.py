@@ -202,24 +202,11 @@ def main():
         # Print the prediction
         print_prediction(pred)
 
-        new_frame_time = time.time()
-  
         # Calculating the fps
-    
-        # fps will be number of frame processed in given time frame
-        # since their will be most of time error of 0.001 second
-        # we will be subtracting it to get more accurate result
+        new_frame_time = time.time()
         fps = 1/(new_frame_time-prev_frame_time)
         prev_frame_time = new_frame_time
-    
-        # converting the fps into integer
-        fps = int(fps)
-    
-        # converting the fps to string so that we can display it on frame
-        # by using putText function
-        fps = str(fps)
-    
-        # putting the FPS count on the frame
+        fps = str(int(fps))
         cv2.putText(img, fps, (7, 70), cv2.FONT_HERSHEY_SIMPLEX, 3, (100, 255, 0), 3, cv2.LINE_AA)
 
         # Display the image in a window
