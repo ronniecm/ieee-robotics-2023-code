@@ -125,7 +125,7 @@ ros::Subscriber <std_msgs::Int16> wrist("/bot/wrist_cmd", &wristCB);
 ros::Subscriber <std_msgs::Int16> paddle("/bot/paddle_cmd", &paddleCB);
 ros::Subscriber <std_msgs::Int16> lifting("/bot/lifting_cmd", &liftingCB);
 ros::Subscriber <std_msgs::Int16> carousel("/bot/carousel_cmd", &carouselCB);
-ros::Subscriber <std_msgs::Float32MultiArray> sub("/bot/PID", &pidCB);
+ros::Subscriber <std_msgs::Float32MultiArray> pid("/bot/PID", &pidCB);
 
 //This will be the callback function for wheel commands from jetson
 void mecanumDriveCallBack(const geometry_msgs::Twist& cmd_msg)
@@ -161,6 +161,7 @@ void setup()
     nh.subscribe(lifting);
     nh.subscribe(carousel);
     nh.advertise(Lifting);
+    nh.subscribe(pid);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
