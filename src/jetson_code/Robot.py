@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 sim = False
 
@@ -252,10 +252,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(0) < A_x :
-            msg_x = A_x - self.rng.getBack(0)
+        if self.rng.getBack(1) < A_x :
+            msg_x = A_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(0) - A_x)
+            msg_x = -(self.rng.getBack(1) - A_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -315,14 +315,14 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(0) < B_x :
-            msg_x = B_x - self.rng.getBack(0)
+        if self.rng.getBack(1) < B_x :
+            msg_x = B_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(0) - B_x)
+            msg_x = -(self.rng.getBack(1) - B_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
-        if self.rng.getLeft(0) > self.rng.getRight(0):
+        if self.rng.getLeft(0) > self.rng.getRight(1):
             msg_y = self.rng.getRight(0) - B_y
         else:
             msg_y = (self.initBoardWidth - self.rng.getLeft(1) - B_y)
@@ -331,7 +331,7 @@ class Robot:
         msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.25)
         print("MSG X-Y Components: ", msg_x, msg_y)
 
-        while not within1inch(self.rng.getRight(0), B_y, 3)  :
+        while not within1inch(self.rng.getRight(1), B_y, 3)  :
             self.ctrl.sendMsg(msg)
         print("Exit Conditions: Right: ", self.rng.getRight(), " Back: ", self.rng.getBack())
 
@@ -379,15 +379,15 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(0) < C_x :
-            msg_x = C_x - self.rng.getBack(0)
+        if self.rng.getBack(1) < C_x :
+            msg_x = C_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(0) - C_x)
+            msg_x = -(self.rng.getBack(1) - C_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
         if self.rng.getLeft(0) > self.rng.getRight(0):
-            msg_y = self.rng.getRight(0) - C_y
+            msg_y = self.rng.getRight(1) - C_y
         else:
             msg_y = C_y - self.rng.getLeft(0)
         
@@ -396,7 +396,7 @@ class Robot:
         print("MSG X-Y Components: ", msg_x, msg_y)
         
 
-        while not within1inch(self.rng.getRight(0), C_y, 2) and not within1inch(self.rng.getLeft(0), C_y, 2)  :
+        while not within1inch(self.rng.getRight(1), C_y, 2) and not within1inch(self.rng.getLeft(0), C_y, 2)  :
             self.ctrl.sendMsg(msg)
         print("Exit Conditions: Right/Left: ", self.rng.getRight(),"/",self.rng.getRight(), " Back: ", self.rng.getBack())
 
@@ -419,34 +419,14 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
 
-    
+    time.sleep(3)
+    print("TURN ON MOTORS")
 
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    '''
-    bot.stopBot()
-    #delay program for 5 seconds
-    #Need to wait for yaw angles to actually come in so will prob have to put in a delay somewhere in here
-    bot.initStartingConditions()
-    print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
-    print("turn on motors")
-    currTime = time.time()
-    currTime = time.time()
 
-    while True:
-        print(bot.realSense.getDetectionData())
-
-    time.sleep(3)
-    print("flip switch")
-    bot.initServos()
-    bot.pickupPathLeft()
-    
-    '''
-
-    while True:
-        print(bot.realSense.getYawAngle())
-    
-    
- 
+    bot.goToLocationA()
+    bot.goToLocationB()
+    bot.goToLocationC()

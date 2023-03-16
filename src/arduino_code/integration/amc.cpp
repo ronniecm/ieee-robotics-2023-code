@@ -88,9 +88,11 @@ void Amc::liftingCmd(int liftCmd)
   else {
     steppers->setPWM(1, 0, 2048);
     if (liftCmd == 1) {
+      Serial.println("going up");
       steppers->setPWM(0, 4096, 0); 
     }
     else if (liftCmd == -1) {
+      Serial.println("going down");
       steppers->setPWM(0, 0, 4096); 
     }
   }

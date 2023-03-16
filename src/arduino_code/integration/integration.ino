@@ -4,6 +4,7 @@
 #include "amc.h"
 #include "TeensyThreads.h"
 #include "std_msgs/Int16.h"
+#include "std_msgs/Float32MultiArray.h"
 
 #define FL_in1 2
 #define FL_in2 3
@@ -26,6 +27,7 @@ ros::NodeHandle nh;
 geometry_msgs::Twist msg;
 
 double demand;
+double kP, kI, kD;
 Drivetrain *drivetrain;
 Amc* arm;
 
@@ -105,6 +107,16 @@ void carouselCB(const std_msgs::Int16& cmd_msg)
   carouselCmd.data = cmd_msg.data;
 }
 
+void pidCB(const std_msgs::Float32MultiArray& cmd_msg)
+{
+  kP = cmd_msg.data[0];
+  kI = cmd_msg.data[1];
+  kD = cmd_msg.data[2];
+
+  //Now that we have the PID values, we can set them in the PID object
+  drivetrain->tunePID(kP, kI, kD);
+}
+
 ros::Subscriber <std_msgs::Int16> gripperRotate("/bot/gripperRotate_cmd", &gripperRotateCB);
 ros::Subscriber <std_msgs::Int16> gripperClamp("/bot/gripperClamp_cmd", &gripperClampCB);
 ros::Subscriber <std_msgs::Int16> door("/bot/door_cmd", &doorCB);
@@ -113,7 +125,7 @@ ros::Subscriber <std_msgs::Int16> wrist("/bot/wrist_cmd", &wristCB);
 ros::Subscriber <std_msgs::Int16> paddle("/bot/paddle_cmd", &paddleCB);
 ros::Subscriber <std_msgs::Int16> lifting("/bot/lifting_cmd", &liftingCB);
 ros::Subscriber <std_msgs::Int16> carousel("/bot/carousel_cmd", &carouselCB);
-
+ros::Subscriber <std_msgs::Float32MultiArray> pid("/bot/PID", &pidCB);
 
 //This will be the callback function for wheel commands from jetson
 void mecanumDriveCallBack(const geometry_msgs::Twist& cmd_msg)
@@ -149,6 +161,7 @@ void setup()
     nh.subscribe(lifting);
     nh.subscribe(carousel);
     nh.advertise(Lifting);
+    nh.subscribe(pid);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
@@ -173,45 +186,40 @@ void loop()
       previousMillis = currentMillis;
        if (Serial.available() > 0) {
         int n = Serial.parseInt();
-        demand = (double) n / 10.0;  
-      }
-      drivetrain->mecanumDrive(0, demand, 0);
-      //drivetrain->mecanumDrive(cmd_y, cmd_x, cmd_z);
-      /*
-       arm->gripperRotateCmd(gripperRotateCmd.data);
-        //GripperRotate.publish(&gripperRotateCmd);
-      arm->gripperClampCmd(gripperClampCmd.data);
-        //GripperClamp.publish(&gripperClampCmd);
-      arm->doorCmd(doorCmd.data);
-          //Door.publish(&doorCmd);
-       arm->armCmd(armCmd.data);
-          //Arm.publish(&armCmd);
-       arm->wristCmd(wristCmd.data);
-          //Wrist.publish(&wristCmd);
-       arm->paddleCmd(paddleCmd.data);
-          //Paddle.publish(&paddleCmd);
-       arm->liftingCmd(liftingCmd.data);
-       if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
-       if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
-       arm->liftingCmd(liftingCmd.data);
-       arm->carouselCmd(carouselCmd.data);
-       //Carousel.publish(&carouselCmd);
-       for(int i = 0; i < 4; i++) {
-        //Serial.print(drivetrain->getRPM(i));
-        //Serial.print(" "); 
-       }
-       //Serial.println();
-       */
-       Serial.print(drivetrain->getRPM(0));
-       Serial.print(" ");
-       Serial.print(drivetrain->getRPM(1));
-       Serial.print(" ");
-       Serial.print(drivetrain->getRPM(2));
-       Serial.print(" ");
-       Serial.print(drivetrain->getRPM(3));
-       Serial.println();
+        demand = (double) n / 10.0; 
+     }
    }
-   //nh.spinOnce();
+    //Mecanum drive now a function of twist msgs
+    drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
+    
+    arm->gripperRotateCmd(gripperRotateCmd.data);
+    //GripperRotate.publish(&gripperRotateCmd);
+    
+    arm->gripperClampCmd(gripperClampCmd.data);
+    //GripperClamp.publish(&gripperClampCmd);
+  
+    arm->doorCmd(doorCmd.data);
+    //Door.publish(&doorCmd);
+    
+    arm->armCmd(armCmd.data);
+    //Arm.publish(&armCmd);
+    
+    arm->wristCmd(wristCmd.data);
+    //Wrist.publish(&wristCmd);
+  
+    arm->paddleCmd(paddleCmd.data);
+    //Paddle.publish(&paddleCmd);
+
+    arm->liftingCmd(liftingCmd.data);
+    if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
+    if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
+    
+    arm->liftingCmd(liftingCmd.data);
+    
+    arm->carouselCmd(carouselCmd.data);
+    //Carousel.publish(&carouselCmd);
+    nh.spinOnce();
+   
 }
 
 

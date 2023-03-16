@@ -96,13 +96,14 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     // set the input of each PID speed controller and compute the output
     for (int i = 0; i < 4; i++)
     {
-      speedController[i]->Compute();
-      // if(setpoint[i] == 0) {
-      //     out[i] = 0;
-      // }
-      // else {
+      // speedController[i]->Compute();
+      
+      if(setpoint[i] == 0) {
+           out[i] = 0;
+      }
+      else {
 
-      //     // speedController[i]->SetTunings(kPlow[i], kIlow[i], kDlow[i]);
+      // speedController[i]->SetTunings(kPlow[i], kIlow[i], kDlow[i]);
 
       //     // // If setpoint is less than 60 RPM, use low speed PID values
       //     // if (setpoint[i] < 70)
@@ -112,8 +113,9 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
       //     //     speedController[i]->SetTunings(kPhigh[i], kIhigh[i], kDhigh[i]);
       //     // }
       
-      //     speedController[i]->Compute();
-      // }
+        speedController[i]->Compute();
+      }
+      
     }
 
     // Apply the calculated values to the motor control pins
@@ -128,7 +130,7 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     }
     else
     {
-        // Counter-clockwise rotation
+
         analogWrite(FL_in1,  out[0]);
         analogWrite(FL_in2, 0);
     }
@@ -152,12 +154,14 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     if (backLeft >= 0)
     {
         // Clockwise rotation
-        analogWrite(BL_in1, 0);
+        analogWrite(BL_in1,0);
         analogWrite(BL_in2, out[2]);
     }
+  
     else
     {
         // Counter-clockwise rotation
+
         analogWrite(BL_in1, out[2]);
         analogWrite(BL_in2, 0);
     }
@@ -271,3 +275,11 @@ double Drivetrain::getRPM(int i) {
 //       previousTime = currentTime;
 //     }
 // }
+
+void Drivetrain::tunePID(double kP, double kI, double kD) {
+    
+    for (int i = 0; i < 4; i++)
+    { 
+      this->getController(i)->SetTunings(kP, kI, kD);
+    }
+}

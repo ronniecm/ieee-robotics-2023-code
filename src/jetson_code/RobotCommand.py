@@ -98,8 +98,7 @@ class RobotCommand:
         currTime = time.time()
         while(time.time() <= currTime + delay):
             self.pub.publish(msg)
-            print('stopped')
-
+            
     def testCommands(self):
 
         currTime = time.time()
