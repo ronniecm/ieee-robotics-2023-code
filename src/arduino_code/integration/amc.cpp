@@ -20,7 +20,7 @@ Amc::Amc() {
     steppers->setPWMFreq(1000);
     
     if (tcs->begin()) {
-    //Serial.println("Found sensor");
+    ////Serial.println("Found sensor");
     }
 
     deg1 = 0; //pedestal rotate
@@ -29,7 +29,7 @@ Amc::Amc() {
     deg4 = 180; //arm flip
     deg5 = 180; //paddle
     deg6 = 100; // door
-    lift = 0; //lifting
+   
     stepsLeft = 0;
     carouselSpeed = 1000;
     speedControl = 0;
@@ -80,9 +80,20 @@ void Amc::paddleCmd(int angle)
 }
 
 //Stepper motor control
-void Amc::liftingCmd(int angle)
-{
-  
+void Amc::liftingCmd(int liftCmd)
+{ 
+  if (liftCmd == 0) {
+    steppers->setPWM(1, 0, 4096);
+  }
+  else {
+    steppers->setPWM(1, 0, 2048);
+    if (liftCmd == 1) {
+      steppers->setPWM(0, 4096, 0); 
+    }
+    else if (liftCmd == -1) {
+      steppers->setPWM(0, 0, 4096); 
+    }
+  }
 }
 
 void Amc::carouselCmd(int movement)
@@ -106,7 +117,7 @@ void Amc::stepperContinue()
     while (stepsLeft > 0) { 
     //if (stepsLeft > 0) {  
       speedControl = stepsLeft % 200;
-      //if (stepsLeft != 0) {Serial.println(speedControl);}      
+      //if (stepsLeft != 0) {//Serial.println(speedControl);}      
       if (speedControl > 75 && speedControl < 125) {carouselSpeed = 10000;}
       else {carouselSpeed = 1000;}    
 
@@ -116,14 +127,14 @@ void Amc::stepperContinue()
       delayMicroseconds(carouselSpeed);    
       stepsLeft -= 1;      
     }
-    //Serial.println(stepsLeft);
+    ////Serial.println(stepsLeft);
   }
   else if (stepsLeft < 0) {
     steppers->setPWM(2, 0, 4096);
     while (stepsLeft < 0) {
     //if (stepsLeft < 0) {
       speedControl = stepsLeft % 200;
-      //if (stepsLeft != 0) {Serial.println(speedControl);}      
+      //if (stepsLeft != 0) {//Serial.println(speedControl);}      
       if (speedControl > -125 && speedControl < -75) {carouselSpeed = 10000;}
       else {carouselSpeed = 1000;}     
 
@@ -133,7 +144,7 @@ void Amc::stepperContinue()
       delayMicroseconds(carouselSpeed);    
       stepsLeft += 1;      
     }
-    //Serial.println(stepsLeft);
+    ////Serial.println(stepsLeft);
   } 
 }
 
@@ -207,7 +218,7 @@ void Amc::drop_in_action() {
     if (stepsLeft == 0) {
       //update array after rotation
       update_slots(1);
-      //Serial.print("after ccw turn: "); 
+      ////Serial.print("after ccw turn: "); 
             
       //get reading for what's in slot 0
       tcs->getRawData(&r, &g, &b, &c);

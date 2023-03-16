@@ -35,14 +35,21 @@ Drivetrain::Drivetrain()
     enc[2] = new Encoder(BL_enc_in1, BL_enc_in2);
     enc[3] = new Encoder(BR_enc_in1, BR_enc_in2);
 
+  
     //Next initialize all 4 PID speed controllers with proper PID and setpoint values
     for (int i = 0; i < 4; i++)
     {
-        speedController[i] = new PID(&in[i], &out[i], &setpoint[i], kP[i], kI, kD[i], DIRECT);
+        speedController[i] = new PID(&in[i], &out[i], &setpoint[i], kPlow[i], kIlow[i], kDlow[i], DIRECT);
         speedController[i]->SetMode(AUTOMATIC);
         speedController[i]->SetSampleTime(10);
     }
 
+    // Initialize all 4 moving average filters
+    for (int i = 0; i < 4; i++)
+    {
+        rpmFilter[i] = new MovingAverageFilter(100);
+    }
+  
     //initialize count to 0
     count = 0;
 }
@@ -52,6 +59,7 @@ Drivetrain::~Drivetrain()
     // Destructor deletes any pointers that were used
     delete[] enc;
     delete[] speedController;
+    delete[] rpmFilter;
 }
 
 void Drivetrain::mecanumDrive(float x, float y, float z)
@@ -75,6 +83,10 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     backRight = backRight * 255;
     */
 
+    for(int i = 0; i < 4; i++) {
+      in[i] = abs(finalRpm[i]);  
+    }
+
     // set the setpoint of each PID speed controller
     setpoint[0] = abs(frontLeftRPM);
     setpoint[1] = abs(frontRightRPM);
@@ -84,12 +96,29 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     // set the input of each PID speed controller and compute the output
     for (int i = 0; i < 4; i++)
     {
-        in[i] = abs(finalRpm[i]);
-        speedController[i]->Compute();
+      speedController[i]->Compute();
+      // if(setpoint[i] == 0) {
+      //     out[i] = 0;
+      // }
+      // else {
+
+      //     // speedController[i]->SetTunings(kPlow[i], kIlow[i], kDlow[i]);
+
+      //     // // If setpoint is less than 60 RPM, use low speed PID values
+      //     // if (setpoint[i] < 70)
+      //     // {
+      //     //     speedController[i]->SetTunings(kPlow[i], kIlow[i], kDlow[i]);
+      //     // } else {
+      //     //     speedController[i]->SetTunings(kPhigh[i], kIhigh[i], kDhigh[i]);
+      //     // }
+      
+      //     speedController[i]->Compute();
+      // }
     }
 
     // Apply the calculated values to the motor control pins
-    
+
+
     // Front left motor
     if (frontLeft >= 0)
     {
@@ -100,10 +129,11 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     else
     {
         // Counter-clockwise rotation
-        analogWrite(FL_in1, out[0]);
+        analogWrite(FL_in1,  out[0]);
         analogWrite(FL_in2, 0);
     }
 
+   
     // Front right motor
     if (frontRight >= 0)
     {
@@ -117,21 +147,22 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
         analogWrite(FR_in1, out[1]);
         analogWrite(FR_in2, 0);
     }
-
+    
     // Back left motor
     if (backLeft >= 0)
     {
         // Clockwise rotation
-        analogWrite(BL_in1, out[2]);
-        analogWrite(BL_in2, 0);
+        analogWrite(BL_in1, 0);
+        analogWrite(BL_in2, out[2]);
     }
     else
     {
         // Counter-clockwise rotation
-        analogWrite(BL_in1, 0);
-        analogWrite(BL_in2, out[2]);
+        analogWrite(BL_in1, out[2]);
+        analogWrite(BL_in2, 0);
     }
 
+    
     // Back right motor
     if (backRight >= 0)
     {
@@ -145,41 +176,71 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
         analogWrite(BR_in1, 0);
         analogWrite(BR_in2, out[3]);
     }
+    
 }
+
+// void Drivetrain::calcRPM()
+// {
+//     //this functions gets called every millisecond
+//     //everytime the functions gets called increment the call count variable 'count'
+//     count++;
+//     for (int i = 0; i < 4; i++)
+//     {
+//         //for each motor, find its current encoder position and then how much it has changed from its last reading
+//         //then divide that delta value by TICK_PER_REV to get the number of revolutions performed in that millisecond
+//         //finally to retrieve the RPM value multiply that value by 60,000 and set the prevPos[i] to the currPos saved earlier
+//         //every 10 calls to this functions, the samples are averaged and saved into finalRpm array
+//         int currPos = enc[i]->read();
+//         double deltaPos = currPos - prevPos[i];
+//         double revs = deltaPos / TICKS_PER_REV;
+//         double rpmCalc = revs * 60000;
+//         prevPos[i] = currPos;
+//         rpmSum[i] += rpmCalc;
+//         if (count >= 10)
+//         {
+//             finalRpm[i] = rpmSum[i] / 10.0;
+//             rpmSum[i] = 0;
+//         }
+//     }
+//     if (count >= 10)
+//     {
+//         count = 0;
+//     }
+// }
 
 void Drivetrain::calcRPM()
 {
-    //this functions gets called every millisecond
-    //everytime the functions gets called increment the call count variable 'count'
-    count++;
+    // Get the current time in microseconds
+    unsigned long currentTime = micros();
+    
+    // Calculate the elapsed time since the last call (in milliseconds)
+    double elapsedTime = (currentTime - previousTime) / 1000.0;
+    previousTime = currentTime;
+
     for (int i = 0; i < 4; i++)
     {
-        //for each motor, find its current encoder position and then how much it has changed from its last reading
-        //then divide that delta value by TICK_PER_REV to get the number of revolutions performed in that millisecond
-        //finally to retrieve the RPM value multiply that value by 60,000 and set the prevPos[i] to the currPos saved earlier
-        //every 10 calls to this functions, the samples are averaged and saved into finalRpm array
         int currPos = enc[i]->read();
         double deltaPos = currPos - prevPos[i];
         double revs = deltaPos / TICKS_PER_REV;
-        double rpmCalc = revs * 60000;
+
+        // Calculate the RPM based on the elapsed time
+        double rpmCalc = revs * (60000.0 / elapsedTime);
         prevPos[i] = currPos;
-        rpmSum[i] += rpmCalc;
-        if (count >= 10)
-        {
-            finalRpm[i] = rpmSum[i] / 10.0;
-            rpmSum[i] = 0;
-        }
+        
+        // // accumulate the RPM values
+        // rpmSum[i] += rpmCalc;
+
+        // Apply moving average filter
+        finalRpm[i] = rpmFilter[i]->process(rpmCalc);
     }
-    if (count >= 10)
-    {
-        count = 0;
-    }
+
 }
 
+
 // Returns the encoder object at the given index
-Encoder *Drivetrain::getEnc(int i)
+int Drivetrain::getEnc(int i)
 {
-    return enc[i];
+    return enc[i]->read();
 }
 
 // Returns the PID object at the given index
@@ -192,3 +253,21 @@ PID *Drivetrain::getController(int i)
 double Drivetrain::getRPM(int i) {
     return finalRpm[i];
 }
+
+// void Drivetrain::calculateSpeed(int i) {
+//     unsigned long currentTime = millis();
+//     unsigned long deltaTime = currentTime - previousTime;
+//     if (deltaTime >= 10) {
+//       double error = setpoint[i] - finalRpm[i];  
+//       double pTerm = kP[i] * error;
+//       integralError += error * deltaTime;
+//       double iTerm = kI[i] * integralError;
+//       double derivativeError = (error - lastError) / deltaTime;
+//       double dTerm = kD[i] * derivativeError;
+//       out[i] = pTerm + iTerm + dTerm;
+//       if (out[i] < 0) { out[i] = 0; }
+//       if (out[i] > 255) { out[i] = 255; }
+//       lastError = error;
+//       previousTime = currentTime;
+//     }
+// }
