@@ -17,6 +17,9 @@
 #define BR_in1 28
 #define BR_in2 29
 
+#define UPPER_LIMIT 39
+#define LOWER_LIMIT 38
+
 //Setting up the ros node for wheel commands
 ros::NodeHandle nh;
 //Thie type of message is geometry_msgs::Twist
@@ -93,6 +96,8 @@ void paddleCB(const std_msgs::Int16& cmd_msg)
 void liftingCB(const std_msgs::Int16& cmd_msg)
 {
   liftingCmd.data = cmd_msg.data;
+  liftingMsg.data = liftingCmd.data;
+  Lifting.publish(&liftingMsg);
 }
 
 void carouselCB(const std_msgs::Int16& cmd_msg)
@@ -148,30 +153,21 @@ double demand;
 void setup()
 {
     drivetrain = new Drivetrain();
-    arm = new Amc;
+    arm = new Amc();
 
     initDrivetrain();
     //Ros setup node & subscribe to topic
     nh.initNode();
-    nh.subscribe(sub);
-
-    nh.initNode();
-    
+    nh.subscribe(sub);    
     nh.subscribe(gripperRotate);
-    
     nh.subscribe(gripperClamp);
-    
     nh.subscribe(door);
-    
     nh.subscribe(elbow);
-    
     nh.subscribe(wrist);
-    
     nh.subscribe(paddle);
-    
     nh.subscribe(lifting);
-    
     nh.subscribe(carousel);
+    nh.advertise(Lifting);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
@@ -180,18 +176,8 @@ void setup()
     paddleCmd.data = 180;
     doorCmd.data = 100;
     carouselCmd.data = 0;
-      
-    xController.SetMode(AUTOMATIC);
-    xController.SetOutputLimits(-1.0, 1.0);
-    xController.SetSampleTime(10);
-
-    yController.SetMode(AUTOMATIC);
-    yController.SetOutputLimits(-1.0, 1.0);
-    yController.SetSampleTime(10);
-
-    yController.SetMode(AUTOMATIC);
-    yController.SetOutputLimits(-1.0, 1.0);
-    yController.SetSampleTime(10);
+    liftingCmd.data = 1;
+       
     pinMode(33, OUTPUT);
     pinMode(38, INPUT);
     pinMode(39, INPUT);
@@ -208,34 +194,33 @@ void loop()
      }
      //Mecanum drive now a function of twist msgs
      drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
-     for(int i = 0; i < 4; i++) {
-        Serial.print(drivetrain->getRPM(i));
-        //Serial.print(" ");
-     }
-     //Serial.println();
      
-  arm->gripperRotateCmd(gripperRotateCmd.data);
-  GripperRotate.publish(&gripperRotateCmd);
-  
-  arm->gripperClampCmd(gripperClampCmd.data);
-  GripperClamp.publish(&gripperClampCmd);
+     arm->gripperRotateCmd(gripperRotateCmd.data);
+      //GripperRotate.publish(&gripperRotateCmd);
+      
+     arm->gripperClampCmd(gripperClampCmd.data);
+      //GripperClamp.publish(&gripperClampCmd);
+    
+     arm->doorCmd(doorCmd.data);
+      //Door.publish(&doorCmd);
+      
+     arm->armCmd(armCmd.data);
+      //Arm.publish(&armCmd);
+      
+     arm->wristCmd(wristCmd.data);
+      //Wrist.publish(&wristCmd);
+    
+     arm->paddleCmd(paddleCmd.data);
+      //Paddle.publish(&paddleCmd);
 
-  arm->doorCmd(doorCmd.data);
-  Door.publish(&doorCmd);
-  
-  arm->armCmd(armCmd.data);
-  Arm.publish(&armCmd);
-  
-  arm->wristCmd(wristCmd.data);
-  Wrist.publish(&wristCmd);
-
-  arm->paddleCmd(paddleCmd.data);
-  Paddle.publish(&paddleCmd);
-  
-  arm->liftingCmd(liftingCmd.data);
-  
-  arm->carouselCmd(carouselCmd.data);
-  Carousel.publish(&carouselCmd);
+     arm->liftingCmd(liftingCmd.data);
+     if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
+     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
+     
+     arm->liftingCmd(liftingCmd.data);
+      
+     arm->carouselCmd(carouselCmd.data);
+      //Carousel.publish(&carouselCmd);
    }
 
    nh.spinOnce();

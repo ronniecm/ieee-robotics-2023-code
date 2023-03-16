@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 sim = False
 
@@ -310,18 +310,19 @@ if __name__ == "__main__":
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    '''
-    bot.stopBot()
+    
+    bot.ctrl.stopBot()
     #delay program for 5 seconds
     #Need to wait for yaw angles to actually come in so will prob have to put in a delay somewhere in here
     bot.initStartingConditions()
-    print("Right: ", bot.ultraRight, "Back: ", bot.ultraBack)
     print("turn on motors")
     currTime = time.time()
     currTime = time.time()
 
+    '''
     while True:
         print(bot.realSense.getDetectionData())
+    '''
 
     time.sleep(3)
     print("flip switch")
@@ -334,4 +335,4 @@ if __name__ == "__main__":
         print(bot.realSense.getYawAngle())
     
     
- 
+ '''

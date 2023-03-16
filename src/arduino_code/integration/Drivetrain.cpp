@@ -95,12 +95,12 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     {
         // Clockwise rotation
         analogWrite(FL_in1, 0);
-        analogWrite(FL_in2, out[0]);
+        analogWrite(FL_in2, abs(frontLeft)* 255);
     }
     else
     {
         // Counter-clockwise rotation
-        analogWrite(FL_in1, out[0]);
+        analogWrite(FL_in1,  abs(frontLeft) * 255);
         analogWrite(FL_in2, 0);
     }
 
@@ -109,12 +109,12 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     {
         // Clockwise rotation
         analogWrite(FR_in1, 0);
-        analogWrite(FR_in2, out[1]);
+        analogWrite(FR_in2, abs(frontRight)*255);
     }
     else
     {
         // Counter-clockwise rotation
-        analogWrite(FR_in1, out[1]);
+        analogWrite(FR_in1, abs(frontRight)*255);
         analogWrite(FR_in2, 0);
     }
 
@@ -122,28 +122,28 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     if (backLeft >= 0)
     {
         // Clockwise rotation
-        analogWrite(BL_in1, out[2]);
+        analogWrite(BL_in1, abs(backLeft)*255);
         analogWrite(BL_in2, 0);
     }
     else
     {
         // Counter-clockwise rotation
         analogWrite(BL_in1, 0);
-        analogWrite(BL_in2, out[2]);
+        analogWrite(BL_in2, abs(backLeft)*255);
     }
 
     // Back right motor
     if (backRight >= 0)
     {
         // Clockwise rotation
-        analogWrite(BR_in1, out[3]);
+        analogWrite(BR_in1, abs(backRight)*255);
         analogWrite(BR_in2, 0);
     }
     else
     {
         // Counter-clockwise rotation
         analogWrite(BR_in1, 0);
-        analogWrite(BR_in2, out[3]);
+        analogWrite(BR_in2, abs(backRight)*255);
     }
 }
 

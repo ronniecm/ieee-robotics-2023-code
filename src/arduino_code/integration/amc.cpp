@@ -29,7 +29,7 @@ Amc::Amc() {
     deg4 = 180; //arm flip
     deg5 = 180; //paddle
     deg6 = 100; // door
-    lift = 0; //lifting
+   
     stepsLeft = 0;
     carouselSpeed = 1000;
     speedControl = 0;
@@ -80,9 +80,22 @@ void Amc::paddleCmd(int angle)
 }
 
 //Stepper motor control
-void Amc::liftingCmd(int angle)
-{
-  
+void Amc::liftingCmd(int liftCmd)
+{ 
+  if (liftCmd == 0) {
+    steppers->setPWM(1, 0, 4096);
+  }
+  else {
+    steppers->setPWM(1, 0, 2048);
+    if (liftCmd == 1) {
+      Serial.println("going up");
+      steppers->setPWM(0, 4096, 0); 
+    }
+    else if (liftCmd == -1) {
+      Serial.println("going down");
+      steppers->setPWM(0, 0, 4096); 
+    }
+  }
 }
 
 void Amc::carouselCmd(int movement)
