@@ -14,14 +14,17 @@ void loop()
   int pValue = analogRead(pResistor);
   //Serial.println(pValue);
   //Analog values for red color range below 
-  /* Testing Distance: Average Analog Reading
+  /* Testing 
+    <1cm: 960
     1cm:  938
     2cm:  846
     3cm:  790
     4cm:  735
     5cm:  727
-  */  
-  if (pValue >720 && pValue <940)
+  */
+  //750 to 820
+  
+  if (pValue >720 && pValue <960)
   {
     Serial.println("START");
   }
