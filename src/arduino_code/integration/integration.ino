@@ -25,7 +25,7 @@ ros::NodeHandle nh;
 //Thie type of message is geometry_msgs::Twist
 geometry_msgs::Twist msg;
 
-//double demand;
+double demand;
 Drivetrain *drivetrain;
 Amc* arm;
 
@@ -173,82 +173,40 @@ void loop()
       previousMillis = currentMillis;
        if (Serial.available() > 0) {
         int n = Serial.parseInt();
-<<<<<<< HEAD
         demand = (double) n / 10.0; 
      }
-     //Mecanum drive now a function of twist msgs
-     drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
-     
-     arm->gripperRotateCmd(gripperRotateCmd.data);
-      //GripperRotate.publish(&gripperRotateCmd);
-      
-     arm->gripperClampCmd(gripperClampCmd.data);
-      //GripperClamp.publish(&gripperClampCmd);
-    
-     arm->doorCmd(doorCmd.data);
-      //Door.publish(&doorCmd);
-      
-     arm->armCmd(armCmd.data);
-      //Arm.publish(&armCmd);
-      
-     arm->wristCmd(wristCmd.data);
-      //Wrist.publish(&wristCmd);
-    
-     arm->paddleCmd(paddleCmd.data);
-      //Paddle.publish(&paddleCmd);
-
-     arm->liftingCmd(liftingCmd.data);
-     if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
-     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
-     
-     arm->liftingCmd(liftingCmd.data);
-      
-     arm->carouselCmd(carouselCmd.data);
-      //Carousel.publish(&carouselCmd);
-=======
-        demand = (double) n / 10.0;  
-      }
->>>>>>> 61c6962a7f508b5e92d2ac6358e4d28d855ef6b5
    }
-      //drivetrain->mecanumDrive(0, demand, 0);
-    drivetrain->mecanumDrive(cmd_y, cmd_x, cmd_z);
+    //Mecanum drive now a function of twist msgs
+    drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
     
     arm->gripperRotateCmd(gripperRotateCmd.data);
-      //GripperRotate.publish(&gripperRotateCmd);
+    //GripperRotate.publish(&gripperRotateCmd);
+    
     arm->gripperClampCmd(gripperClampCmd.data);
-      //GripperClamp.publish(&gripperClampCmd);
+    //GripperClamp.publish(&gripperClampCmd);
+  
     arm->doorCmd(doorCmd.data);
-        //Door.publish(&doorCmd);
+    //Door.publish(&doorCmd);
+    
     arm->armCmd(armCmd.data);
-        //Arm.publish(&armCmd);
+    //Arm.publish(&armCmd);
+    
     arm->wristCmd(wristCmd.data);
-        //Wrist.publish(&wristCmd);
+    //Wrist.publish(&wristCmd);
+  
     arm->paddleCmd(paddleCmd.data);
-        //Paddle.publish(&paddleCmd);
+    //Paddle.publish(&paddleCmd);
+
     arm->liftingCmd(liftingCmd.data);
     if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
-    arm->liftingCmd(liftingCmd.data);
-    arm->carouselCmd(carouselCmd.data);
-    nh.spinOnce();
     
-
-       //for(int i = 0; i < 4; i++) {
-        //Serial.print(drivetrain->getRPM(i));
-        //Serial.print(" "); 
-       //}
-       //Serial.println();
-       
-      //  Serial.print(drivetrain->getRPM(0));
-      //  Serial.print(" ");
-      //  Serial.print(drivetrain->getRPM(1));
-      //  Serial.print(" ");
-      //  Serial.print(drivetrain->getRPM(2));
-      //  Serial.print(" ");
-      //  Serial.print(drivetrain->getRPM(3));
-      //  Serial.println();
-   //}
-   //nh.spinOnce();
+    arm->liftingCmd(liftingCmd.data);
+    
+    arm->carouselCmd(carouselCmd.data);
+    //Carousel.publish(&carouselCmd);
+    nh.spinOnce();
+   
 }
 
 

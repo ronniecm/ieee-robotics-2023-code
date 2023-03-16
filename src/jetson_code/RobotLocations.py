@@ -273,10 +273,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(0) < A_x :
-            msg_x = A_x - self.rng.getBack(0)
+        if self.rng.getBack(1) < A_x :
+            msg_x = A_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(0) - A_x)
+            msg_x = -(self.rng.getBack(1) - A_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -336,10 +336,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(0) < B_x :
-            msg_x = B_x - self.rng.getBack(0)
+        if self.rng.getBack(1) < B_x :
+            msg_x = B_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(0) - B_x)
+            msg_x = -(self.rng.getBack(1) - B_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -400,10 +400,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(0) < C_x :
-            msg_x = C_x - self.rng.getBack(0)
+        if self.rng.getBack(1) < C_x :
+            msg_x = C_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(0) - C_x)
+            msg_x = -(self.rng.getBack(1) - C_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -467,8 +467,8 @@ if __name__ == "__main__":
     #bot.pickupPathRight()
     time.sleep(2)
     bot.goToLocationA()
-    bot.goToLocationB()
-    bot.goToLocationC()
+    #bot.goToLocationB()
+    #bot.goToLocationC()
     #bot.goToLocationC()
     
     
