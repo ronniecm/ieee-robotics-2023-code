@@ -20,7 +20,7 @@ Amc::Amc() {
     steppers->setPWMFreq(1000);
     
     if (tcs->begin()) {
-    //Serial.println("Found sensor");
+    ////Serial.println("Found sensor");
     }
 
     deg1 = 0; //pedestal rotate
@@ -88,11 +88,17 @@ void Amc::liftingCmd(int liftCmd)
   else {
     steppers->setPWM(1, 0, 2048);
     if (liftCmd == 1) {
+<<<<<<< HEAD
       Serial.println("going up");
       steppers->setPWM(0, 4096, 0); 
     }
     else if (liftCmd == -1) {
       Serial.println("going down");
+=======
+      steppers->setPWM(0, 4096, 0); 
+    }
+    else if (liftCmd == -1) {
+>>>>>>> 61c6962a7f508b5e92d2ac6358e4d28d855ef6b5
       steppers->setPWM(0, 0, 4096); 
     }
   }
@@ -119,7 +125,7 @@ void Amc::stepperContinue()
     while (stepsLeft > 0) { 
     //if (stepsLeft > 0) {  
       speedControl = stepsLeft % 200;
-      //if (stepsLeft != 0) {Serial.println(speedControl);}      
+      //if (stepsLeft != 0) {//Serial.println(speedControl);}      
       if (speedControl > 75 && speedControl < 125) {carouselSpeed = 10000;}
       else {carouselSpeed = 1000;}    
 
@@ -129,14 +135,14 @@ void Amc::stepperContinue()
       delayMicroseconds(carouselSpeed);    
       stepsLeft -= 1;      
     }
-    //Serial.println(stepsLeft);
+    ////Serial.println(stepsLeft);
   }
   else if (stepsLeft < 0) {
     steppers->setPWM(2, 0, 4096);
     while (stepsLeft < 0) {
     //if (stepsLeft < 0) {
       speedControl = stepsLeft % 200;
-      //if (stepsLeft != 0) {Serial.println(speedControl);}      
+      //if (stepsLeft != 0) {//Serial.println(speedControl);}      
       if (speedControl > -125 && speedControl < -75) {carouselSpeed = 10000;}
       else {carouselSpeed = 1000;}     
 
@@ -146,7 +152,7 @@ void Amc::stepperContinue()
       delayMicroseconds(carouselSpeed);    
       stepsLeft += 1;      
     }
-    //Serial.println(stepsLeft);
+    ////Serial.println(stepsLeft);
   } 
 }
 
@@ -220,7 +226,7 @@ void Amc::drop_in_action() {
     if (stepsLeft == 0) {
       //update array after rotation
       update_slots(1);
-      //Serial.print("after ccw turn: "); 
+      ////Serial.print("after ccw turn: "); 
             
       //get reading for what's in slot 0
       tcs->getRawData(&r, &g, &b, &c);
