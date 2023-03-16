@@ -1,22 +1,27 @@
 //Link for wiring: https://www.instructables.com/How-to-use-a-photoresistor-or-photocell-Arduino-Tu/
 //(only need photoresistor, 10k resistor, A0 pin, 5V, ground)
-//Constants
+
+//Note: The Red LED must be directly above the photoresistor!
 int pResistor = A0; // Photoresistor at Arduino analog pin A0
-//int redLED = 2;
-
-
 void setup()
 {
   Serial.begin(9600);
-  pinMode(pResistor, INPUT);// Set pResistor - A0 pin as an input (optional)
-  pinMode(redLED, OUTPUT);
+  pinMode(pResistor, INPUT);
 }
-// range for red detection is 750-815
-void loop(){
-  //digitalWrite(redLED,HIGH);//For testing
-  int value = analogRead(pResistor);
-  // Serial.println(value);
-  if (value >750 && value <820)
+
+void loop()
+{
+  int pValue = analogRead(pResistor);
+  //Serial.println(pValue);
+  //Analog values for red color range below 
+  /* Testing Distance: Average Analog Reading
+    1cm:  938
+    2cm:  846
+    3cm:  790
+    4cm:  735
+    5cm:  727
+  */  
+  if (pValue >720 && pValue <940)
   {
     Serial.println("START");
   }
