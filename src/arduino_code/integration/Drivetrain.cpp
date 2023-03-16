@@ -275,3 +275,10 @@ double Drivetrain::getRPM(int i) {
 //       previousTime = currentTime;
 //     }
 // }
+
+void tunePID(double kP, double kI, double kD) {
+    for (int i = 0; i < 4; i++)
+    {
+        speedController[i]->SetTunings(kP, kI, kD);
+    }
+}

@@ -19,6 +19,7 @@ public:
     double getRPM(int i); //get method for retrieving RPM of a wheel
     void mecanumDrive(float x, float y, float z); //mecanum drive function
     void calcRPM(); //calculates RPM of all motors
+    void tunePID(); //tunes PID values for all motors
     // void calculateSpeed(int i);
 private:
     Encoder* enc[4]; //encoder array

@@ -4,6 +4,7 @@
 #include "amc.h"
 #include "TeensyThreads.h"
 #include "std_msgs/Int16.h"
+#include "std_msgs/Float32MultiArray.h"
 
 #define FL_in1 2
 #define FL_in2 3
@@ -26,6 +27,7 @@ ros::NodeHandle nh;
 geometry_msgs::Twist msg;
 
 double demand;
+double kP, kI, kD;
 Drivetrain *drivetrain;
 Amc* arm;
 
@@ -105,6 +107,16 @@ void carouselCB(const std_msgs::Int16& cmd_msg)
   carouselCmd.data = cmd_msg.data;
 }
 
+void pidCB(const std_msgs::Float32MultiArray& cmd_msg)
+{
+  kP = cmd_msg.data[0];
+  kI = cmd_msg.data[1];
+  kD = cmd_msg.data[2];
+
+  //Now that we have the PID values, we can set them in the PID object
+  drivetrain->tunePID(kP, kI, kD);
+}
+
 ros::Subscriber <std_msgs::Int16> gripperRotate("/bot/gripperRotate_cmd", &gripperRotateCB);
 ros::Subscriber <std_msgs::Int16> gripperClamp("/bot/gripperClamp_cmd", &gripperClampCB);
 ros::Subscriber <std_msgs::Int16> door("/bot/door_cmd", &doorCB);
@@ -113,7 +125,7 @@ ros::Subscriber <std_msgs::Int16> wrist("/bot/wrist_cmd", &wristCB);
 ros::Subscriber <std_msgs::Int16> paddle("/bot/paddle_cmd", &paddleCB);
 ros::Subscriber <std_msgs::Int16> lifting("/bot/lifting_cmd", &liftingCB);
 ros::Subscriber <std_msgs::Int16> carousel("/bot/carousel_cmd", &carouselCB);
-
+ros::Subscriber <std_msgs::Float32MultiArray> sub("/bot/PID", &pidCB);
 
 //This will be the callback function for wheel commands from jetson
 void mecanumDriveCallBack(const geometry_msgs::Twist& cmd_msg)
