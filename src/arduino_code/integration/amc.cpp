@@ -105,7 +105,7 @@ void Amc::carouselCmd(int movement)
       stepsLeft += 200;
       drop_in = true;
       stepperContinue();
-      drop_in_action();
+      //drop_in_action();
       //dispense();
       //dispense_stack_helper();
       movement = 0;
@@ -115,19 +115,19 @@ void Amc::carouselCmd(int movement)
 void Amc::stepperContinue()
 {
     if (stepsLeft > 0) {
-    steppers->setPWM(2, 4096, 0);
-    while (stepsLeft > 0) { 
-    //if (stepsLeft > 0) {  
-      speedControl = stepsLeft % 200;
-      //if (stepsLeft != 0) {//Serial.println(speedControl);}      
-      if (speedControl > 75 && speedControl < 125) {carouselSpeed = 10000;}
-      else {carouselSpeed = 1000;}    
-
-      digitalWrite(CarouselPin, HIGH);
-      delayMicroseconds(carouselSpeed);
-      digitalWrite(CarouselPin, LOW);
-      delayMicroseconds(carouselSpeed);    
-      stepsLeft -= 1;      
+      steppers->setPWM(2, 4096, 0);
+      while (stepsLeft > 0) { 
+      //if (stepsLeft > 0) {  
+        speedControl = stepsLeft % 200;
+        //if (stepsLeft != 0) {//Serial.println(speedControl);}      
+        if (speedControl > 75 && speedControl < 125) {carouselSpeed = 10000;}
+        else {carouselSpeed = 1000;}    
+  
+        digitalWrite(CarouselPin, HIGH);
+        delayMicroseconds(carouselSpeed);
+        digitalWrite(CarouselPin, LOW);
+        delayMicroseconds(carouselSpeed);    
+        stepsLeft -= 1;      
     }
     ////Serial.println(stepsLeft);
   }
@@ -291,4 +291,8 @@ void Amc::storeUprightPedestal(const int wristOffset) {
     deg2 = 180;
     servos->setPWM(1, 0, map( deg2, 0, 180, servoMIN, servoMAX)); //clamp open
     delay(1000);
+}
+
+int Amc::getStepsLeft() {
+  return stepsLeft;  
 }

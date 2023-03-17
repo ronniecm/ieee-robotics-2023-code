@@ -188,8 +188,7 @@ void loop()
         int n = Serial.parseInt();
         demand = (double) n / 10.0; 
      }
-   }
-    //Mecanum drive now a function of twist msgs
+     //Mecanum drive now a function of twist msgs
     drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
     
     arm->gripperRotateCmd(gripperRotateCmd.data);
@@ -215,11 +214,17 @@ void loop()
     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
     
     arm->liftingCmd(liftingCmd.data);
+
     
     arm->carouselCmd(carouselCmd.data);
+    if(arm->getStepsLeft() == 0) {
+      carouselCmd.data = 0;
+      arm->carouselCmd(carouselCmd.data);  
+    }
     //Carousel.publish(&carouselCmd);
+   }
+    
     nh.spinOnce();
-   
 }
 
 
