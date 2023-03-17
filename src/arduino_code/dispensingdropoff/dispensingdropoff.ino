@@ -1,76 +1,29 @@
 #include <Wire.h>
 #include "dispensingdropoff.h"
+#include "ros.h"
+#include "std_msgs/Int8.h"
+
+ros::NodeHandle nh;
 
 Dispensing dispense;
 
-uint32_t startTime;
-bool droplocationfound = false;
+std_msgs::Int8 colorMsg;
 
-
+ros::Publisher color("/bot/color", &colorMsg);
 void setup(void)
 {
   dispense.setup_bot();
+  colorMsg.data = 0;
+  nh.advertise(color);
 }
 void loop(void) {
-
-  startTime = millis();
-  while (!droplocationfound && (millis() - startTime < 2000))
-  {
-      if (dispense.checkcolor())
-      {
-        dispense.halt();
-        droplocationfound = true;
-      }
-      else
-      {
-        dispense.right(100);
-        delay(100);
-      }
-      Serial.print("a");
-  }
-  if (!droplocationfound)
-  {
-    if (dispense.checkcolor())
-    {
-      dispense.halt();
-      droplocationfound = true;
-    }
-    else
-    {
-      dispense.forward(100);
-      delay(500);
-    }
-    Serial.print("b");
-  }
-  startTime = millis();
-  while (!droplocationfound && (millis() - startTime < 2000))
-  {
-     if (dispense.checkcolor())
-     {
-       dispense.halt();
-       droplocationfound = true;
-     }
-     else
-     {
-       dispense.left(100);
-       delay(100);
-     }
-     Serial.print("c");
-  }
-  if (!droplocationfound)
-  {
-    if (dispense.checkcolor())
-    {
-      dispense.halt();
-      droplocationfound = true;
-    }
-    else
-    {
-      dispense.forward(100);
-      delay(500);
-    }
-    Serial.print("d");
-  }
-
   
+  if (dispense.checkcolor()) {
+    colorMsg.data = 1;
+    GripperRotate.publish(&colorMsg);
+  }
+  else {
+    colorMsg.data = 0;
+    GripperRotate.publish(&colorMsg);
+  }
 }

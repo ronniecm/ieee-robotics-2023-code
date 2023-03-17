@@ -41,6 +41,7 @@ from pedestal_classification.PedestalTracker import PedestalTracker
 
 if onJetson:
     from Cameras import RealSense
+from Color import Color
 
 
 #This will be the main class that inherits everything from every other class
@@ -54,6 +55,7 @@ class Robot:
 
         self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
         self.rng = Ranging(robot_name, node_name)
+        self.color = Color(robot_name)
 
         # Initialize pedestal tracker object
         path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"

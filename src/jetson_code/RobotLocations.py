@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 sim = True
 
@@ -39,6 +39,7 @@ from RobotCommand import RobotCommand
 from Servos import Servos
 if onJetson:
     from Cameras import RealSense
+from pedestal_classification.PedestalTracker import PedestalTracker 
 
 
 #This will be the main class that inherits everything from every other class
@@ -433,36 +434,36 @@ class Robot:
         while dropofflocation is False and (time.time() - start < 2000):
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go right
             else:
-                RobotCommand.goRight();
+                RobotCommand.goRight()
         if not dropofflocation:
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go forward
             else:
-                RobotCommand.goForward()
+                self.ctrl.goFoward()
         start = time.time()
         while dropofflocation is False and (time.time() - start < 2000):
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go left
             else:
-                RobotCommand.goLeft();
+                self.ctrl.goLeft()
         if not dropofflocation:
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go forward
             else:
-                RobotCommand.goForward()
+                self.ctrl.goFoward()
 
             
         
