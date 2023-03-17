@@ -13,7 +13,7 @@ import torch.nn.functional as F
 
 from math import atan2, cos, sin, sqrt, pi
 
-from ImageClassifierNets import LightweightCNN
+from .ImageClassifierNets import LightweightCNN
 
 def drawAxis(img, p_, q_, color, scale):
     '''
