@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = True
+onJetson = False
 
 sim = True
 
@@ -39,6 +39,7 @@ from RobotCommand import RobotCommand
 from Servos import Servos
 if onJetson:
     from Cameras import RealSense
+from pedestal_classification.PedestalTracker import PedestalTracker 
 
 
 #This will be the main class that inherits everything from every other class
