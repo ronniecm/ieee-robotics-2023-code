@@ -426,7 +426,48 @@ class Robot:
         self.ctrl.stopBot()
         #Now we should be at or near location
 
-    
+    def alignDispensing(self):
+        dropofflocation = False
+        start = time.time()
+#        while(!self.color.isWhite()):
+        while dropofflocation is False and (time.time() - start < 2000):
+            if self.color.isWhite():
+                # stop robot
+                RobotCommand.stopBot()
+                dropofflocation = True
+            # else go right
+            else:
+                RobotCommand.goRight();
+        if not dropofflocation:
+            if self.color.isWhite():
+                # stop robot
+                RobotCommand.stopBot()
+                dropofflocation = True
+            # else go forward
+            else:
+                RobotCommand.goForward()
+        start = time.time()
+        while dropofflocation is False and (time.time() - start < 2000):
+            if self.color.isWhite():
+                # stop robot
+                RobotCommand.stopBot()
+                dropofflocation = True
+            # else go left
+            else:
+                RobotCommand.goLeft();
+        if not dropofflocation:
+            if self.color.isWhite():
+                # stop robot
+                RobotCommand.stopBot()
+                dropofflocation = True
+            # else go forward
+            else:
+                RobotCommand.goForward()
+
+            
+        
+            
+        
 
 
 #Put helper functions here prob will make a util class later
@@ -440,6 +481,7 @@ def within1inch(n, target, threshold=1):
         return False
 
 
+        
 if __name__ == "__main__":
 
     
@@ -472,4 +514,3 @@ if __name__ == "__main__":
     #bot.goToLocationC()
     
     
- 

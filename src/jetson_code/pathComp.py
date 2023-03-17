@@ -10,7 +10,7 @@ from Robot import Robot as bot
 from Ranging import Ranging as range
 from RobotCommand import RobotCommand as command
 import objectTrackingv5 as track
-from getToLocation import getToLocation as location
+import getToLocation as location
 
 '''
 if we start from the white box we can do either 2 things:
@@ -31,7 +31,7 @@ So we would start off by moving all the way left on the game board
     we would want it to stop once it touches the wall or a little before the wall
 '''
 start_pos = range.getRight()
-if start_pos > 15: # value should be adjustable to make sure bot does not hit the wall
+while start_pos > 15: # value should be adjustable to make sure bot does not hit the wall
     command.goRight()
 
 '''
@@ -48,11 +48,33 @@ We will then run the objectTracking algorithm where the robot will approch the o
 '''
 # make a function in Robot.py that will move the robot up and down plus alighn itself after
 # it adjusts to pick up an object
+def pickupPath(self):
+
+        while not bot.rng.getLeft(0) <= 10 and not bot.rng.getLeft(1) <= 10:
+            while not bot.rng.getLeft(0) <= 10:
+                if bot.realSense.getObjDetect(0) == 1:
+                    break
+                bot.ctrl.goLeft(0.5)
+            
+            bot.ctrl.stopBot()
+
+            if bot.rng.getObjDetect()[0] == 1:
+                bot.cameraAlign()
+                bot.tofApproach()
+                bot.tofAllign()
+                bot.pickUprightPedestal() # picks up the pedestal
+                while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
+                    bot.ctrl.goBackwards(0.5)
+                bot.ctrl.stopBot()
+            bot.ctrl.goRight(1)
 '''
 We will repeat this process until the ultrasonic sensors 6 and 7 are a low range.
 we will keep on moving left until the ultrasonic sensors reach that range.
 '''
 # while loop the above function that will be made
+while range.getLeft() > 10:
+    pickupPath(self)
+
 '''
 Assuming we have all pedestals stored on board we will go to the top wall using
 ultrasonic sensors 0 and 1 until they are a low value. Then rotate the robot. Will then
@@ -67,7 +89,13 @@ By pushing range i mean where the robot can push the ducks in one push and not l
 a duck behind
 '''
 # a while loop that will push the ducks
-
+while range.getFront() > 10:
+    command.goFoward(self,0.5)
+command.rotateRight(self,1)
+i = 0
+while i not 10: 
+    command.goFoward(self,0.5)
+    i += 1
 ### ESSENTIALLY MILESTONE 1 and 2 SHOULD BE COMPLETED ABOVE ###
 
 '''
