@@ -75,7 +75,7 @@ class Robot:
         
         self.lifting.sendMsg('liftUp')
         time.sleep(3)
-        self.arm.sendMsg('armDown')
+        self.arm.sendMsg('armUp')
         time.sleep(2)
         self.gripperClamp.sendMsg('gripperClampClosed')
         time.sleep(1)
@@ -87,7 +87,7 @@ class Robot:
             while not self.rng.getLeft(0) <= 10:
                 if self.rng.getObjDetect()[0]== 1:
                     break
-                self.ctrl.goLeft(0.5)
+                self.ctrl.goLeft(0.3)
             
             self.ctrl.stopBot()
 
@@ -162,8 +162,8 @@ class Robot:
 
     def cameraAlign(self):
         data = self.rng.getObjDetect()
-        while data[0] == 1 and (data[1] < 150 or data[1] > 275):
-            if data[1] < 150:
+        while data[0] == 1 and (data[1] < 175 or data[1] > 290):
+            if data[1] < 175:
                 self.ctrl.goLeft(0.25)
             else:
                 self.ctrl.goRight(0.25)
@@ -426,7 +426,13 @@ if __name__ == "__main__":
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-
+    
+    bot.ctrl.stopBot()
+    bot.initServos()
+    bot.pickupPathLeft()
+    '''
     bot.goToLocationA()
     bot.goToLocationB()
     bot.goToLocationC()
+    '''
+    

@@ -25,7 +25,7 @@ class RobotCommand:
         self.robot_name = robot_name
         
         self.command_topic = command_topic
-        self.pub = rospy.Publisher("%s/%s" %(robot_name,command_topic), Twist, queue_size =10)
+        self.pub = rospy.Publisher("/%s/%s" %(robot_name,command_topic), Twist, queue_size =10)
            
         
     def yaw(self, msg):

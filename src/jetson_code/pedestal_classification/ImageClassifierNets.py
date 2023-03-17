@@ -51,14 +51,14 @@ class LightweightCNN(nn.Module):
         self.maxpool1 = nn.MaxPool2d(kernel_size=4, stride=2)
 
         self.conv2 = nn.Conv2d(16, 32, kernel_size=5, stride=2, padding=1)
-        self.maxpool2 = nn.MaxPool2d(kernel_size=4, stride=2)
+        self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
         
         self.conv3 = nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=1)
         self.maxpool3 = nn.MaxPool2d(kernel_size=2, stride=2)
 
-        self.fc1 = nn.Linear(64, 32)
+        self.fc1 = nn.Linear(128, 64)
         self.dropout = nn.Dropout(p=0.5)
-        self.fc2 = nn.Linear(32, 6)
+        self.fc2 = nn.Linear(64, 6)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
