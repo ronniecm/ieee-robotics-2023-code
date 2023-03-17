@@ -29,6 +29,7 @@ class Amc {
     void storeUprightPedestal(const int msg);
     void liftArm();
     void lowerArm();
+    int getStepsLeft();
 
 
     //Functions for all servo controll
