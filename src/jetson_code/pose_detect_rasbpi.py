@@ -3,9 +3,6 @@ from math import atan2, cos, sin, sqrt, pi
 import numpy as np
 import sys
 
-from picamera.array import PiRGBArray
-from picamera import PiCamera
-
 # Python script to demonstrate working of PCA
 # To be used for pedestal orientatation 
 # detection for alignment of robotic arm.
@@ -95,17 +92,14 @@ def getOrientation(pts, img):
 
 
 def main():
-    # Initialize the Raspberry Pi camera
-    camera = PiCamera()
-    camera.resolution = (640, 480)
-    camera.framerate = 30
-    raw_capture = PiRGBArray(camera, size=(640, 480))
+    # cam = cv.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink", cv.CAP_GSTREAMER)
+    cam = cv.VideoCapture("/dev/video0")
+
 
     # Warm up the camera
-    print("Warming up camera...")
-    for _ in range(30):
-        camera.capture(raw_capture, format="bgr", use_video_port=True)
-        raw_capture.truncate(0)
+    if not cam.isOpened():
+        print("Could not open camera")
+        exit(0)
 
     print("Camera ready")
 
@@ -113,9 +107,13 @@ def main():
     cv.namedWindow("Pose Detection", cv.WINDOW_NORMAL)
 
     # Loop over the frames from the camera
-    for frame in camera.capture_continuous(raw_capture, format="bgr", use_video_port=True):
+    while True:
         # Get the raw numpy array representing the image
-        img = frame.array
+        ret, img = cam.read()
+
+        if not ret:
+            print("Failed to capture frame from camera")
+            break
 
         # Downsample img
         img = cv.resize(img, (0, 0), fx=0.6, fy=0.6)
@@ -158,15 +156,12 @@ def main():
         # Wait for a key press
         key = cv.waitKey(1) & 0xFF
 
-        # Clear the stream in preparation for the next frame
-        raw_capture.truncate(0)
-
         # If the `q` key was pressed, break from the loop
         if key == ord("q"):
             break
 
     # Release the camera and close the window
-    camera.close()
+    cam.release()
     cv.destroyAllWindows()
 
 if __name__ == "__main__":
