@@ -37,6 +37,8 @@ from sensor_msgs.msg import Range
 from Ranging import Ranging
 from RobotCommand import RobotCommand
 from Servos import Servos
+from pedestal_classification.PedestalTracker import PedestalTracker
+
 if onJetson:
     from Cameras import RealSense
 
@@ -52,8 +54,11 @@ class Robot:
 
         self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
         self.rng = Ranging(robot_name, node_name)
-        
 
+        # Initialize pedestal tracker object
+        path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
+        #self.pedestal_tracker = PedestalTracker(path, "cpu")
+        
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
         self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
         self.door = Servos(robot_name, node_name, "door", queue_size = 10)
@@ -69,6 +74,7 @@ class Robot:
         self.initYaw = 0.0
         self.botWidth = 30.0
 
+
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
     def initServos(self):
@@ -80,6 +86,16 @@ class Robot:
         self.gripperClamp.sendMsg('gripperClampClosed')
         time.sleep(1)
         self.wrist.sendMsg('wristDefault')
+
+    def handleWrist(self):
+        angleOffset = self.pedestal_tracker.make_prediction()
+        print("angle", angleOffset)
+
+        # Check if upright or on side
+        if angleOffset == -1:
+            self.pickUprightPedestal()
+        else:
+            self.pickUpDownPedestal(angleOffset)
 
     #Going to write the function that will make the robot go left and grab objects along the way
     def pickupPathLeft(self):
@@ -96,6 +112,18 @@ class Robot:
                 self.tofApproach()
                 self.tofAllign()
                 self.ctrl.stopBot(3)
+                #Going to check if the object is upright or not
+
+                '''
+                angleOffset = self.pedestal_tracker.make_prediction()
+                print("angle", angleOffset)
+
+                # Check if upright or on side
+                if angleOffset == -1:
+                    self.pickUprightPedestal()
+                else:
+                    self.pickUpDownPedestal(angleOffset)
+                '''
                 self.pickUprightPedestal()
 
                 while not self.rng.getBack(0) <= 30 and not self.rng.getBack(1) <= 30:
@@ -150,6 +178,52 @@ class Robot:
         time.sleep(1)
         print('Closing')
         self.gripperClamp.sendMsg('gripperClampClosed')
+
+    def pickUpDownPedestal(self, angleOffset):
+        print("Arm Down")
+        self.arm.sendMsg('armDown')
+        time.sleep(3)
+
+        print('Rotating Default')
+        self.gripperRotate.sendMsg('gripperRotate90')
+        time.sleep(1)
+
+        print("Opening")
+        self.gripperClamp.sendMsg('gripperClampOpen')
+        time.sleep(2)
+
+        print("Adjusting Wrist")
+        self.wrist.sendMsg('wristAdjust', wristAdjust=(180-angleOffset))
+        time.sleep(2)
+
+        print("Lift Down")
+        self.lifting.sendMsg('liftDown')
+        time.sleep(2)
+
+        print("Closing")
+        self.gripperClamp.sendMsg('gripperClampClosed')
+        time.sleep(2)
+
+        print("Lift Up")
+        self.lifting.sendMsg('liftUp')
+        time.sleep(4)
+
+        print("Arm Going Up")
+        self.arm.sendMsg('armUp')
+        time.sleep(2)
+
+        print('Opening')
+        self.gripperClamp.sendMsg('gripperClampOpen')
+        time.sleep(1)
+
+    def tofApproach(self):
+        #We are going to go fowrward until we detect a disturbance for TOF
+        print("Sensor Values", self.rng.getTofSensors())
+        while(self.rng.getTofSensors(1) > 12.5):
+            self.ctrl.goFoward(.1)
+
+        #As soon as we detect a disturbance stop the bot
+        self.ctrl.stopBot()
 
     def tofApproach(self):
         #We are going to go fowrward until we detect a disturbance for TOF
@@ -430,6 +504,8 @@ if __name__ == "__main__":
     bot.ctrl.stopBot()
     bot.initServos()
     bot.pickupPathLeft()
+    #bot.arm.sendMsg("armDown")
+    #bot.handleWrist()
     '''
     bot.goToLocationA()
     bot.goToLocationB()
