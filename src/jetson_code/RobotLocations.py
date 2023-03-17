@@ -434,36 +434,36 @@ class Robot:
         while dropofflocation is False and (time.time() - start < 2000):
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go right
             else:
-                RobotCommand.goRight();
+                RobotCommand.goRight()
         if not dropofflocation:
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go forward
             else:
-                RobotCommand.goForward()
+                self.ctrl.goFoward()
         start = time.time()
         while dropofflocation is False and (time.time() - start < 2000):
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go left
             else:
-                RobotCommand.goLeft();
+                self.ctrl.goLeft()
         if not dropofflocation:
             if self.color.isWhite():
                 # stop robot
-                RobotCommand.stopBot()
+                self.ctrl.stopBot()
                 dropofflocation = True
             # else go forward
             else:
-                RobotCommand.goForward()
+                self.ctrl.goFoward()
 
             
         
