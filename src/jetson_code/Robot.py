@@ -59,7 +59,7 @@ class Robot:
 
         # Initialize pedestal tracker object
         path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
-        #self.pedestal_tracker = PedestalTracker(path, "cpu")
+        self.pedestal_tracker = PedestalTracker(path, "cpu")
         
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
         self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
@@ -91,13 +91,22 @@ class Robot:
 
     def handleWrist(self):
         angleOffset = self.pedestal_tracker.make_prediction()
-        print("angle", angleOffset)
+        #print("angle in degrees: ", angleOffset)
 
         # Check if upright or on side
+        if angleOffset == None:
+            print("No pedestal detected or upright pedestal detected")
+        else:
+            print("Angle in degrees", angleOffset)
+
+
+        '''
         if angleOffset == -1:
             self.pickUprightPedestal()
         else:
             self.pickUpDownPedestal(angleOffset)
+        '''
+        
 
     #Going to write the function that will make the robot go left and grab objects along the way
     def pickupPathLeft(self):
@@ -495,22 +504,20 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
 
-    time.sleep(3)
+    time.sleep(2)
     print("TURN ON MOTORS")
 
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    
+    while True:
+
+        bot.handleWrist()
+    '''
     bot.ctrl.stopBot()
     bot.initServos()
     bot.pickupPathLeft()
-    #bot.arm.sendMsg("armDown")
-    #bot.handleWrist()
-    '''
-    bot.goToLocationA()
-    bot.goToLocationB()
-    bot.goToLocationC()
+   
     '''
     
