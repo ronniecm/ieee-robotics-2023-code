@@ -149,6 +149,7 @@ class PedestalTracker:
         _, pred = torch.max(output, 1)
 
         # Return the prediction
+        print("Class: ", pred.item())
         return pred.item()
     
 
@@ -172,6 +173,8 @@ class PedestalTracker:
 
         # Classify the frame
         pred = self.__classify_frame(frame)
+
+
 
         # First check if the pedestal is standing, if it is, then we shouldn't try to estimate the angle
         if pred == 1 or pred == 3 or pred == 5:
@@ -212,8 +215,9 @@ class PedestalTracker:
 
         # Filter out contours that are too small or too large
         contours = [c for c in contours if min_countour_area < cv2.contourArea(c) < max_countour_area]
-
         
+        if len(contours) == 0:
+            return 0
 
         # # Loop over all the contours
         # for i, c in enumerate(contours):
