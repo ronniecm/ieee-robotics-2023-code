@@ -45,7 +45,8 @@ class Servos:
         self.servoCmds['carouselStop'] = 0
         self.servoCmds['liftUp'] = 1
         self.servoCmds['liftDown'] = -1
-
+        self.servoCmds['dispenseRed'] = 1
+        self.servoCmds['dispenseGreen'] = 2
     '''
     Table for how servos should be contrlled for desired position
 
