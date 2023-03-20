@@ -20,10 +20,10 @@ void loop(void) {
   
   if (dispense.checkcolor()) {
     colorMsg.data = 1;
-    GripperRotate.publish(&colorMsg);
+    color.publish(&colorMsg);
   }
   else {
     colorMsg.data = 0;
-    GripperRotate.publish(&colorMsg);
+    color.publish(&colorMsg);
   }
 }

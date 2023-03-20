@@ -19,6 +19,23 @@ class Amc {
   public:
     Amc();
     ~Amc();
+    
+    //Variables needed to carousel control
+    int stepsLeft = 0;
+    int carouselSpeed = 1000;
+    int speedControl = 0;
+    bool drop_in = false;
+    bool dispense_stack = false;
+    bool dispensed = false;
+    bool dispense_stack_start = false;
+    bool dispense_stack_finish = false;
+    slots[] = {0,0,0,0,0}; //slot assignment start from tube & ccw: 0,1,2,3,4
+    tube[] = {0,0,0}; //What is in tube
+    built[] = {0,0,0}; //{0} for 3 stack, [1],[2] for 2 stack
+    uint16_t r, g, b, c. colorTemp, lux; 
+
+  
+
     void activate_paddle();
     void stepperContinue();
     void dispense_stack_helper();
@@ -29,7 +46,6 @@ class Amc {
     void storeUprightPedestal(const int msg);
     void liftArm();
     void lowerArm();
-
 
     //Functions for all servo controll
     void gripperRotateCmd(int angle);
@@ -42,15 +58,6 @@ class Amc {
     void carouselCmd(int angle);
   
 
-
-
-    
-    int deg1;
-    int deg2;
-    int deg3;
-    int deg4;
-    int deg5;
-    int deg6;
     
   private:
     Adafruit_PWMServoDriver* servos;

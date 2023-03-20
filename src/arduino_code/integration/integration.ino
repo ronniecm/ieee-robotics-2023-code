@@ -5,6 +5,7 @@
 #include "TeensyThreads.h"
 #include "std_msgs/Int16.h"
 #include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Int32MultiArray.h"
 
 #define FL_in1 2
 #define FL_in2 3
@@ -38,8 +39,10 @@ std_msgs::Int16 armMsg;
 std_msgs::Int16 wristMsg;
 std_msgs::Int16 paddleMsg;
 std_msgs::Int16 liftingMsg;
-std_msgs::Int16 carouselMsg;
+std_msgs::Int32MultiArray carouselMsg;
 std_msgs::Int16 cmd_msg;
+
+
 
 std_msgs::Int16 gripperRotateCmd;
 std_msgs::Int16 gripperClampCmd;
@@ -162,15 +165,23 @@ void setup()
     nh.subscribe(carousel);
     nh.advertise(Lifting);
     nh.subscribe(pid);
+    nh.advertise(Carousel);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
     wristCmd.data = 180;
     armCmd.data = 180;
     paddleCmd.data = 180;
-    doorCmd.data = 100;
+    doorCmd.data = 120;
     carouselCmd.data = 0;
     liftingCmd.data = 1;
+    
+    carouselMsg.data_length = 5;
+    carouselMsg.data = (int32_t*) malloc(5 * sizeof(int32_t));
+
+    for(int i=0;i<5;i++){
+      carouselMsg.data[i] = int32_t(0);
+    }
        
     pinMode(33, OUTPUT);
     pinMode(38, INPUT);
@@ -221,9 +232,18 @@ void loop()
       carouselCmd.data = 0;
       arm->carouselCmd(carouselCmd.data);  
     }
-    //Carousel.publish(&carouselCmd);
-   }
     
+   }
+
+   for(int i = 0; i<5; i++){
+    //carouselMsg.data[i] = int32_t(arm->slots[i]);
+   }
+   //Serial.println(carouselMsg.data[2]);
+   
+
+   Carousel.publish(&carouselMsg);
+  
+   delay(100);
     nh.spinOnce();
 }
 
