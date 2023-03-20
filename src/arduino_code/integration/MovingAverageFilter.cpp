@@ -1,5 +1,8 @@
 #include "MovingAverageFilter.hpp"
 
+// Author: Jhonny Velasquez
+// Date: 03/17/2023
+
 MovingAverageFilter::MovingAverageFilter(int numReadings)
   : _numReadings(numReadings), _readIndex(0), _total(0) {
   _readings = new int[_numReadings];

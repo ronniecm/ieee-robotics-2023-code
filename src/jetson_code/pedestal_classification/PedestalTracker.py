@@ -75,20 +75,23 @@ def getOrientation(pts, img):
           cntr[1] + 0.02 * eigenvectors[0, 1] * eigenvalues[0, 0])
     p2 = (cntr[0] - 0.02 * eigenvectors[1, 0] * eigenvalues[1, 0],
           cntr[1] - 0.02 * eigenvectors[1, 1] * eigenvalues[1, 0])
-    drawAxis(img, cntr, p1, (255, 255, 0), 1)
-    drawAxis(img, cntr, p2, (0, 0, 255), 5)
+    # drawAxis(img, cntr, p1, (255, 255, 0), 1)
+    # drawAxis(img, cntr, p2, (0, 0, 255), 5)
 
     # orientation in radians
     angle = atan2(eigenvectors[0, 1], eigenvectors[0, 0])
     # [visualization]
 
-    # Label with the rotation angle
-    label = "  Rotation Angle: " + \
-        str(-int(np.rad2deg(angle)) - 90) + " degrees"
-    textbox = cv2.rectangle(
-        img, (cntr[0], cntr[1]-25), (cntr[0] + 250, cntr[1] + 10), (255, 255, 255), -1)
-    cv2.putText(img, label, (cntr[0], cntr[1]),
-               cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+    # # Label with the rotation angle
+    # label = "  Rotation Angle: " + \
+    #     str(-int(np.rad2deg(angle)) - 90) + " degrees"
+    # textbox = cv2.rectangle(
+    #     img, (cntr[0], cntr[1]-25), (cntr[0] + 250, cntr[1] + 10), (255, 255, 255), -1)
+    # cv2.putText(img, label, (cntr[0], cntr[1]),
+    #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
+
+    # Convert to degrees
+    angle = -int(np.rad2deg(angle)) - 90
 
     return angle
 
@@ -149,6 +152,7 @@ class PedestalTracker:
         _, pred = torch.max(output, 1)
 
         # Return the prediction
+        print("Class: ", pred.item())
         return pred.item()
     
 
@@ -175,7 +179,7 @@ class PedestalTracker:
 
         # First check if the pedestal is standing, if it is, then we shouldn't try to estimate the angle
         if pred == 1 or pred == 3 or pred == 5:
-            return -1
+            return None
 
         # If the pedestal is fallen, then we can estimate the angle
 
@@ -212,8 +216,11 @@ class PedestalTracker:
 
         # Filter out contours that are too small or too large
         contours = [c for c in contours if min_countour_area < cv2.contourArea(c) < max_countour_area]
-
         
+        # Print length of contours
+        # print("Length of contours: ", len(contours))
+        if len(contours) == 0:
+            return None
 
         # # Loop over all the contours
         # for i, c in enumerate(contours):
@@ -232,6 +239,7 @@ class PedestalTracker:
         #     # Find the orientation of each shape
         #     getOrientation(c, img)
 
+        
 
         # Calculate the angle of the largest contour
         angle = getOrientation(contours[0], img)
