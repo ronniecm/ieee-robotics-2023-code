@@ -6,6 +6,7 @@
 #include "std_msgs/Int16.h"
 #include "std_msgs/Float32MultiArray.h"
 #include "std_msgs/Int32MultiArray.h"
+#include "std_msgs/UInt16MultiArray.h"
 
 #define FL_in1 2
 #define FL_in2 3
@@ -40,6 +41,7 @@ std_msgs::Int16 wristMsg;
 std_msgs::Int16 paddleMsg;
 std_msgs::Int16 liftingMsg;
 std_msgs::Int32MultiArray carouselMsg;
+std_msgs::UInt16MultiArray pedestalColorMsg;
 std_msgs::Int16 cmd_msg;
 
 
@@ -66,6 +68,7 @@ ros::Publisher Wrist("/bot/wrist_callback", &wristMsg);
 ros::Publisher Paddle("/bot/paddle_callback", &paddleMsg);
 ros::Publisher Lifting("/bot/lifting_callback", &liftingMsg);
 ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
+ros::Publisher PedestalColor("/bot/pedestalColor", &pedestalColorMsg);
 
 
 void gripperRotateCB(const std_msgs::Int16& cmd_msg)
@@ -166,6 +169,7 @@ void setup()
     nh.advertise(Lifting);
     nh.subscribe(pid);
     nh.advertise(Carousel);
+    nh.advertise(PedestalColor);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
@@ -181,6 +185,13 @@ void setup()
 
     for(int i=0;i<5;i++){
       carouselMsg.data[i] = int32_t(0);
+    }
+
+    pedestalColorMsg.data_length = 4;
+    pedestalColorMsg.data = (uint16_t*) malloc(4 * sizeof(uint16_t));
+
+    for(int i=0;i<4;i++){
+      pedestalColorMsg.data[i] = uint16_t(0);
     }
        
     pinMode(33, OUTPUT);
@@ -236,12 +247,22 @@ void loop()
    }
 
    for(int i = 0; i<5; i++){
-    //carouselMsg.data[i] = int32_t(arm->slots[i]);
+    carouselMsg.data[i] = int32_t(arm->slots[i]);
    }
-   //Serial.println(carouselMsg.data[2]);
    
 
    Carousel.publish(&carouselMsg);
+   
+   for(int i = 0; i < 4; i++){
+    Serial.println(pedestalColorMsg.data[i]);
+   }
+   pedestalColorMsg.data[0] = arm->r;
+   pedestalColorMsg.data[1] = arm->g;
+   pedestalColorMsg.data[2] = arm->b;
+   pedestalColorMsg.data[3] = arm->c;
+   
+
+   PedestalColor.publish(&pedestalColorMsg);
   
    delay(100);
     nh.spinOnce();

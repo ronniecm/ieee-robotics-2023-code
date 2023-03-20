@@ -219,6 +219,7 @@ void Amc::drop_in_action() {
       //get reading for what's in slot 0
       tcs->getRawData(&r, &g, &b, &c);
       tcs->getRawData(&r, &g, &b, &c);
+      
       if (c > 25000) {this->slots[0] = 1;} //white
       else if (g > r && g > b) {this->slots[0] = 2;}     //green
       else {this->slots[0] = 3;}           //red

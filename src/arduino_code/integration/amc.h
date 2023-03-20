@@ -32,8 +32,8 @@ class Amc {
     int slots[5] = {0,0,0,0,0}; //slot assignment start from tube & ccw: 0,1,2,3,4
     int tube[3] = {0,0,0}; //What is in tube
     int built[3] = {0,0,0}; //{0} for 3 stack, [1],[2] for 2 stack
-    uint16_t r, g, b, c, temp, lux; 
-
+    uint16_t r, g, b, c, lux; 
+    int temp;
   
 
     void activate_paddle();
