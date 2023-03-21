@@ -9,6 +9,7 @@
 from Robot import Robot as bot
 from Ranging import Ranging as range
 from RobotCommand import RobotCommand as command
+import RobotLocations as locations
 import objectTrackingv5 as track
 import getToLocation as location
 
@@ -30,6 +31,16 @@ So we would start off by moving all the way left on the game board
     the sensors to do that would be ultrasonic sensor 2 and 3
     we would want it to stop once it touches the wall or a little before the wall
 '''
+curYaw = command.yaw()
+yawOffset = (curYaw % 360) - 360
+while locations.bot.getRedLed() == 0:
+    command.stopBot()
+
+if locations.bot.getRedLed() == 1:
+    if command.yaw() > 0:
+        while (command.yaw() > curYaw - yawOffset):
+            command.rotateLeft()
+
 start_pos = range.getRight()
 while start_pos > 15: # value should be adjustable to make sure bot does not hit the wall
     command.goRight()
@@ -48,32 +59,32 @@ We will then run the objectTracking algorithm where the robot will approch the o
 '''
 # make a function in Robot.py that will move the robot up and down plus alighn itself after
 # it adjusts to pick up an object
-def pickupPath(self):
+# def pickupPath(self):
 
-        while not bot.rng.getLeft(0) <= 10 and not bot.rng.getLeft(1) <= 10:
-            while not bot.rng.getLeft(0) <= 10:
-                if bot.realSense.getObjDetect(0) == 1:
-                    break
-                bot.ctrl.goLeft(0.5)
+#         while not bot.rng.getLeft(0) <= 10 and not bot.rng.getLeft(1) <= 10:
+#             while not bot.rng.getLeft(0) <= 10:
+#                 if bot.realSense.getObjDetect(0) == 1:
+#                     break
+#                 bot.ctrl.goLeft(0.5)
             
-            bot.ctrl.stopBot()
+#             bot.ctrl.stopBot()
 
-            if bot.rng.getObjDetect()[0] == 1:
-                bot.cameraAlign()
-                bot.tofApproach()
-                bot.tofAllign()
-                bot.pickUprightPedestal() # picks up the pedestal
-                while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
-                    bot.ctrl.goBackwards(0.5)
-                bot.ctrl.stopBot()
-            bot.ctrl.goRight(1)
+#             if bot.rng.getObjDetect()[0] == 1:
+#                 bot.cameraAlign()
+#                 bot.tofApproach()
+#                 bot.tofAllign()
+#                 bot.pickUprightPedestal() # picks up the pedestal
+#                 while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
+#                     bot.ctrl.goBackwards(0.5)
+#                 bot.ctrl.stopBot()
+#             bot.ctrl.goRight(1)
 '''
 We will repeat this process until the ultrasonic sensors 6 and 7 are a low range.
 we will keep on moving left until the ultrasonic sensors reach that range.
 '''
 # while loop the above function that will be made
 while range.getLeft() > 10:
-    pickupPath(self)
+    bot.pickupComp()
 
 '''
 Assuming we have all pedestals stored on board we will go to the top wall using
@@ -90,11 +101,11 @@ a duck behind
 '''
 # a while loop that will push the ducks
 while range.getFront() > 10:
-    command.goFoward(self,0.5)
-command.rotateRight(self,1)
+    command.goFoward(0.5)
+command.rotateRight(1)
 i = 0
-while i not 10: 
-    command.goFoward(self,0.5)
+while i is not 10: 
+    command.goFoward(0.5)
     i += 1
 ### ESSENTIALLY MILESTONE 1 and 2 SHOULD BE COMPLETED ABOVE ###
 

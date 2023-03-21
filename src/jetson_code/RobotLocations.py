@@ -88,6 +88,8 @@ class Robot:
         self.gripperClamp.sendMsg('gripperClampClosed')
         time.sleep(1)
         self.wrist.sendMsg('wristDefault')
+    
+    
 
     # Going to write the function that will make the robot go left and grab objects along the way
     def pickupPathLeft(self):
