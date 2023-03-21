@@ -155,29 +155,41 @@ void loop() {
     //TO KEEP THINGS CONSISTANT 0 index ==> LEFT SENSOR & 1 index ==> RIGHT for each side
 
       currentMillis = millis();      
-      
-      distMsgUltra2.data = ultraSensors.getUltra2_Distance();
+
+      ultraSensors.getUltra2_Distance();
+      distMsgUltra2.data = ultraSensors.getReading(2);
       Ultra2.publish(&distMsgUltra2);
-      
-      distMsgUltra3.data = ultraSensors.getUltra3_Distance();
+
+      ultraSensors.getUltra3_Distance();
+      distMsgUltra3.data = ultraSensors.getReading(3);
       Ultra3.publish(&distMsgUltra3);
 
-      distMsgUltra4.data = ultraSensors.getUltra4_Distance();
+      ultraSensors.getUltra4_Distance();
+      distMsgUltra4.data = ultraSensors.getReading(4);
       Ultra4.publish(&distMsgUltra4);
 
-      distMsgUltra5.data = ultraSensors.getUltra5_Distance();
+      ultraSensors.getUltra5_Distance();
+      distMsgUltra5.data = ultraSensors.getReading(5);
       Ultra5.publish(&distMsgUltra5);
 
-      distMsgUltra6.data = ultraSensors.getUltra6_Distance();
+      ultraSensors.getUltra6_Distance();
+      distMsgUltra6.data = ultraSensors.getReading(6);
       Ultra6.publish(&distMsgUltra6);
 
-      distMsgUltra7.data = ultraSensors.getUltra7_Distance();
+      ultraSensors.getUltra7_Distance();
+      distMsgUltra7.data = ultraSensors.getReading(7);
       Ultra7.publish(&distMsgUltra7);  
 
+      for(int i = 2; i < 8; i++) {
+        Serial.print(ultraSensors.getReading(i));
+        Serial.print(" ");  
+      }
+      Serial.println();
       
       uint8_t leftStatus = lSensor.readRangeStatus();
       uint8_t rightStatus = rSensor.readRangeStatus();
       float leftVal, rightVal;
+      /*
       if (leftStatus == VL6180X_ERROR_NONE) {
         leftVal = lSensor.readRange() * 0.1;
         leftMsg.data = leftVal;
@@ -187,7 +199,7 @@ void loop() {
       } else {
         //Serial.println("PROBLEM WITH LEFT"); 
       }
-
+    */
      if (rightStatus == VL6180X_ERROR_NONE) {
         rightVal = rSensor.readRange() * 0.1;
         rightMsg.data = rightVal;
@@ -225,7 +237,7 @@ void setID() {
   ////Serial.println("setting up left");
   if (!lSensor.begin()) {
     //Serial.println(F("Failed to boot lSensor VL6180X"));
-    while (1);
+    //while (1);
   }
   //Serial.println("Done wiht left");
   lSensor.setAddress(LEFT_ADDRESS);

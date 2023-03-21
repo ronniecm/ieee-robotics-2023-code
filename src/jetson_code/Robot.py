@@ -107,6 +107,24 @@ class Robot:
             self.pickUpDownPedestal(angleOffset)
         '''
         
+    def pickupComp(self):
+        while not bot.rng.getLeft(0) <= 10 and not bot.rng.getLeft(1) <= 10:
+            while not bot.rng.getLeft(0) <= 10:
+                if bot.realSense.getObjDetect(0) == 1:
+                    break
+                bot.ctrl.goLeft(0.5)
+            
+            bot.ctrl.stopBot()
+
+            if bot.rng.getObjDetect()[0] == 1:
+                bot.cameraAlign()
+                bot.tofApproach()
+                bot.tofAllign()
+                bot.pickUprightPedestal() # picks up the pedestal
+                while not bot.rng.getBack(0) <= 30 and not bot.rng.getBack(1) <= 30:
+                    bot.ctrl.goBackwards(0.5)
+                bot.ctrl.stopBot()
+            bot.ctrl.goRight(1)
 
     #Going to write the function that will make the robot go left and grab objects along the way
     def pickupPathLeft(self):

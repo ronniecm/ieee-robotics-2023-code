@@ -1,8 +1,11 @@
 #include "Arduino.h"
+#include "MovingAverageFilter.hpp"
 
 class Ultrasonic
 {
 public:
+    Ultrasonic();
+    ~Ultrasonic();
 //Distance measurements
     float getUltra0_Distance();
     float getUltra1_Distance();
@@ -12,6 +15,7 @@ public:
     float getUltra5_Distance();
     float getUltra6_Distance();
     float getUltra7_Distance();
+    float getReading(int i);
 
 private:
     float duration_Ultra0, cm_Ultra0;
@@ -22,4 +26,6 @@ private:
     float duration_Ultra5, cm_Ultra5;
     float duration_Ultra6, cm_Ultra6;
     float duration_Ultra7, cm_Ultra7;
+    MovingAverageFilter* filters[8];
+    float readings[8];
 };
