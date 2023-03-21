@@ -21,6 +21,7 @@ public:
     void calcRPM(); //calculates RPM of all motors
     void tunePID(double kP, double kI, double kD); //tunes PID values for all motors
     // void calculateSpeed(int i);
+    
 private:
     Encoder* enc[4]; //encoder array
     int prevPos[4]; //used in RPM calculations

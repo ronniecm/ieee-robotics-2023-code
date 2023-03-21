@@ -33,7 +33,7 @@ class Amc {
     int tube[3] = {0,0,0}; //What is in tube
     int built[3] = {0,0,0}; //{0} for 3 stack, [1],[2] for 2 stack
     uint16_t r, g, b, c, lux; 
-    int temp;
+    
   
 
     void activate_paddle();
@@ -56,6 +56,7 @@ class Amc {
     void carouselCmd(int angle);
     int getStepsLeft();
     int* getSlots();
+    void fillStack(int stackType);
   
 
     

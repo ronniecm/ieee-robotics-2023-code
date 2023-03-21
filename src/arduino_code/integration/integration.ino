@@ -60,6 +60,7 @@ float cmd_x;
 float cmd_y;
 float cmd_z;
 
+/*
 ros::Publisher GripperRotate("/bot/gripperRotate_callback", &gripperRotateMsg);
 ros::Publisher GripperClamp("/bot/gripperClamp_callback", &gripperClampMsg);
 ros::Publisher Door("/bot/door_callback", &doorMsg);
@@ -69,7 +70,7 @@ ros::Publisher Paddle("/bot/paddle_callback", &paddleMsg);
 ros::Publisher Lifting("/bot/lifting_callback", &liftingMsg);
 ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 ros::Publisher PedestalColor("/bot/pedestalColor", &pedestalColorMsg);
-
+*/
 
 void gripperRotateCB(const std_msgs::Int16& cmd_msg)
 {
@@ -104,8 +105,6 @@ void paddleCB(const std_msgs::Int16& cmd_msg)
 void liftingCB(const std_msgs::Int16& cmd_msg)
 {
   liftingCmd.data = cmd_msg.data;
-  liftingMsg.data = liftingCmd.data;
-  Lifting.publish(&liftingMsg);
 }
 
 void carouselCB(const std_msgs::Int16& cmd_msg)
@@ -166,37 +165,41 @@ void setup()
     nh.subscribe(paddle);
     nh.subscribe(lifting);
     nh.subscribe(carousel);
-    nh.advertise(Lifting);
+    //nh.advertise(Lifting);
     nh.subscribe(pid);
-    nh.advertise(Carousel);
-    nh.advertise(PedestalColor);
+    //nh.advertise(Carousel);
+    //nh.advertise(PedestalColor);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
     wristCmd.data = 180;
     armCmd.data = 180;
-    paddleCmd.data = 180;
+    paddleCmd.data = 135;
     doorCmd.data = 120;
     carouselCmd.data = 0;
     liftingCmd.data = 1;
-    
+
+    /*
     carouselMsg.data_length = 5;
     carouselMsg.data = (int32_t*) malloc(5 * sizeof(int32_t));
-
+    
+    
     for(int i=0;i<5;i++){
       carouselMsg.data[i] = int32_t(0);
     }
 
     pedestalColorMsg.data_length = 4;
     pedestalColorMsg.data = (uint16_t*) malloc(4 * sizeof(uint16_t));
-
+    
+    
     for(int i=0;i<4;i++){
       pedestalColorMsg.data[i] = uint16_t(0);
     }
-       
-    pinMode(33, OUTPUT);
+    */   
+    pinMode(13, OUTPUT);
     pinMode(38, INPUT);
     pinMode(39, INPUT);
+    
 }
 
 void loop()
@@ -220,7 +223,7 @@ void loop()
     //GripperClamp.publish(&gripperClampCmd);
   
     arm->doorCmd(doorCmd.data);
-    //Door.publish(&doorCmd);
+    //Door.publish(&doorCmd); 
     
     arm->armCmd(armCmd.data);
     //Arm.publish(&armCmd);
@@ -239,33 +242,35 @@ void loop()
 
     
     arm->carouselCmd(carouselCmd.data);
-    if(arm->getStepsLeft() == 0) {
-      carouselCmd.data = 0;
-      arm->carouselCmd(carouselCmd.data);  
-    }
+    //if(arm->getStepsLeft() == 0) {
+     //carouselCmd.data = 0;
+      //arm->carouselCmd(carouselCmd.data);  
+    //}
     
    }
+   carouselCmd.data = 0;
 
+  /*
    for(int i = 0; i<5; i++){
     carouselMsg.data[i] = int32_t(arm->slots[i]);
    }
+   */
+   //Carousel.publish(&carouselMsg);
    
-
-   Carousel.publish(&carouselMsg);
-   
-   for(int i = 0; i < 4; i++){
-    Serial.println(pedestalColorMsg.data[i]);
-   }
-   pedestalColorMsg.data[0] = arm->r;
-   pedestalColorMsg.data[1] = arm->g;
-   pedestalColorMsg.data[2] = arm->b;
+   //for(int i = 0; i < 4; i++){
+    //Serial.println(pedestalColorMsg.data[i]);
+   //}
+   /*
+   pedestalColorMsg.data[0] = arm->tube[0];
+   pedestalColorMsg.data[1] = arm->tube[1];
+   pedestalColorMsg.data[2] = arm->tube[2];
    pedestalColorMsg.data[3] = arm->c;
-   
+   */
 
-   PedestalColor.publish(&pedestalColorMsg);
+   //PedestalColor.publish(&pedestalColorMsg);
   
-   delay(100);
-    nh.spinOnce();
+   delay(10);
+   nh.spinOnce();
 }
 
 
