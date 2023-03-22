@@ -4,7 +4,7 @@
 //(only need photoresistor, 10k resistor, A0 pin, 5V, ground)
 ros::NodeHandle nh; //creating ros node
 std_msgs::Int8 redLEDmsg; 
-int pResistor = A0; // Photoresistor at Arduino analog pin A0
+int pResistor = A1; // Photoresistor at Arduino analog pin A0
 ros::Publisher RedLED("/bot/redled", &redLEDmsg);
 //Note: The Red LED must be directly above the photoresistor!
 /*
@@ -34,8 +34,8 @@ void loop()
     5cm:  727
   */
   //750 to 820
-  int lower_range = 720;
-  int upper_range = 960;
+  int lower_range = 0;
+  int upper_range = 50;
   if (pValue >lower_range && pValue <upper_range)
   {
     //Serial.println("START");
