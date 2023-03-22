@@ -3,8 +3,8 @@
 #define flipMIN 120
 #define flipMAX 530
 
-#define wristMIN 110
-#define wristMAX 520
+#define wristMIN 120
+#define wristMAX 530
 
 #define servoMIN 103
 #define servoMAX 512
@@ -25,7 +25,12 @@ Amc::Amc() {
     //color sensor
     tcs->begin();
   
-    //color sensor stuff:    
+    //color sensor stuff:   
+    onWhite = true;
+    onGreen = false;
+    onRed = false; 
+    onTwo = false;
+    onThree = true;
 }
 
 Amc::~Amc() {
@@ -76,11 +81,11 @@ void Amc::liftingCmd(int liftCmd)
     steppers->setPWM(1, 0, 2048);
     if (liftCmd == 1) {
       //Serial.println("going up");
-      steppers->setPWM(0, 4096, 0); 
+      steppers->setPWM(0, 0, 4096); 
     }
     else if (liftCmd == -1) {
       //Serial.println("going down");
-      steppers->setPWM(0, 0, 4096); 
+      steppers->setPWM(0, 4096, 0); 
     }
   }
 }
@@ -249,7 +254,39 @@ void Amc::drop_in_action() {
       else if (r > g && r > b && abs(r - g) > 500) {this->slots[0] = 3;}     //red
       else {this->slots[0] = 1;}           //whtie
          
-      this->drop_in = false;    
+      this->drop_in = false;
+
+      if (onWhite) {
+        for(int i = 0; i < 5; i++) {
+          if (this->slots[i] == 1) { //srearch for white pedestal
+            dispense_helper(i, 1);
+            onWhite = false;
+            onGreen = true;
+            break;    
+          }  
+        }
+      }
+      else if (onGreen) {
+        for(int i = 0; i < 5; i++) {
+          if (this->slots[i] == 2) { //srearch for green pedestal
+            dispense_helper(i, 2);
+            onGreen = false;
+            if (onTwo) { onWhite = true; }
+            else { onRed = true; }
+            break;    
+          }
+        }
+      }
+      else {
+        for(int i = 0; i < 5; i++) {
+          if (this->slots[i] == 3) { //srearch for red pedestal
+            dispense_helper(i, 3);
+            onRed = false;
+            onWhite = true;
+            break;    
+          }
+        }
+      }
     }
   }
 }

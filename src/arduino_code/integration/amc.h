@@ -33,7 +33,7 @@ class Amc {
     int tube[3] = {0,0,0}; //What is in tube
     int built[3] = {0,0,0}; //{0} for 3 stack, [1],[2] for 2 stack
     uint16_t r, g, b, c, lux; 
-    
+    bool onWhite, onGreen, onRed, onTwo, onThree;
   
 
     void activate_paddle();

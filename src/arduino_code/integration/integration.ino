@@ -215,7 +215,7 @@ void loop()
      }
      //Mecanum drive now a function of twist msgs
     drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
-    
+
     arm->gripperRotateCmd(gripperRotateCmd.data);
     //GripperRotate.publish(&gripperRotateCmd);
     
@@ -269,7 +269,7 @@ void loop()
 
    //PedestalColor.publish(&pedestalColorMsg);
   
-   delay(10);
+   //delay(10);
    nh.spinOnce();
 }
 
