@@ -37,7 +37,7 @@ from sensor_msgs.msg import Range
 from Ranging import Ranging
 from RobotCommand import RobotCommand
 from Servos import Servos
-from pedestal_classification.PedestalTracker import PedestalTracker
+#from pedestal_classification.PedestalTracker import PedestalTracker
 
 if onJetson:
     from Cameras import RealSense
@@ -55,11 +55,11 @@ class Robot:
 
         self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
         self.rng = Ranging(robot_name, node_name)
-        self.color = Color(robot_name)
+        #self.color = Color(robot_name)
 
         # Initialize pedestal tracker object
-        path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
-        self.pedestal_tracker = PedestalTracker(path, "cpu")
+        #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
+        #self.pedestal_tracker = PedestalTracker(path, "cpu")
         
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
         self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
@@ -80,7 +80,6 @@ class Robot:
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
     def initServos(self):
-        
         self.lifting.sendMsg('liftUp')
         time.sleep(3)
         self.arm.sendMsg('armUp')
@@ -529,13 +528,10 @@ if __name__ == "__main__":
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    while True:
-
-        bot.handleWrist()
-    '''
+    
     bot.ctrl.stopBot()
     bot.initServos()
     bot.pickupPathLeft()
    
-    '''
+    
     
