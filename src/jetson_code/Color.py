@@ -16,7 +16,7 @@ subcriber to recieve messages from teensy that the action is finished
 '''
 
 class Color:
-    def __init__(self, robot_name, command_topic, queue_size):
+    def __init__(self, robot_name):
         self.robot_name = robot_name
         
         rospy.Subscriber('%s/color' %robot_name, Int8, self.callBack)
@@ -28,6 +28,21 @@ class Color:
             self.isWhite == 1
         else:
             self.isWhite == 0
+
+class LED:
+    def __init__(self, robot_name):
+        self.robot_name = robot_name
+        rospy.Subscriber('%s/redled' % robot_name, Int8, self.redled)
+        self.led = 0
+
+
+    def redled(self, msg):
+        self.led = msg.data
+
+    def getRedLed(self):
+        return self.led
+
+
 
     
         

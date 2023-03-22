@@ -468,6 +468,21 @@ class Robot:
             else:
                 self.ctrl.goFoward()
 
+    def startRound((self):
+        currYaw = self.currYawAngle
+
+        while (self.currYaw < 90 + currYaw):
+            command.rotateLeft()
+            
+        self.alignBack()
+
+    def run(self):
+
+        while(self.getRedLed != 1):
+            self.stopBot()
+
+        self.startRound()
+
 
 # Put helper functions here prob will make a util class later
 

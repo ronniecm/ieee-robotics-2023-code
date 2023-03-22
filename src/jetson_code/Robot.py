@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = False
+onJetson = True
 
 sim = False
 
@@ -42,6 +42,7 @@ from Servos import Servos
 if onJetson:
     from Cameras import RealSense
 from Color import Color
+from Color import LED
 
 
 #This will be the main class that inherits everything from every other class
@@ -55,7 +56,8 @@ class Robot:
 
         self.ctrl = RobotCommand(robot_name, node_name, command_topic, queue_size = 10)
         self.rng = Ranging(robot_name, node_name)
-        #self.color = Color(robot_name)
+        self.color = Color(robot_name)
+        self.led = LED(robot_name)
 
         # Initialize pedestal tracker object
         #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
@@ -69,9 +71,10 @@ class Robot:
         self.paddle = Servos(robot_name, node_name, "paddle", queue_size = 10)
         self.lifting = Servos(robot_name, node_name, "lifting", queue_size = 10)
         self.carousel = Servos(robot_name, node_name, "carousel", queue_size = 10)
+        
 
-
-        self.currYawAngle = 0.0 - 180.0 #This will ensure our starting yaw will be 0 degees easier calculations
+        #need a node here to tell us what that current YAW is
+        self.currYawAngle = 0.0  #This will ensure our starting yaw will be 0 degees easier calculations
         self.initBoardWidth = 233.0
         self.initYaw = 0.0
         self.botWidth = 30.0
@@ -302,26 +305,26 @@ class Robot:
 
     def alignRight(self, threshhold = 0.75):
         while abs(self.rng.getRight(0) - self.rng.getRight(1)) > threshhold:
-            if self.rng.getLeft(0) > self.rng.getRight(1):
-                self.ctrl.rotateLeft(0.25)
-            else:
+            if self.rng.getRight(0) > self.rng.getRight(1):
                 self.ctrl.rotateRight(0.25)
+            else:
+                self.ctrl.rotateLeft(0.25)
         self.ctrl.stopBot()
 
     def alignBack(self, threshhold = 0.75):
         while abs(self.rng.getBack(0) - self.rng.getBack(1)) > threshhold:
             if self.rng.getBack(0) > self.rng.getBack(1):
-                self.ctrl.rotateLeft(0.25)
-            else:
                 self.ctrl.rotateRight(0.25)
+            else:
+                self.ctrl.rotateLeft(0.25)
         self.ctrl.stopBot()
 
     def alignLeft(self, threshhold = 0.75):
         while abs(self.rng.getLeft(0) - self.rng.getLeft(1)) > threshhold:
             if self.rng.getLeft(0) > self.rng.getLeft(1):
-                self.ctrl.rotateLeft(0.25)
-            else:
                 self.ctrl.rotateRight(0.25)
+            else:
+                self.ctrl.rotateLeft(0.25)
         self.ctrl.stopBot()
 
 
@@ -458,7 +461,7 @@ class Robot:
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
 
-        currYaw = self.currYawAngle
+        currYaw = self.realSense.getCurrYaw()
     
         '''
         Now we know how much we should rotate. Since a clockwise rotation increases yaw, and 
@@ -507,6 +510,23 @@ class Robot:
         self.ctrl.stopBot()
         #Now we should be at or near location
 
+    def startRound(self):
+        currYaw = self.realSense.getCurrYaw()
+        print("Starting Round")
+        print("current YAW: ", self.realSense.getCurrYaw())
+        while (self.realSense.getCurrYaw() > currYaw - 90):
+            print("In loop YAW: ", self.realSense.getCurrYaw())
+            self.ctrl.rotateLeft()
+        print("done Rotating")
+            
+        self.alignBack()
+
+    def run(self):
+
+        while(self.led.getRedLed == 0):
+            self.ctrl.stopBot()
+        print("LED DETECTED")
+        self.startRound()
 
 #Put helper functions here prob will make a util class later
 
@@ -529,9 +549,16 @@ if __name__ == "__main__":
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
     
+
+    '''
     bot.ctrl.stopBot()
     bot.initServos()
     bot.pickupPathLeft()
+    '''
+    bot.run()
+
+
+    
    
     
     

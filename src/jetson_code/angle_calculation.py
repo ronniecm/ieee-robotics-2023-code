@@ -112,7 +112,7 @@ try:
         combinedangleX = totalgyroangleX * alpha + accel_angle_x * (1-alpha)
         combinedangleZ = totalgyroangleZ * alpha + accel_angle_z * (1-alpha)
         combinedangleY = totalgyroangleY
-
+        print(combinedangleX, combinedangleY, combinedangleZ)
         #print("Angle -  X: " + str(round(combinedangleX,2)) + "   Y: " + str(round(combinedangleY,2)) + "   Z: " + str(round(combinedangleZ,2)))
         msg = Float32()
         msg.data = combinedangleY
