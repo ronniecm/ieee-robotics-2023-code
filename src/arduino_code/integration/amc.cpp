@@ -4,269 +4,417 @@
 #define flipMIN 120
 #define flipMAX 530
 
-#define wristMIN 110
-#define wristMAX 520
+#define wristMIN 120
+#define wristMAX 530
 
 #define servoMIN 103
 #define servoMAX 512
-#define upper_limit 39  //upper limit switch
-#define lower_limit 38  //lower limit switch
-#define CarouselPin 33
+#define upper_limit 39 // upper limit switch
+#define lower_limit 38 // lower limit switch
+#define CarouselPin 13
 
-Amc::Amc() {    
-    servos = new Adafruit_PWMServoDriver(0x40);
-    steppers = new Adafruit_PWMServoDriver(0x41);
-    tcs = new Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
-    foodChipTcs = new Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
+Amc::Amc()
+{
+  servos = new Adafruit_PWMServoDriver(0x40);
+  steppers = new Adafruit_PWMServoDriver(0x41);
+  tcs = new Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
+  foodChipTcs = new Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 
-    servos->begin();
-    servos->setPWMFreq(50);
-  
-    steppers->begin();
-    steppers->setPWMFreq(1000);
-    //color sensor
-    tcs->begin();
-    foodChipTcs->begin(0x29, &Wire1);
-  
-    //color sensor stuff:    
+  servos->begin();
+  servos->setPWMFreq(50);
+
+  steppers->begin();
+  steppers->setPWMFreq(1000);
+
+  // color sensor
+  tcs->begin();
+  foodChipTcs->begin(0x29, &Wire1);
 
   servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));
+
+  // color sensor stuff:
+  onWhite = true;
+  onGreen = false;
+  onRed = false;
+  onTwo = false;
+  onThree = true;
 }
 
-Amc::~Amc() {
-    delete servos;
-    delete steppers;
-    delete tcs;
-    delete foodChipTcs;
+Amc::~Amc()
+{
+  delete servos;
+  delete steppers;
+  delete tcs;
+  delete foodChipTcs;
 }
 
-//Functions for all servo controll
+// Functions for all servo controll
 void Amc::gripperRotateCmd(int angle)
 {
 
-  servos->setPWM(0, 0, map( angle, 0, 180, servoMIN, servoMAX));
+  servos->setPWM(0, 0, map(angle, 0, 180, servoMIN, servoMAX));
 }
 
 void Amc::gripperClampCmd(int angle)
 {
-  servos->setPWM(1, 0, map( angle, 0, 180, servoMIN, servoMAX));
+  servos->setPWM(1, 0, map(angle, 0, 180, servoMIN, servoMAX));
 }
 
 void Amc::wristCmd(int angle)
 {
-  servos->setPWM(2, 0, map( angle, 0, 270, wristMIN, wristMAX));
+  servos->setPWM(2, 0, map(angle, 0, 270, wristMIN, wristMAX));
 }
 
 void Amc::doorCmd(int angle)
 {
-  servos->setPWM(5, 0, map( angle, 0, 180, servoMIN, servoMAX));
+  servos->setPWM(5, 0, map(angle, 0, 180, servoMIN, servoMAX));
 }
 
 void Amc::armCmd(int angle)
 {
-  servos->setPWM(3, 0, map( angle, 0, 180, flipMIN, flipMAX));
+  servos->setPWM(3, 0, map(angle, 0, 180, flipMIN, flipMAX));
 }
 
 void Amc::paddleCmd(int angle)
 {
-  servos->setPWM(4, 0, map( angle, 0, 180, servoMIN, servoMAX));
+  servos->setPWM(4, 0, map(angle, 0, 180, servoMIN, servoMAX));
 }
 
-//Stepper motor control
+// Stepper motor control
 void Amc::liftingCmd(int liftCmd)
-{ 
-  if (liftCmd == 0) {
+{
+  if (liftCmd == 0)
+  {
     steppers->setPWM(1, 0, 4096);
   }
-  else {
+  else
+  {
     steppers->setPWM(1, 0, 2048);
-    if (liftCmd == 1) {
-      //Serial.println("going up");
-      steppers->setPWM(0, 4096, 0); 
+    if (liftCmd == 1)
+    {
+      // Serial.println("going up");
+      steppers->setPWM(0, 0, 4096);
     }
-    else if (liftCmd == -1) {
-      //Serial.println("going down");
-      steppers->setPWM(0, 0, 4096); 
+    else if (liftCmd == -1)
+    {
+      // Serial.println("going down");
+      steppers->setPWM(0, 4096, 0);
     }
   }
 }
 
-void Amc::carouselCmd(int movement)
+void Amc::carouselCmd(int stackType)
 {
-    if(movement==1)
-    {
-      this->stepsLeft += 200;
-      this->drop_in = true;
-      stepperContinue();
-      drop_in_action();
-      //dispense();
-      //this->dispense_stack_helper();
-      movement = 0;
-    }
 
-    else
-    {
-      steppers->setPWM(2, 0, 4096);
-    }
+  if (stackType == 2 || stackType == 3)
+  {
+    fillStack(stackType);
+  }
+
+  else if (stackType == 1)
+  {
+
+    this->stepsLeft += 200;
+    stepperContinue();
+    this->drop_in = true;
+    drop_in_action();
+  }
+  else
+  {
+    steppers->setPWM(2, 0, 4096);
+  }
 }
 
 void Amc::stepperContinue()
 {
-    if (this->stepsLeft > 0) {
-      steppers->setPWM(2, 4096, 0);
-      while (this->stepsLeft > 0) { 
-      //if (this->stepsLeft > 0) {  
-        //this->speedControl = this->stepsLeft % 200;
-        //if (this->stepsLeft != 0) {//Serial.println(this->speedControl);}      
-        //if (this->speedControl > 75 && this->speedControl < 125) {this->carouselSpeed = 10000;}
-        //else {this->carouselSpeed = 1000;}    
-        
+  if (this->stepsLeft > 0)
+  {
+
+    steppers->setPWM(2, 4096, 0);
+    while (this->stepsLeft > 0)
+    {
+      if (this->stepsLeft > 0)
+      {
+        this->speedControl = this->stepsLeft % 200;
+        // if (this->stepsLeft != 0) {//Serial.println(this->speedControl);}
+        if (this->speedControl > 75 && this->speedControl < 125)
+        {
+          this->carouselSpeed = 10000;
+        }
+        else
+        {
+          this->carouselSpeed = 1000;
+        }
+
         digitalWrite(CarouselPin, HIGH);
-        delayMicroseconds(this->carouselSpeed);
+        delayMicroseconds(5000);
         digitalWrite(CarouselPin, LOW);
-        delayMicroseconds(this->carouselSpeed);    
-        this->stepsLeft -= 1;      
+        delayMicroseconds(5000);
+        this->stepsLeft -= 1;
+      }
+      ////Serial.println(this->stepsLeft);
     }
-    ////Serial.println(this->stepsLeft);
   }
-  else if (this->stepsLeft < 0) {
+  else if (this->stepsLeft < 0)
+  {
     steppers->setPWM(2, 0, 4096);
-    while (this->stepsLeft < 0) {
-    //if (this->stepsLeft < 0) {
+    while (this->stepsLeft < 0)
+    {
+      // if (this->stepsLeft < 0) {
       this->speedControl = this->stepsLeft % 200;
-      //if (this->stepsLeft != 0) {//Serial.println(this->speedControl);}      
-      if (this->speedControl > -125 && this->speedControl < -75) {this->carouselSpeed = 10000;}
-      else {this->carouselSpeed = 1000;}     
+      // if (this->stepsLeft != 0) {//Serial.println(this->speedControl);}
+      if (this->speedControl > -125 && this->speedControl < -75)
+      {
+        this->carouselSpeed = 10000;
+      }
+      else
+      {
+        this->carouselSpeed = 1000;
+      }
 
       digitalWrite(CarouselPin, HIGH);
-      delayMicroseconds(this->carouselSpeed);
+      delayMicroseconds(5000);
       digitalWrite(CarouselPin, LOW);
-      delayMicroseconds(this->carouselSpeed);    
-      this->stepsLeft += 1;      
+      delayMicroseconds(5000);
+      this->stepsLeft += 1;
     }
     ////Serial.println(this->stepsLeft);
-  } 
+  }
 }
 
-void Amc::activate_paddle() {
-  servos->setPWM(4, 0, map( 0, 0, 180, servoMIN,  servoMAX)); //paddle
+void Amc::activate_paddle()
+{
+  // Serial.println("Dropping");
+  servos->setPWM(4, 0, map(0, 0, 180, servoMIN, servoMAX)); // paddle
   delay(1000);
-  servos->setPWM(4, 0, map( 180, 0, 180, servoMIN,  servoMAX)); //paddle
+  servos->setPWM(4, 0, map(135, 0, 180, servoMIN, servoMAX)); // paddle
   delay(1000);
 }
 
-void Amc::dispense_stack_helper() {
-    if (this->dispense_stack == true && this->dispensed == false) {
-      this->tube[0] = 0;
-      this->tube[1] = 0;
-      this->tube[2] = 0;        
-      this->dispensed = true;
-    } 
+void Amc::dispense_stack_helper()
+{
+  if (this->dispense_stack)
+  {
+    this->tube[0] = 0;
+    this->tube[1] = 0;
+    this->tube[2] = 0;
+    // ADD REMOVING THE BUILT INDEX OF THE STACK WE WANT BUILT BECAUASE WE HAVE THAT IN ROS MSG
+    this->dispense_stack = false;
+  }
 }
 
-void Amc::dispense_helper(int i, int pedestal) {
-  if (i == 0 && this->stepsLeft == 0) { //drop pedestal
+void Amc::dispense_helper(int i, int pedestal)
+{
+  // Serial.print("Index: ");
+  // Serial.println(i);
+  if (i == 0 && this->stepsLeft == 0)
+  { // drop pedestal
     activate_paddle();
     this->slots[0] = 0;
-    this->tube[pedestal - 1] = pedestal; 
-  }        
-  else {
-    if (i == 1 || i == 2) {
-      this->stepsLeft -= 200;
-      stepperContinue();
-      update_slots(0);
-    }
-    else {
-      this->stepsLeft += 200;
-      stepperContinue();
-      update_slots(1);
-    }  
+    this->tube[pedestal - 1] = pedestal;
   }
-     
+  else
+  {
+    if (i == 1 || i == 2)
+    {
+      for (int j = 0; j < i; j++)
+      {
+        // Serial.println("Clockwise");
+        this->stepsLeft -= 200;
+        stepperContinue();
+        update_slots(0);
+      }
+      activate_paddle();
+      this->slots[0] = 0;
+      this->tube[pedestal - 1] = pedestal;
+    }
+
+    if (i == 3 || i == 4)
+    {
+      for (int k = 2; k < i + 1; k++)
+      {
+        // Serial.println("CounterClockwise");
+        this->stepsLeft += 200;
+        stepperContinue();
+        update_slots(1);
+      }
+      activate_paddle();
+      this->slots[0] = 0;
+      this->tube[pedestal - 1] = pedestal;
+    }
+  }
 }
 
-void Amc::dispense() {  
-  if (this->drop_in == false && this->dispense_stack == false) {
-    if (this->tube[0] == 0) { //empty this->tube
-      for(int i = 0; i < 5; i++) {
-        if (this->slots[i] == 1) { //srearch for white pedestal
+void Amc::dispense()
+{
+
+  // Serial.println("In Dispense");
+  if (this->drop_in == false && this->dispense_stack == false)
+  {
+    if (this->tube[0] == 0)
+    { // empty this->tube
+      for (int i = 0; i < 5; i++)
+      {
+        if (this->slots[i] == 1)
+        { // srearch for white pedestal
           dispense_helper(i, 1);
-          break;    
-        } 
-      }
-    }
-    else if (this->tube[0] == 1 && this->tube[1] == 0) { //white pedetal at bottom
-      for(int i = 0; i < 5; i++) {
-        if (this->slots[i] == 2) { //search for green pedestal
-          dispense_helper(i, 2);
-          break;       
+          break;
         }
       }
-    }  
-    else if (built[0] == 0 && this->tube[0] == 1 && this->tube[1] == 2 && this->tube[2] == 0) { 
-      //white pedetal at bottom, green in the middle, waitinf for red to build 3 stack
-      for(int i = 0; i < 5; i++) {
-        if (this->slots[i] == 3) { //search for red pedestal
+    }
+    else if (this->tube[0] == 1 && (this->tube[1] == 0 || this->tube[2] == 0))
+    { // white pedetal at bottom
+      for (int i = 0; i < 5; i++)
+      {
+        if (this->slots[i] == 2)
+        { // search for green pedestal
+          dispense_helper(i, 2);
+          break;
+        }
+      }
+    }
+    else if (built[0] == 0 && this->tube[0] == 1 && this->tube[1] == 2 && this->tube[2] == 0)
+    {
+      // white pedetal at bottom, green in the middle, waitinf for red to build 3 stack
+      for (int i = 0; i < 5; i++)
+      {
+        if (this->slots[i] == 3)
+        { // search for red pedestal
           dispense_helper(i, 3);
           break;
         }
       }
-    }    
-  }  
-}
-
-void Amc::drop_in_action() {
-  if (this->drop_in == true){
-    if (this->stepsLeft == 0) {
-      //update array after rotation
-      update_slots(1);
-      ////Serial.print("after ccw turn: "); 
-            
-      //get reading for what's in slot 0
-      tcs->getRawData(&r, &g, &b, &c);
-      tcs->getRawData(&r, &g, &b, &c);
-      
-      if (c > 25000) {this->slots[0] = 1;} //white
-      else if (g > r && g > b) {this->slots[0] = 2;}     //green
-      else {this->slots[0] = 3;}           //red
-         
-      this->drop_in = false;    
     }
   }
 }
 
-void Amc::update_slots(int dir) {
-  if (dir == 0) //cw
+void Amc::drop_in_action()
+{
+
+  if (this->drop_in == true)
   {
-    this->temp = this->slots[0];
-    this->slots[0] = this->slots[1];
-    this->slots[1] = this->slots[2];
-    this->slots[2] = this->slots[3];
-    this->slots[3] = this->slots[4];
-    this->slots[4] = temp;    
-  }
-  else //ccw
-  {
-    this->temp = this->slots[4];    
-    this->slots[4] = this->slots[3];      
-    this->slots[3] = this->slots[2];
-    this->slots[2] = this->slots[1];
-    this->slots[1] = this->slots[0];
-    this->slots[0] = this->temp;
+
+    if (this->stepsLeft == 0)
+    {
+      // update array after rotation
+
+      update_slots(1);
+      ////Serial.print("after ccw turn: ");
+
+      // get reading for what's in slot 0
+      tcs->getRawData(&r, &g, &b, &c);
+      tcs->getRawData(&r, &g, &b, &c);
+
+      if (g > r && g > b && abs(r - g) > 500)
+      {
+        this->slots[0] = 2;
+      } // green
+      else if (r > g && r > b && abs(r - g) > 500)
+      {
+        this->slots[0] = 3;
+      } // red
+      else
+      {
+        this->slots[0] = 1;
+      } // whtie
+
+      this->drop_in = false;
+
+      if (onWhite)
+      {
+        if (this->slots[0] == 1)
+        {
+          dispense_helper(0, 1);
+          onWhite = false;
+          onGreen = true;
+        }
+      }
+      else if (onGreen)
+      {
+        if (this->slots[0] == 2)
+        {
+          dispense_helper(0, 2);
+          onGreen = true;
+          onRed = true;
+        }
+      }
+      else
+      {
+        onRed = false;
+        if (this->slots[0] == 3)
+        {
+          dispense_helper(0, 3);
+        }
+      }
+    }
+    // Now need to check if the 4th slot is empty
+
+    if (this->slots[4] != 0 && (this->tube[1] == 2 || this->tube[2] == 3))
+    {
+      int emptySlotIndex = findEmptySlot();
+
+      if (emptySlotIndex == -1)
+      {
+        // this means not empty slots, carousel full
+        return;
+      }
+      else
+      {
+        initSlotFour(emptySlotIndex);
+      }
+    }
   }
 }
 
+void Amc::update_slots(int dir)
+{
 
-int Amc::getStepsLeft() {
-  return this->stepsLeft;  
+  int temp = 0;
+
+  if (dir == 0) // cw
+  {
+    temp = this->slots[0];
+    for (int i = 0; i < 4; i++)
+    {
+      this->slots[i] = this->slots[i + 1];
+    }
+    this->slots[4] = temp;
+  }
+
+  else // ccw
+  {
+    temp = this->slots[4];
+    for (int i = 4; i > 0; i--)
+    {
+      this->slots[i] = this->slots[i - 1];
+    }
+
+    this->slots[0] = temp;
+  }
+
+  if (this->slots[4] == 0)
+  {
+    this->loadSlotEmpty = true;
+  }
+  else
+  {
+    this->loadSlotEmpty = false;
+  }
 }
 
-int* Amc::getSlots() {
-  
+int Amc::getStepsLeft()
+{
+  return this->stepsLeft;
+}
+
+int *Amc::getSlots()
+{
+
   return this->slots;
 }
 
-int Amc::getFoodChipColor() {
+int Amc::getFoodChipColor()
+{
   uint16_t r, g, b, c;
   foodChipTcs->getRawData(&r, &g, &b, &c);
   Serial.print(r);
@@ -275,25 +423,101 @@ int Amc::getFoodChipColor() {
   Serial.print(" ");
   Serial.print(b);
   Serial.println();
-  //if (r > g && r > b) 
-  if((r >= 400 && r<= 420) && (g >=140 && g<=150) && (b>=130 && b<=140))
-  { // red 
-      Serial.println("red");
-      servos->setPWM(6, 0, map(0, 0, 180, servoMIN, servoMAX));
-      delay(2000);
-      servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));      
-      return 0;
-  }
-  else 
-  {//green
-    Serial.println("green");
-    servos->setPWM(6, 0, map( 180, 0, 180, servoMIN, servoMAX));
+  // if (r > g && r > b)
+  if ((r >= 400 && r <= 420) && (g >= 140 && g <= 150) && (b >= 130 && b <= 140))
+  { // red
+    Serial.println("red");
+    servos->setPWM(6, 0, map(0, 0, 180, servoMIN, servoMAX));
     delay(2000);
-    servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));      
-    return 1;    
+    servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));
+    return 0;
+  }
+  else
+  { // green
+    Serial.println("green");
+    servos->setPWM(6, 0, map(180, 0, 180, servoMIN, servoMAX));
+    delay(2000);
+    servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));
+    return 1;
   }
 }
 
-void Amc::foodChipCmd(int angle) {
-  servos->setPWM(6, 0, map( angle, 0, 180, servoMIN, servoMAX));
+void Amc::foodChipCmd(int angle)
+{
+  servos->setPWM(6, 0, map(angle, 0, 180, servoMIN, servoMAX));
+}
+
+void Amc::fillStack(int stackType)
+{
+
+  for (int i = 0; i < stackType; i++)
+  {
+    dispense();
+  }
+
+  this->dispense_stack = true;
+  dispense_stack_helper();
+
+  // will check to see if there is a green pedestal"2" in the second indec of the tube then mark it as built
+  if ((stackType == 2) && (this->built[1] == 0) && (this->tube[1] == 2))
+  {
+    this->built[1] = 1;
+    return;
+  }
+
+  if ((stackType == 2) && (this->built[2] == 0) && (this->tube[1] == 2))
+  {
+    this->built[2] = 1;
+    return;
+  }
+
+  if ((stackType == 3) && (this->built[0] == 0) && (this->tube[2] == 3))
+  {
+    this->built[0] = 1;
+    return;
+  }
+}
+
+int Amc::findEmptySlot()
+{
+  if (this->slots[4] == 0)
+  {
+    return 0;
+  }
+  else
+  {
+    for (int i = 0; i < 4; i++)
+    {
+      if (this->slots[i] == 0)
+      {
+        return 1;
+      }
+    }
+  }
+  // if nothing empty we return -1
+  return -1;
+}
+
+void Amc::initSlotFour(int index)
+{
+
+  if (index == 0 || index == 1)
+  {
+    for (int j = 0; j < index; j++)
+    {
+      this->stepsLeft -= 200;
+      stepperContinue();
+      update_slots(0);
+    }
+  }
+
+  if (index == 2 || index == 3)
+  {
+    for (int k = 2; k < index + 1; k++)
+    {
+      this->stepsLeft += 200;
+      stepperContinue();
+      update_slots(1);
+    }
+  }
 }
