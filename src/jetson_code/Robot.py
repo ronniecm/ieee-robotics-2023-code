@@ -25,7 +25,7 @@
 # Modified by: Ronnie Mohapatra
 # Modified by: Jhonny Velasquez
 
-onJetson = False
+onJetson = True
 
 sim = False
 
@@ -37,7 +37,7 @@ from sensor_msgs.msg import Range
 from Ranging import Ranging
 from RobotCommand import RobotCommand
 from Servos import Servos
-from pedestal_classification.PedestalTracker import PedestalTracker
+#from pedestal_classification.PedestalTracker import PedestalTracker
 
 if onJetson:
     from Cameras import RealSense
@@ -60,8 +60,8 @@ class Robot:
         self.led = LED(robot_name)
 
         # Initialize pedestal tracker object
-        path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
-        self.pedestal_tracker = PedestalTracker(path, "cpu")
+        #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
+        #self.pedestal_tracker = PedestalTracker(path, "cpu")
         
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
         self.gripperClamp = Servos(robot_name, node_name, "gripperClamp", queue_size = 10)
@@ -74,7 +74,7 @@ class Robot:
         
 
         #need a node here to tell us what that current YAW is
-        self.currYawAngle = 0.0 - 180.0 #This will ensure our starting yaw will be 0 degees easier calculations
+        self.currYawAngle = 0.0  #This will ensure our starting yaw will be 0 degees easier calculations
         self.initBoardWidth = 233.0
         self.initYaw = 0.0
         self.botWidth = 30.0
@@ -83,7 +83,6 @@ class Robot:
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
     def initServos(self):
-        
         self.lifting.sendMsg('liftUp')
         time.sleep(3)
         self.arm.sendMsg('armUp')
@@ -513,8 +512,10 @@ class Robot:
 
     def startRound(self):
         currYaw = self.realSense.getCurrYaw()
-
-        while (self.realSense.getCurrYaw() < 90 + currYaw):
+        print("Starting Round")
+        print("current YAW: ", self.realSense.getCurrYaw())
+        while (self.realSense.getCurrYaw() > currYaw - 90):
+            print("In loop YAW: ", self.realSense.getCurrYaw())
             self.ctrl.rotateLeft()
         print("done Rotating")
             
@@ -522,9 +523,9 @@ class Robot:
 
     def run(self):
 
-        while(self.led.getRedLed != 1):
-            self.stopBot()
-
+        while(self.led.getRedLed == 0):
+            self.ctrl.stopBot()
+        print("LED DETECTED")
         self.startRound()
 
 #Put helper functions here prob will make a util class later
@@ -547,13 +548,17 @@ if __name__ == "__main__":
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    while True:
+    
 
-        bot.handleWrist()
     '''
     bot.ctrl.stopBot()
     bot.initServos()
     bot.pickupPathLeft()
-   
     '''
+    bot.run()
+
+
+    
+   
+    
     

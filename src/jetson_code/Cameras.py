@@ -76,8 +76,8 @@ class RealSense:
         self.pipeline = rs.pipeline()
         config = rs.config()
         #Changed these from 640x480 to 1280x480
-        config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
+        ##config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
+        #config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
         config.enable_stream(rs.stream.accel)
         config.enable_stream(rs.stream.gyro)
@@ -85,7 +85,7 @@ class RealSense:
         # Start the pipeline
         self.pipeline.start(config)
 
-        self.detections = []
+        ##self.detections = []
 
         #This for Yaw calculation thread
         self.rpy = [0.0, 0.0, 0.0]
@@ -96,21 +96,24 @@ class RealSense:
         
         # create video sources and outputs
         # input = videoSource(args.input_URI, argv=sys.argv)
-        self.output = videoOutput("display://0")
+        ##self.output = videoOutput("display://0")
 
         # load the object detection network
         # self.net = detectNet(self.args.network, sys.argv, self.args.threshold)
 
         # note: to hard-code the paths to load a model, the following API can be used:
+        '''
         self.net = detectNet(model="/home/mdelab/jetson-inference//build/aarch64/bin/ssd-mobilenet-02262023.onnx", labels="/home/mdelab/jetson-inference/build/aarch64/bin/labels.txt",
                  input_blob="input_0", output_cvg="scores", output_bbox="boxes",
                  threshold=self.args.threshold)
+        '''
         
         #thread = threading.Thread(target=self.objDectect)
         #thread.start()
+        print("Starting Cameera")
         angles = threading.Thread(target=self.angleCalculation)
         angles.start()
-        print("Starting Cameera")
+       
         
 
     def filter_detections(self, detections):
@@ -251,21 +254,21 @@ class RealSense:
 
     """
     def angleCalculation(self):
-
-        
         while True:
+           
             
             f = self.pipeline.wait_for_frames()
             
             #gather IMU data
-            accel = f[2].as_motion_frame().get_motion_data()
-            gyro = f[3].as_motion_frame().get_motion_data()
+            accel = f[0].as_motion_frame().get_motion_data()
+            gyro = f[1].as_motion_frame().get_motion_data()
 
             ts = f.get_timestamp()
 
             #calculation for the first frame
             if (self.first):
-                first = False
+                
+                self.first = False
                 last_ts_gyro = ts
 
                 # accelerometer calculation
@@ -273,6 +276,7 @@ class RealSense:
                 accel_angle_x = degrees(atan2(accel.x, sqrt(accel.y * accel.y + accel.z * accel.z)))
                 accel_angle_y = degrees(pi)
                 continue
+
 
             #calculation for the second frame onwards
 
@@ -303,9 +307,10 @@ class RealSense:
             combinedangleX = totalgyroangleX * self.alpha + accel_angle_x * (1-self.alpha)
             combinedangleZ = totalgyroangleZ * self.alpha + accel_angle_z * (1-self.alpha)
             combinedangleY = self.totalgyroangleY
+            
 
             self.rpy = [combinedangleX, combinedangleY - 180, combinedangleZ]
-            print(self.rpy)
+            
     
 
     def getCurrYaw(self):
