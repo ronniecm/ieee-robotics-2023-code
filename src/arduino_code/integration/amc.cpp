@@ -10,7 +10,9 @@
 #define servoMAX 512
 #define upper_limit 39  //upper limit switch
 #define lower_limit 38  //lower limit switch
-#define CarouselPin 13
+
+#define carouselDir 14
+#define carouselStep 15
 
 Amc::Amc() {    
     servos = new Adafruit_PWMServoDriver(0x40);
@@ -109,7 +111,7 @@ void Amc::carouselCmd(int stackType)
     }
     else
     {
-      steppers->setPWM(2, 0, 4096);
+      //steppers->setPWM(2, 0, 4096);
     }
 }
 
@@ -117,7 +119,8 @@ void Amc::stepperContinue()
 {
     if (this->stepsLeft > 0) {
       
-        steppers->setPWM(2, 4096, 0);
+        //steppers->setPWM(2, 4096, 0);
+        digitalWrite(carouselDir, HIGH);
         while (this->stepsLeft > 0) { 
         if (this->stepsLeft > 0) {  
         this->speedControl = this->stepsLeft % 200;
@@ -125,9 +128,9 @@ void Amc::stepperContinue()
         if (this->speedControl > 75 && this->speedControl < 125) {this->carouselSpeed = 10000;}
         else {this->carouselSpeed = 1000;}    
         
-        digitalWrite(CarouselPin, HIGH);
+        digitalWrite(carouselStep, HIGH);
         delayMicroseconds(5000);
-        digitalWrite(CarouselPin, LOW);
+        digitalWrite(carouselStep, LOW);
         delayMicroseconds(5000);    
         this->stepsLeft -= 1;      
     }
@@ -135,7 +138,8 @@ void Amc::stepperContinue()
   }
    }
   else if (this->stepsLeft < 0) {
-    steppers->setPWM(2, 0, 4096);
+    //steppers->setPWM(2, 0, 4096);
+    digitalWrite(carouselDir, LOW);
     while (this->stepsLeft < 0) {
     //if (this->stepsLeft < 0) {
       this->speedControl = this->stepsLeft % 200;
@@ -143,9 +147,9 @@ void Amc::stepperContinue()
       if (this->speedControl > -125 && this->speedControl < -75) {this->carouselSpeed = 10000;}
       else {this->carouselSpeed = 1000;}     
 
-      digitalWrite(CarouselPin, HIGH);
+      digitalWrite(carouselStep, HIGH);
       delayMicroseconds(5000);
-      digitalWrite(CarouselPin, LOW);
+      digitalWrite(carouselStep, LOW);
       delayMicroseconds(5000);    
       this->stepsLeft += 1;      
     }
@@ -259,42 +263,61 @@ void Amc::drop_in_action() {
          
       this->drop_in = false;
 
-      if (onWhite) {
+      if (this->onWhite) {
         if(this->slots[0] == 1){
           dispense_helper(0,1);
-          onWhite = false;
-          onGreen = true;
+          this->onWhite = false;
+          this->onGreen = true;
         }
       }
-      else if (onGreen) {
+      else if (this->onGreen) {
         if(this->slots[0] == 2){
           dispense_helper(0,2);
-          onGreen = true;
-          onRed = true;
+          this->onGreen = false;
+          this->onRed = false;
         }
       }
-      else {
-        onRed = false;
+      else if (this->onRed) {
+        this->onRed = false;
         if(this->slots[0] == 3){
           dispense_helper(0,3);
         }
+       
       }
     }
   //Now need to check if the 4th slot is empty
 
-  if(this->slots[4] != 0 && (this->tube[1] == 2 || this->tube[2] == 3)){
+  //first will check if there is a white in tube, if there is will find green and dispense it
+  //then we will check if we have stack in tube if we do then we will not dispense anything we will only make sure slot4 is empy
+  
+  if(this->slots[4] != 0 && !this->slotsFull) {
+    
+    //first find a green if there is a white in tube and there isnt a green already
+    if(this->tube[0] == 1 && this->tube[1] == 0){
+      //dispense a green 
+      for(int i =0; i<5; i++){
+        if(this->slots[i] == 2){
+          dispense_helper(i,2);
+          break;
+        }
+      }
+    }
+    
+    //then we will check if the carousel is full we wont do anything just get out of function
+    //beasue it is not empy we will check
     int emptySlotIndex = findEmptySlot();
-
+    
     if(emptySlotIndex == -1){
       //this means not empty slots, carousel full
+      this->slotsFull = true;
       return;
     }
     else{
+      //so if it is not full then we will go to the empty slot
       initSlotFour(emptySlotIndex);
     }
   }
-  }
-
+ }
 }
 
 void Amc::update_slots(int dir) {
@@ -369,12 +392,12 @@ void Amc::fillStack(int stackType) {
 
 int Amc::findEmptySlot(){
   if (this->slots[4] == 0){
-    return 0;
+    return 4;
   }
   else{
     for (int i = 0; i < 4; i++){
       if (this->slots[i] == 0){
-        return 1;
+        return i;
       }
     }
   }
@@ -384,6 +407,9 @@ int Amc::findEmptySlot(){
 }
 
 void Amc::initSlotFour(int index){
+  if(index == 4){
+    return;
+  }
 
   if (index == 0 || index == 1) {
       for (int j = 0; j < index; j++) {

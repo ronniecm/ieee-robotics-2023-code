@@ -198,7 +198,8 @@ void setup()
       pedestalColorMsg.data[i] = uint16_t(0);
     }
       
-    pinMode(13, OUTPUT);
+    pinMode(14, OUTPUT);
+    pinMode(15, OUTPUT);
     pinMode(38, INPUT);
     pinMode(39, INPUT);
     
@@ -261,17 +262,18 @@ void loop()
    }
    carouselCmd.data = 0;
 
-  /*
+  
    for(int i = 0; i<5; i++){
     carouselMsg.data[i] = int32_t(arm->slots[i]);
    }
-   */
-   //Carousel.publish(&carouselMsg);
    
-   //for(int i = 0; i < 4; i++){
-    //Serial.println(pedestalColorMsg.data[i]);
-   //}
+   Carousel.publish(&carouselMsg);
+   
    /*
+   for(int i = 0; i < 4; i++){
+    Serial.println(pedestalColorMsg.data[i]);
+   }
+   
    pedestalColorMsg.data[0] = arm->tube[0];
    pedestalColorMsg.data[1] = arm->tube[1];
    pedestalColorMsg.data[2] = arm->tube[2];
@@ -280,7 +282,7 @@ void loop()
 
    //PedestalColor.publish(&pedestalColorMsg);
   
-   //delay(10);
+   delay(10);
    nh.spinOnce();
 }
 
