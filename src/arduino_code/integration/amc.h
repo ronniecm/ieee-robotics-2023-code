@@ -11,10 +11,6 @@
 #include "Adafruit_TCS34725.h"
 #include "Arduino.h"
 
-
-
-
-
 class Amc {
   public:
     Amc();
@@ -54,8 +50,10 @@ class Amc {
     void paddleCmd(int angle);
     void liftingCmd(int angle);
     void carouselCmd(int angle);
+    void foodChipCmd(int angle);
     int getStepsLeft();
     int* getSlots();
+    int getFoodChipColor();
   
 
     
@@ -63,6 +61,7 @@ class Amc {
     Adafruit_PWMServoDriver* servos;
     Adafruit_PWMServoDriver* steppers;
     Adafruit_TCS34725* tcs;
+    Adafruit_TCS34725* foodChipTcs;
 };
 
 #endif

@@ -7,6 +7,7 @@
 #include "std_msgs/Float32MultiArray.h"
 #include "std_msgs/Int32MultiArray.h"
 #include "std_msgs/UInt16MultiArray.h"
+#include "std_msgs/String.h"
 
 #define FL_in1 2
 #define FL_in2 3
@@ -33,17 +34,10 @@ double kP, kI, kD;
 Drivetrain *drivetrain;
 Amc* arm;
 
-std_msgs::Int16 gripperRotateMsg;
-std_msgs::Int16 gripperClampMsg;
-std_msgs::Int16 doorMsg;
-std_msgs::Int16 armMsg;
-std_msgs::Int16 wristMsg;
-std_msgs::Int16 paddleMsg;
-std_msgs::Int16 liftingMsg;
 std_msgs::Int32MultiArray carouselMsg;
 std_msgs::UInt16MultiArray pedestalColorMsg;
 std_msgs::Int16 cmd_msg;
-
+std_msgs::String foodChipColorMsg;
 
 
 std_msgs::Int16 gripperRotateCmd;
@@ -54,22 +48,16 @@ std_msgs::Int16 wristCmd;
 std_msgs::Int16 paddleCmd;
 std_msgs::Int16 liftingCmd;
 std_msgs::Int16 carouselCmd;
+std_msgs::Int16 foodChipColorCmd;
 
 //These will be the inputs to the mecanumDrive function
 float cmd_x;
 float cmd_y;
 float cmd_z;
 
-ros::Publisher GripperRotate("/bot/gripperRotate_callback", &gripperRotateMsg);
-ros::Publisher GripperClamp("/bot/gripperClamp_callback", &gripperClampMsg);
-ros::Publisher Door("/bot/door_callback", &doorMsg);
-ros::Publisher Arm("/bot/arm_callback", &armMsg);
-ros::Publisher Wrist("/bot/wrist_callback", &wristMsg);
-ros::Publisher Paddle("/bot/paddle_callback", &paddleMsg);
-ros::Publisher Lifting("/bot/lifting_callback", &liftingMsg);
 ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 ros::Publisher PedestalColor("/bot/pedestalColor", &pedestalColorMsg);
-
+ros::Publisher foodChip("/bot/foodChipsTATUS", &foodChipColorMsg);
 
 void gripperRotateCB(const std_msgs::Int16& cmd_msg)
 {
@@ -104,8 +92,6 @@ void paddleCB(const std_msgs::Int16& cmd_msg)
 void liftingCB(const std_msgs::Int16& cmd_msg)
 {
   liftingCmd.data = cmd_msg.data;
-  liftingMsg.data = liftingCmd.data;
-  Lifting.publish(&liftingMsg);
 }
 
 void carouselCB(const std_msgs::Int16& cmd_msg)
@@ -123,6 +109,10 @@ void pidCB(const std_msgs::Float32MultiArray& cmd_msg)
   drivetrain->tunePID(kP, kI, kD);
 }
 
+void foodChipColorCB(const std_msgs::Int16& cmd_msg) {
+  foodChipColorCmd.data = cmd_msg.data;
+}
+
 ros::Subscriber <std_msgs::Int16> gripperRotate("/bot/gripperRotate_cmd", &gripperRotateCB);
 ros::Subscriber <std_msgs::Int16> gripperClamp("/bot/gripperClamp_cmd", &gripperClampCB);
 ros::Subscriber <std_msgs::Int16> door("/bot/door_cmd", &doorCB);
@@ -132,8 +122,11 @@ ros::Subscriber <std_msgs::Int16> paddle("/bot/paddle_cmd", &paddleCB);
 ros::Subscriber <std_msgs::Int16> lifting("/bot/lifting_cmd", &liftingCB);
 ros::Subscriber <std_msgs::Int16> carousel("/bot/carousel_cmd", &carouselCB);
 ros::Subscriber <std_msgs::Float32MultiArray> pid("/bot/PID", &pidCB);
+ros::Subscriber <std_msgs::Int16> foodChipColor("/bot/foodChipColor", &foodChipColorCB);
 
 //This will be the callback function for wheel commands from jetson
+
+
 void mecanumDriveCallBack(const geometry_msgs::Twist& cmd_msg)
 {
   cmd_x = cmd_msg.linear.x;
@@ -151,11 +144,15 @@ unsigned long previousMillis;
 void setup()
 {
     Serial.begin(115200);
-    drivetrain = new Drivetrain();
-    arm = new Amc();
-
     initDrivetrain();
+    Serial.println("init drivetrain");
+    drivetrain = new Drivetrain();
+    Serial.println("constructed drivetrain");
+    arm = new Amc();
+    Serial.println("constructed arm");
+
     //Ros setup node & subscribe to topic
+    
     nh.initNode();
     nh.subscribe(sub);    
     nh.subscribe(gripperRotate);
@@ -166,11 +163,12 @@ void setup()
     nh.subscribe(paddle);
     nh.subscribe(lifting);
     nh.subscribe(carousel);
-    nh.advertise(Lifting);
     nh.subscribe(pid);
     nh.advertise(Carousel);
     nh.advertise(PedestalColor);
-
+    nh.subscribe(foodChipColor);
+    nh.advertise(foodChip);
+    
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
     wristCmd.data = 180;
@@ -193,7 +191,7 @@ void setup()
     for(int i=0;i<4;i++){
       pedestalColorMsg.data[i] = uint16_t(0);
     }
-       
+     
     pinMode(33, OUTPUT);
     pinMode(38, INPUT);
     pinMode(39, INPUT);
@@ -201,7 +199,6 @@ void setup()
 
 void loop()
 {
-  
    //Mecanum drive now a function of twist msgs
    currentMillis = millis();
    while(currentMillis - previousMillis >= 10) {
@@ -209,10 +206,15 @@ void loop()
        if (Serial.available() > 0) {
         int n = Serial.parseInt();
         demand = (double) n / 10.0; 
-     }
      //Mecanum drive now a function of twist msgs
-    drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
-    
+      drivetrain->mecanumDrive(0.0, demand,0.0);
+      for(int i = 0; i < 4; i++) {
+        Serial.print(drivetrain->getRPM(i));
+        Serial.print(" ");
+      }
+      Serial.println();
+    }
+    /*
     arm->gripperRotateCmd(gripperRotateCmd.data);
     //GripperRotate.publish(&gripperRotateCmd);
     
@@ -231,6 +233,9 @@ void loop()
     arm->paddleCmd(paddleCmd.data);
     //Paddle.publish(&paddleCmd);
 
+    //arm->foodChipCmd(foodChipColorCmd.data);
+    //foodChip.publish(foodChipColorCmd.data);
+
     arm->liftingCmd(liftingCmd.data);
     if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
@@ -246,13 +251,14 @@ void loop()
     
    }
 
-   for(int i = 0; i<5; i++){
+   for(int i = 0; i < 5; i++){
     carouselMsg.data[i] = int32_t(arm->slots[i]);
    }
    
 
    Carousel.publish(&carouselMsg);
    
+   /*
    for(int i = 0; i < 4; i++){
     Serial.println(pedestalColorMsg.data[i]);
    }
@@ -264,8 +270,27 @@ void loop()
 
    PedestalColor.publish(&pedestalColorMsg);
   
-   delay(100);
-    nh.spinOnce();
+  
+  if (foodChipColorCmd.data == 1) {
+    foodChipColorMsg.data = "detecting";
+    foodChip.publish(&foodChipColorMsg);
+    foodChipColorCmd.data = 0;
+    int color = arm->getFoodChipColor(); 
+    if (color == 0) {
+      foodChipColorMsg.data = "detected red";
+    } else {
+      foodChipColorMsg.data = "detected green";
+    }
+    foodChip.publish(&foodChipColorMsg);
+    arm->foodChipCmd(90);
+  }
+  
+
+  delay(10);
+  nh.spinOnce();
+  
+   */
+   }
 }
 
 

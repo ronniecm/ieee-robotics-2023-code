@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "amc.h"
 
 #define flipMIN 120
@@ -16,6 +17,7 @@ Amc::Amc() {
     servos = new Adafruit_PWMServoDriver(0x40);
     steppers = new Adafruit_PWMServoDriver(0x41);
     tcs = new Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
+    foodChipTcs = new Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_614MS, TCS34725_GAIN_1X);
 
     servos->begin();
     servos->setPWMFreq(50);
@@ -24,14 +26,18 @@ Amc::Amc() {
     steppers->setPWMFreq(1000);
     //color sensor
     tcs->begin();
+    foodChipTcs->begin(0x29, &Wire1);
   
     //color sensor stuff:    
+
+  servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));
 }
 
 Amc::~Amc() {
     delete servos;
     delete steppers;
     delete tcs;
+    delete foodChipTcs;
 }
 
 //Functions for all servo controll
@@ -258,4 +264,36 @@ int Amc::getStepsLeft() {
 int* Amc::getSlots() {
   
   return this->slots;
+}
+
+int Amc::getFoodChipColor() {
+  uint16_t r, g, b, c;
+  foodChipTcs->getRawData(&r, &g, &b, &c);
+  Serial.print(r);
+  Serial.print(" ");
+  Serial.print(g);
+  Serial.print(" ");
+  Serial.print(b);
+  Serial.println();
+  //if (r > g && r > b) 
+  if((r >= 400 && r<= 420) && (g >=140 && g<=150) && (b>=130 && b<=140))
+  { // red 
+      Serial.println("red");
+      servos->setPWM(6, 0, map(0, 0, 180, servoMIN, servoMAX));
+      delay(2000);
+      servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));      
+      return 0;
+  }
+  else 
+  {//green
+    Serial.println("green");
+    servos->setPWM(6, 0, map( 180, 0, 180, servoMIN, servoMAX));
+    delay(2000);
+    servos->setPWM(6, 0, map(90, 0, 180, servoMIN, servoMAX));      
+    return 1;    
+  }
+}
+
+void Amc::foodChipCmd(int angle) {
+  servos->setPWM(6, 0, map( angle, 0, 180, servoMIN, servoMAX));
 }
