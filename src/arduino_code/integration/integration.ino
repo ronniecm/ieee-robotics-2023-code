@@ -68,9 +68,11 @@ ros::Publisher Arm("/bot/arm_callback", &armMsg);
 ros::Publisher Wrist("/bot/wrist_callback", &wristMsg);
 ros::Publisher Paddle("/bot/paddle_callback", &paddleMsg);
 ros::Publisher Lifting("/bot/lifting_callback", &liftingMsg);
+
+*/
+
 ros::Publisher Carousel("/bot/carousel_callback", &carouselMsg);
 ros::Publisher PedestalColor("/bot/pedestalColor", &pedestalColorMsg);
-*/
 
 void gripperRotateCB(const std_msgs::Int16& cmd_msg)
 {
@@ -167,8 +169,8 @@ void setup()
     nh.subscribe(carousel);
     //nh.advertise(Lifting);
     nh.subscribe(pid);
-    //nh.advertise(Carousel);
-    //nh.advertise(PedestalColor);
+    nh.advertise(Carousel);
+    nh.advertise(PedestalColor);
 
     gripperRotateCmd.data = 90;
     gripperClampCmd.data = 0;
@@ -179,7 +181,7 @@ void setup()
     carouselCmd.data = 0;
     liftingCmd.data = 1;
 
-    /*
+   
     carouselMsg.data_length = 5;
     carouselMsg.data = (int32_t*) malloc(5 * sizeof(int32_t));
     
@@ -195,7 +197,7 @@ void setup()
     for(int i=0;i<4;i++){
       pedestalColorMsg.data[i] = uint16_t(0);
     }
-    */   
+      
     pinMode(13, OUTPUT);
     pinMode(38, INPUT);
     pinMode(39, INPUT);
@@ -213,31 +215,40 @@ void loop()
         int n = Serial.parseInt();
         demand = (double) n / 10.0; 
      }
+    drivetrain->mecanumDrive(cmd_y, 1.0,cmd_z);
+    for(int i = 0; i < 4; i++) {
+      Serial.print(drivetrain->getRPM(i));
+      Serial.print(" ");  
+    }
+    Serial.println();
      //Mecanum drive now a function of twist msgs
-    drivetrain->mecanumDrive(cmd_y, cmd_x,cmd_z);
-
     arm->gripperRotateCmd(gripperRotateCmd.data);
     //GripperRotate.publish(&gripperRotateCmd);
-    
+
+
     arm->gripperClampCmd(gripperClampCmd.data);
     //GripperClamp.publish(&gripperClampCmd);
-  
+
     arm->doorCmd(doorCmd.data);
     //Door.publish(&doorCmd); 
-    
+
     arm->armCmd(armCmd.data);
     //Arm.publish(&armCmd);
-    
+
+
     arm->wristCmd(wristCmd.data);
     //Wrist.publish(&wristCmd);
-  
+
+
     arm->paddleCmd(paddleCmd.data);
     //Paddle.publish(&paddleCmd);
+
 
     arm->liftingCmd(liftingCmd.data);
     if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
-    
+
+
     arm->liftingCmd(liftingCmd.data);
 
     

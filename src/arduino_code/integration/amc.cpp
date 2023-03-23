@@ -100,11 +100,12 @@ void Amc::carouselCmd(int stackType)
      
     else if (stackType == 1)
     {
+      
       this->stepsLeft += 200;
       stepperContinue();
       this->drop_in = true;
       drop_in_action();
-      
+       
     }
     else
     {
@@ -178,7 +179,6 @@ void Amc::dispense_helper(int i, int pedestal) {
     activate_paddle();
     this->slots[0] = 0;
     this->tube[pedestal - 1] = pedestal; 
-    
   }        
   else {
     if (i == 1 || i == 2) {
@@ -219,7 +219,7 @@ void Amc::dispense() {
         } 
       }
     }
-    else if (this->tube[0] == 1 && this->tube[1] == 0) { //white pedetal at bottom
+    else if (this->tube[0] == 1 && (this->tube[1] == 0 || this->tube[2] == 0)) { //white pedetal at bottom
       for(int i = 0; i < 5; i++) {
         if (this->slots[i] == 2) { //search for green pedestal
           dispense_helper(i, 2);
@@ -240,9 +240,12 @@ void Amc::dispense() {
 }
 
 void Amc::drop_in_action() {
+  
   if (this->drop_in == true){
+    
     if (this->stepsLeft == 0) {
       //update array after rotation
+ 
       update_slots(1);
       ////Serial.print("after ccw turn: "); 
             
@@ -257,38 +260,41 @@ void Amc::drop_in_action() {
       this->drop_in = false;
 
       if (onWhite) {
-        for(int i = 0; i < 5; i++) {
-          if (this->slots[i] == 1) { //srearch for white pedestal
-            dispense_helper(i, 1);
-            onWhite = false;
-            onGreen = true;
-            break;    
-          }  
+        if(this->slots[0] == 1){
+          dispense_helper(0,1);
+          onWhite = false;
+          onGreen = true;
         }
       }
       else if (onGreen) {
-        for(int i = 0; i < 5; i++) {
-          if (this->slots[i] == 2) { //srearch for green pedestal
-            dispense_helper(i, 2);
-            onGreen = false;
-            if (onTwo) { onWhite = true; }
-            else { onRed = true; }
-            break;    
-          }
+        if(this->slots[0] == 2){
+          dispense_helper(0,2);
+          onGreen = true;
+          onRed = true;
         }
       }
       else {
-        for(int i = 0; i < 5; i++) {
-          if (this->slots[i] == 3) { //srearch for red pedestal
-            dispense_helper(i, 3);
-            onRed = false;
-            onWhite = true;
-            break;    
-          }
+        onRed = false;
+        if(this->slots[0] == 3){
+          dispense_helper(0,3);
         }
       }
     }
+  //Now need to check if the 4th slot is empty
+
+  if(this->slots[4] != 0 && (this->tube[1] == 2 || this->tube[2] == 3)){
+    int emptySlotIndex = findEmptySlot();
+
+    if(emptySlotIndex == -1){
+      //this means not empty slots, carousel full
+      return;
+    }
+    else{
+      initSlotFour(emptySlotIndex);
+    }
   }
+  }
+
 }
 
 void Amc::update_slots(int dir) {
@@ -313,6 +319,13 @@ void Amc::update_slots(int dir) {
    
     this->slots[0] = temp;
 
+  }
+  
+  if(this->slots[4] == 0){
+    this->loadSlotEmpty = true;
+  }
+  else {
+    this->loadSlotEmpty = false;
   }
 }
 
@@ -352,5 +365,39 @@ void Amc::fillStack(int stackType) {
     this->built[0] = 1;
     return;
   }
+}
+
+int Amc::findEmptySlot(){
+  if (this->slots[4] == 0){
+    return 0;
+  }
+  else{
+    for (int i = 0; i < 4; i++){
+      if (this->slots[i] == 0){
+        return 1;
+      }
+    }
+  }
+  //if nothing empty we return -1
+  return -1;
   
+}
+
+void Amc::initSlotFour(int index){
+
+  if (index == 0 || index == 1) {
+      for (int j = 0; j < index; j++) {
+        this->stepsLeft -= 200;
+        stepperContinue();
+        update_slots(0);
+      }
+    }
+    
+    if (index == 2 || index == 3 ) {
+      for (int k = 2; k < index+1; k++) {
+        this->stepsLeft += 200;
+        stepperContinue();
+        update_slots(1);
+      }  
+    }
 }
