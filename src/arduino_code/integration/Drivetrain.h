@@ -5,7 +5,6 @@
 #include "MovingAverageFilter.hpp"
 #include <vector>
 
-
 /*
  * Author: Ronnie Mohapatra 
  * Description: Outlines header file for Drivetrain object
@@ -52,5 +51,4 @@ private:
 
     // Array of moving average filters for each motor
     MovingAverageFilter* rpmFilter[4];
-
 };
