@@ -34,15 +34,20 @@ import numpy as np
 import rospy
 
 from sensor_msgs.msg import Range
-from Ranging import Ranging
+
 from RobotCommand import RobotCommand
 from Servos import Servos
 #from pedestal_classification.PedestalTracker import PedestalTracker
 
 if onJetson:
     from Cameras import RealSense
+
+'''
 from Color import Color
 from Color import LED
+from Ranging import Ranging
+'''
+from Sensors import Color, LED, Ranging
 
 
 #This will be the main class that inherits everything from every other class
@@ -512,12 +517,12 @@ class Robot:
 
     def startRound(self):
         currYaw = self.realSense.getCurrYaw()
-        print("Starting Round")
-        print("current YAW: ", self.realSense.getCurrYaw())
+        #print("Starting Round")
+        #print("current YAW: ", self.realSense.getCurrYaw())
         while (self.realSense.getCurrYaw() > currYaw - 90):
-            print("In loop YAW: ", self.realSense.getCurrYaw())
+            #print("In loop YAW: ", self.realSense.getCurrYaw())
             self.ctrl.rotateLeft()
-        print("done Rotating")
+        #print("done Rotating")
             
         self.alignBack()
 
@@ -525,7 +530,7 @@ class Robot:
 
         while(self.led.getRedLed == 0):
             self.ctrl.stopBot()
-        print("LED DETECTED")
+        #print("LED DETECTED")
         self.startRound()
 
 #Put helper functions here prob will make a util class later
@@ -555,7 +560,26 @@ if __name__ == "__main__":
     bot.initServos()
     bot.pickupPathLeft()
     '''
-    bot.run()
+    # Open file in write mode
+
+    try:
+        prev_data = None
+        with open('yawData.txt', 'w') as f:
+            currTime = time.time()
+
+            while time.time() < currTime + 2:
+                currTime = time.time()
+                data = bot.realSense.getCurrYaw()
+                if prev_data is not None and data != prev_data:
+                    print(time.time() - currTime, data, f)
+                prev_data = bot.realSense.getCurrYaw()
+         
+    except rospy.ROSInterruptException:
+        pass
+    
+        
+        
+
 
 
     
