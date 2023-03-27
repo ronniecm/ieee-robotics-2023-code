@@ -15,6 +15,9 @@
 #define carouselDir 14
 #define carouselStep 15
 
+#define elevatorDir 20
+#define elevatorStep 21
+
 #define WHITE 1
 #define GREEN 2
 #define RED 3
@@ -90,24 +93,24 @@ void Amc::paddleCmd(int angle)
 // Stepper motor control
 void Amc::liftingCmd(int liftCmd)
 {
-  if (liftCmd == 0)
-  {
-    steppers->setPWM(1, 0, 4096);
-  }
-  else
-  {
-    steppers->setPWM(1, 0, 2048);
-    if (liftCmd == 1)
-    {
-      // Serial.println("going up");
-      steppers->setPWM(0, 0, 4096);
-    }
-    else if (liftCmd == -1)
-    {
-      // Serial.println("going down");
-      steppers->setPWM(0, 4096, 0);
+  if (liftCmd == 1) {
+    digitalWrite(elevatorDir, LOW);
+    while(digitalRead(upper_limit) == HIGH) {
+      digitalWrite(elevatorStep, HIGH);
+      delayMicroseconds(1000);
+      digitalWrite(elevatorStep, LOW);
+      delayMicroseconds(1000); 
     }
   }
+  else if (liftCmd == -1) {
+    digitalWrite(elevatorDir, HIGH);
+    while(digitalRead(lower_limit) == HIGH) {
+      digitalWrite(elevatorStep, HIGH);
+      delayMicroseconds(1000);
+      digitalWrite(elevatorStep, LOW);
+      delayMicroseconds(1000);
+    }
+  }  
 }
 
 void Amc::carouselCmd(int stackType)
@@ -122,7 +125,7 @@ void Amc::carouselCmd(int stackType)
     else if (stackType == 1)
     {
       
-      this->stepsLeft += 200;
+      this->stepsLeft -= 200;
       stepperContinue();
       this->drop_in = true;
       drop_in_action();
