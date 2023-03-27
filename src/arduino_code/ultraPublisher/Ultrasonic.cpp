@@ -50,6 +50,16 @@ float duration_Ultra7, cm_Ultra7;
 //Using Serial1 therefore RX1 & TX1 ports
 
 Ultrasonic::Ultrasonic() {
+  Serial.println("Constructing");
+  ultraPublishers[0] = new ros::Publisher("bot/ultra0", &ultraMessages[0]);
+  ultraPublishers[1] = new ros::Publisher("bot/ultra1", &ultraMessages[1]);
+  ultraPublishers[2] = new ros::Publisher("/bot/ultra2", &ultraMessages[2]);
+  ultraPublishers[3] = new ros::Publisher("/bot/ultra3", &ultraMessages[3]);
+  ultraPublishers[4] = new ros::Publisher("/bot/ultra4", &ultraMessages[4]);
+  ultraPublishers[5] = new ros::Publisher("/bot/ultra5", &ultraMessages[5]);
+  ultraPublishers[6] = new ros::Publisher("/bot/ultra6", &ultraMessages[6]);
+  ultraPublishers[7] = new ros::Publisher("/bot/ultra7", &ultraMessages[7]);
+  Serial.println("constructed publishers");
   for(int i = 0; i < 8; i++) {
     filters[i] = new MovingAverageFilter(5);
   }
@@ -57,6 +67,7 @@ Ultrasonic::Ultrasonic() {
 
 Ultrasonic::~Ultrasonic() {
   delete[] filters;
+  delete[] ultraPublishers;
 }
 //for each of the sensor measurements followed reference listed in comment header
 float Ultrasonic::getUltra0_Distance()
@@ -198,4 +209,24 @@ float Ultrasonic::getUltra7_Distance()
 
 float Ultrasonic::getReading(int i) {
   return readings[i];  
+}
+
+void Ultrasonic::publishData() {
+  getUltra2_Distance();
+  getUltra3_Distance();
+  getUltra4_Distance();
+  getUltra5_Distance();
+  getUltra6_Distance();
+  getUltra7_Distance();
+  for(int i = 2; i < 8; i++) {
+    ultraMessages[i].data = readings[i];
+    //Serial.print(readings[i]);
+    //Serial.print(" ");
+    ultraPublishers[i]->publish(&ultraMessages[i]);
+  }
+  //Serial.println();  
+}
+
+ros::Publisher* Ultrasonic::getPub(int i) {
+  return ultraPublishers[i];
 }
