@@ -311,12 +311,13 @@ void loop()
     //foodChip.publish(foodChipColorCmd.data);
 
     arm->liftingCmd(liftingCmd.data);
+    
     if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
 
 
     arm->liftingCmd(liftingCmd.data);
-
+    
     arm->carouselCmd(carouselCmd.data);
     //if(arm->getStepsLeft() == 0) {
      //carouselCmd.data = 0;
