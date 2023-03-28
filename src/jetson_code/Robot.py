@@ -28,7 +28,7 @@
 onJetson = True
 
 sim = False
-
+import matplotlib.pyplot as plt
 import time
 import numpy as np
 import rospy
@@ -546,14 +546,12 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
 
-    time.sleep(2)
-    print("TURN ON MOTORS")
-
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    
+    while True:
+        pass
 
     '''
     bot.ctrl.stopBot()
@@ -561,18 +559,9 @@ if __name__ == "__main__":
     bot.pickupPathLeft()
     '''
     # Open file in write mode
-
+    
     try:
-        prev_data = None
-        with open('yawData.txt', 'w') as f:
-            currTime = time.time()
-
-            while time.time() < currTime + 2:
-                currTime = time.time()
-                data = bot.realSense.getCurrYaw()
-                if prev_data is not None and data != prev_data:
-                    print(time.time() - currTime, data, f)
-                prev_data = bot.realSense.getCurrYaw()
+        pass
          
     except rospy.ROSInterruptException:
         pass
