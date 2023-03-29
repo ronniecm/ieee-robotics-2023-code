@@ -8,7 +8,7 @@ import sys
 
 class ArmControl(QWidget):
     def __init__(self):
-        super(JointControl, self).__init__()
+        super(ArmControl, self).__init__()
         pi = 3.14
         rospy.init_node('joint_control', anonymous=True)
         # Create a Publisher object for the /scara_arm_controller/command topic
