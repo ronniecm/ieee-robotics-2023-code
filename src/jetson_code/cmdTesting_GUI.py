@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider, QLabel,
 from PyQt5.QtCore import Qt
 import sys
 
-class JointControl(QWidget):
+class ArmControl(QWidget):
     def __init__(self):
         super(JointControl, self).__init__()
         pi = 3.14
@@ -25,8 +25,7 @@ class JointControl(QWidget):
         # Create four slider widgets and label widgets
         self.sliders = [QSlider(Qt.Horizontal) for i in range(7)]
         self.labels = [QLabel('Gripper Rotate'), QLabel('Gripper Clamp'), QLabel('Door'), QLabel('Arm'), QLabel('Wrist'), QLabel('Paddle'), QLabel('Lifting'), QLabel('Carousel')]
-        self.button = QPushButton('Carousel')
-        self.button.clicked.connect(self.carousel_cmd)
+        
         # Set the minimum and maximum values for the sliders as floats
         min_value = 0
         max_value = 180
@@ -37,16 +36,21 @@ class JointControl(QWidget):
             slider.setSingleStep(1)
     
         
+        # Create a button widget to publish the carousel command
+        self.button1 = QPushButton('Publish Carousel Cmd')
+        self.button1.clicked.connect(self.carouselCommand)
+
         # Create a button widget to publish the position command
-        self.button = QPushButton('Publish Position Command')
-        self.button.clicked.connect(self.carousel_cmd)
+        self.button2 = QPushButton('Publish Arm Cmds')
+        self.button2.clicked.connect(self.publishArmCommands)
 
         # Create a layout to organize the widgets
         layout = QVBoxLayout()
         for slider, label in zip(self.sliders, self.labels):
             layout.addWidget(label)
             layout.addWidget(slider)
-        layout.addWidget(self.button)
+        layout.addWidget(self.button1)
+        layout.addWidget(self.button2)
 
         # Set the layout for the main widget
         self.setLayout(layout)
@@ -61,7 +65,7 @@ class JointControl(QWidget):
         labels = {0: 'Gripper Rotate', 1: 'Gripper Clamp', 2: 'Door', 3: 'Arm', 4: 'Wrist', 5: 'Paddle', 6: 'Lifting', 7: 'Carousel'}
         self.labels[index].setText('%s : %.2f' %(labels[index], value / 100.0))
 
-    def publish_position(self):
+    def publishArmCommands(self):
         # Get the current position values from the sliders
         cmds = [slider.value() / 100.0 for slider in self.sliders]
         #print(cmds)
@@ -74,7 +78,7 @@ class JointControl(QWidget):
         self.pub_paddle.publish(int(cmds[5]))
         self.pub_lifting.publish(int(cmds[6]))
 
-    def carousel_cmd(self):
+    def carouselCommand(self):
         self.pub_carousel.publish(int(1))
 
 
@@ -83,7 +87,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     
     # Create the joint control widget and show it
-    widget = JointControl()
+    widget = ArmControl()
     widget.show()
     
     # Run the PyQt5 application
