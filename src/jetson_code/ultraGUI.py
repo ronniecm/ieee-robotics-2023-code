@@ -2,17 +2,26 @@
 
 import rospy
 from std_msgs.msg import Float32
+from sensor_msgs.msg import Range
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QSlider, QLabel, QPushButton
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer
 import sys
+import time
 
 class UltraGUI(QWidget):
     def __init__(self):
         super(UltraGUI, self).__init__()
         self.value =[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+        self.sim = True
+
+        if self.sim:
+            robot_name = 'sim'
+            ultra_msg_type = Range
+            
         rospy.init_node('ultraGUI', anonymous=True)
-        robot_name = "bot"
-        ultra_msg_type = Float32
+        print(robot_name)
+        
         self.labels = [QLabel('ultra2'), QLabel('ultra3'), QLabel('ultra4'), QLabel('ultra5'), QLabel('ultra6'), QLabel('ultra7')]
         rospy.Subscriber('%s/ultra2' %robot_name, ultra_msg_type, self.ultra2)
         rospy.Subscriber('%s/ultra3' %robot_name, ultra_msg_type, self.ultra3)
@@ -36,36 +45,65 @@ class UltraGUI(QWidget):
 
     def ultra2(self, msg):
         #print("Top Right Reading: %s" %msg.range)
-        self.value[0] = msg.data
-        self.update_label(0)
+        #print("here2")
+        if self.sim:
+            self.value[0] = msg.range * 100
+        else:
+            self.value[0] = msg.data
+
+        self.update_label()
+        time.sleep(0.1)
         
 
     def ultra3(self, msg):
         ##print("Bottom Right Reading: %s" %msg.range)
-        self.value[1] = msg.data
-        self.update_label(1)
+        #print("here3")
+        if self.sim:
+            self.value[1] = msg.range * 100
+        else:
+            self.value[1] = msg.data
+
         
     def ultra4(self, msg):
         ##print("Back Right Reading: %s" %msg.range)
         #if abs(self.ultraBack[0] - msg.range) < 3:
-        self.value[2] = msg.data
-        self.update_label(2)
+        #print("here4")
+        if self.sim:
+            self.value[2] = msg.range * 100
+        else:
+            self.value[2] = msg.data
+
+        
 
     def ultra5(self, msg):
         ##print("Back Left Reading: %s" %msg.range)
         #if abs(self.ultraBack[1] - msg.range) < 3:
-        self.value[3] = msg.data
-        self.update_label(3)
+        if self.sim:
+            self.value[3] = msg.range * 100
+        else:
+            self.value[3] = msg.data
+
         
+            
     def ultra6(self, msg):
         ##print("Bottom Left Reading: %s" %msg.range)
         #if abs(self.ultraLeft[0] - msg.range) < 3:
-        self.value[4] = msg.data
-        self.update_label(4)
+        if self.sim:
+            self.value[4] = msg.range * 100
+        else:
+            self.value[4] = msg.data
+        
+        
+            
 
     def ultra7(self, msg):
-        self.value[5] = msg.data
-        self.update_label(5)
+        if self.sim:
+            self.value[5] = msg.range * 100
+        else:
+            self.value[5] = msg.data
+
+        
+            
 
     def tof0(self, msg):
         pass
@@ -74,10 +112,11 @@ class UltraGUI(QWidget):
         pass
 
 
-    def update_label(self, index):
+    def update_label(self):
         # Update the label text with the current position value
         label = {0: 'ultra2', 1: 'ultra3', 2: 'ultra4', 3: 'ultra5', 4: 'ultra6', 5: 'ultra7'}
-        self.labels[index].setText('%s : %.2f cm' %(label[index], self.value[index]))
+        for index in range(6):
+            self.labels[index].setText('%s : %.2f cm' %(label[index], self.value[index]))
 
 
 if __name__ == '__main__':
