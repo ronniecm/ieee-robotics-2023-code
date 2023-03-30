@@ -7,7 +7,6 @@
 #include "std_msgs/String.h"
 
 
-
 #define UPPER_LIMIT 39
 #define LOWER_LIMIT 38
 
@@ -17,14 +16,11 @@ ros::NodeHandle nh;
 //Thie type of message is geometry_msgs::Twist
 // Thie type of message is geometry_msgs::Twist
 
-
-
 Amc* arm;
 
 
-
 //std_msgs::Int32MultiArray carouselMsg;
-//std_msgs::UInt16MultiArray pedestalColorMsg;
+std_msgs::UInt16MultiArray pedestalColorMsg;
 
 std_msgs::Int16 gripperRotateCmd;
 std_msgs::Int16 gripperClampCmd;
@@ -33,6 +29,15 @@ std_msgs::Int16 doorCmd;
 std_msgs::Int16 paddleCmd;
 std_msgs::Int16 armCmd;
 std_msgs::Int16 foodChipColorCmd;
+
+
+
+//Stepper ros variables
+std_msgs::Int16 carouselCmd;
+std_msgs::Int16 liftingCmd;
+
+
+ros::Publisher PedestalColor("/bot/pedestalColor", &pedestalColorMsg);
 
 
 void gripperRotateCB(const std_msgs::Int16 &cmd_msg)
@@ -74,6 +79,20 @@ void foodChipColorCB(const std_msgs::Int16 &cmd_msg)
   foodChipColorCmd.data = cmd_msg.data;
 }
 
+
+void carouselCB(const std_msgs::Int16 &cmd_msg)
+{
+  carouselCmd.data = cmd_msg.data;
+}
+
+
+void liftingCB(const std_msgs::Int16 &cmd_msg)
+{
+  liftingCmd.data = cmd_msg.data;
+}
+
+
+
 ros::Subscriber<std_msgs::Int16> gripperRotate("/bot/gripperRotate_cmd", gripperRotateCB);
 ros::Subscriber<std_msgs::Int16> gripperClamp("/bot/gripperClamp_cmd", gripperClampCB);
 ros::Subscriber<std_msgs::Int16> door("/bot/door_cmd", doorCB);
@@ -82,12 +101,18 @@ ros::Subscriber<std_msgs::Int16> wrist("/bot/wrist_cmd", wristCB);
 ros::Subscriber<std_msgs::Int16> paddle("/bot/paddle_cmd", paddleCB);
 ros::Subscriber<std_msgs::Int16> foodChipColor("/bot/foodChipColor", foodChipColorCB);
 
+
+ros::Subscriber<std_msgs::Int16> carousel("/bot/carousel_cmd", carouselCB);
+ros::Subscriber<std_msgs::Int16> lifting("/bot/lifting_cmd", liftingCB);
+
+
 // This will be the callback function for wheel commands from jetson
 
 
 void setup()
 {
     arm = new Amc();
+    //Wire2.begin();
 
     nh.initNode();
     
@@ -98,19 +123,38 @@ void setup()
     nh.subscribe(wrist);
     nh.subscribe(paddle);
     nh.subscribe(foodChipColor);
+
+
+    nh.subscribe(carousel);
+    nh.subscribe(lifting);
+
+    nh.advertise(PedestalColor);
     
-    gripperRotateCmd.data = 90;
+    gripperRotateCmd.data = 0;
     gripperClampCmd.data = 0;
     wristCmd.data = 180;
-    armCmd.data = 180;
+    armCmd.data = 172;
     paddleCmd.data = 135;
     doorCmd.data = 120;
     foodChipColorCmd.data = 90;
+
+    liftingCmd.data = 1;
+    carouselCmd.data = 0;
+
+    
+    pedestalColorMsg.data_length = 4;
+    pedestalColorMsg.data = (uint16_t *)malloc(4 * sizeof(uint16_t));
+
+    for (int i = 0; i < 4; i++)
+     {
+        pedestalColorMsg.data[i] = uint16_t(0);
+      }
+
 }
 
 void loop()
 {
-
+    
     arm->gripperRotateCmd(gripperRotateCmd.data);
     
 
@@ -128,7 +172,31 @@ void loop()
     arm->wristCmd(wristCmd.data);
 
     arm->foodChipCmd(foodChipColorCmd.data);
+
+
+    arm->liftingCmd(liftingCmd.data);
+    
+    if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
+    if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
+    arm->liftingCmd(liftingCmd.data);
+   
+    
+    arm->carouselCmd(carouselCmd.data);
+    
+    //Reset the message after pedestal loaded
+    carouselCmd.data = 0;
+
+    
+    pedestalColorMsg.data[0] = arm->r;
+    pedestalColorMsg.data[1] = arm->g;
+    pedestalColorMsg.data[2] = arm->b;
+    pedestalColorMsg.data[3] = arm->c;
+
+    PedestalColor.publish(&pedestalColorMsg);
+    
     
     nh.spinOnce();
-    delay(10);
+    //arm->getColorData();
+    //Serial.println("END OF LOOP");
+    delay(50);
 }
