@@ -40,6 +40,7 @@ from jetson_utils import videoSource, videoOutput, logUsage
 import jetson_utils_python
 from math import sqrt, degrees, pi, atan2
 import threading
+import time
 
 class RealSense:
     def __init__(self):
@@ -50,6 +51,11 @@ class RealSense:
         self.frame_center = self.screen_width/2
         self.threshold = 200 
         self.detectionData = [0,0,0]
+
+        self.yawOffset = 0.0
+        
+
+        #This is for calculating yaw offsets. We are going to need to increment time in a thread
 
         parser = argparse.ArgumentParser(description="Locate objects in a live camera stream using an object detection DNN.", 
                                  formatter_class=argparse.RawTextHelpFormatter, 
@@ -113,9 +119,44 @@ class RealSense:
         print("Starting Cameera")
         angles = threading.Thread(target=self.angleCalculation)
         angles.start()
-       
-        
 
+        timePassed = threading.Thread(target=self.timePassed)
+        timePassed.start()
+
+    
+    def timePassed(self):
+        print("Starting timePassed thread")
+        timePassed = 0.0
+
+        currTime = time.time()
+        dt = 0.0
+        timeStep = 0.5
+
+        #This is from the linear regressiong of the data
+        
+        correctionFactor = 0.11182
+        '''
+        To tune this let the below while loop run for some time and then plot the data in YawCorrection.txt
+        Data has time and yaw offset
+        After plotting add a trend line and get the slope of the line
+        We want the plot to be as flat as possible, so add whatever slot you see to the correction factor
+        '''
+
+        #Uncomment the following line and indent the while loop to write to file:
+        #Also uncomment the print statement in the while loop
+
+        #with open("yawCorrection.txt", "a") as f:
+
+        #Let loop run for 10 seconds
+        while(time.time() - currTime < 180):
+            noise = 2*timeStep*np.random.normal(0,0.00001)
+            self.yawOffset = (correctionFactor*timePassed - noise)
+            #print(timePassed, self.getCurrYaw() - self.yawOffset, file=f, flush=True)
+            prevTime = time.time()
+            time.sleep(timeStep)
+            dt = time.time() - prevTime
+            timePassed += dt
+            
     def filter_detections(self, detections):
         """
         Filter out "double" detections of the same object within the same frame.
@@ -308,15 +349,16 @@ class RealSense:
             combinedangleZ = totalgyroangleZ * self.alpha + accel_angle_z * (1-self.alpha)
             combinedangleY = self.totalgyroangleY
             
+            #print(self.rpy[1])
 
-            self.rpy = [combinedangleX, combinedangleY - 180, combinedangleZ]
-            
+            self.rpy = [combinedangleX, combinedangleY - 180 - self.yawOffset, combinedangleZ]
+            print(self.rpy[1])
     
 
     def getCurrYaw(self):
-        return self.rpy[1]
-
         
+        return self.rpy[1] 
+
 
 def getScore(distance, class_id):
         score = 0

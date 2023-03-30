@@ -27,6 +27,103 @@ void setup()
 void loop()
 {
   // Mecanum drive now a function of twist msgs
+  currentMillis = millis();
+  while (currentMillis - previousMillis >= 10)
+  {
+    previousMillis = currentMillis;
+    if (Serial.available() > 0)
+    {
+      int n = Serial.parseInt();
+      demand = (double)n / 10.0;
+      // Mecanum drive now a function of twist msgs
+      drivetrain->mecanumDrive(0.0, demand, 0.0);
+      for (int i = 0; i < 4; i++)
+      {
+        Serial.print(drivetrain->getRPM(i));
+        Serial.print(" ");
+      }
+      Serial.println();
+    }
+    
+    arm->gripperRotateCmd(gripperRotateCmd.data);
+    //GripperRotate.publish(&gripperRotateCmd);
+
+
+    arm->gripperClampCmd(gripperClampCmd.data);
+    //GripperClamp.publish(&gripperClampCmd);
+
+    arm->doorCmd(doorCmd.data);
+    //Door.publish(&doorCmd);
+
+    arm->armCmd(armCmd.data);
+    //Arm.publish(&armCmd);
+
+
+    arm->wristCmd(wristCmd.data);
+    //Wrist.publish(&wristCmd);
+
+
+    arm->paddleCmd(paddleCmd.data);
+    //Paddle.publish(&paddleCmd);
+
+    //arm->foodChipCmd(foodChipColorCmd.data);
+    //foodChip.publish(foodChipColorCmd.data);
+
+    arm->liftingCmd(liftingCmd.data);
+    
+    if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
+    if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
+
+
+    arm->liftingCmd(liftingCmd.data);
+    
+    arm->carouselCmd(carouselCmd.data);
+    //if(arm->getStepsLeft() == 0) {
+     //carouselCmd.data = 0;
+      //arm->carouselCmd(carouselCmd.data);
+    //}
+
+   }
+   carouselCmd.data = 0;
+
+   pedestalColorMsg.data[0] = arm->r;
+   pedestalColorMsg.data[1] = arm->g;
+   pedestalColorMsg.data[2] = arm->b;
+   pedestalColorMsg.data[3] = arm->c;
+    
+   for(int i = 0; i < 5; i++){
+    carouselMsg.data[i] = int32_t(arm->slots[i]);
+   }
+
+    Carousel.publish(&carouselMsg);
+
+    PedestalColor.publish(&pedestalColorMsg);
+
+
+
+    if (foodChipColorCmd.data == 1)
+    {
+      foodChipColorMsg.data = "detecting";
+      foodChip.publish(&foodChipColorMsg);
+      foodChipColorCmd.data = 0;
+      int color = arm->getFoodChipColor();
+      if (color == 0)
+      {
+        foodChipColorMsg.data = "detected red";
+      }
+      else
+      {
+        foodChipColorMsg.data = "detected green";
+      }
+      foodChip.publish(&foodChipColorMsg);
+      arm->foodChipCmd(90);
+    }
+
+    delay(10);
+    nh.spinOnce();
+  }
+
+
  drivetrain->mecanumDrive(0,1.0, 0.0);
  ultrason
  for(int i = 0; i < 4; i++) {

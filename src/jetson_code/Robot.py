@@ -28,21 +28,26 @@
 onJetson = True
 
 sim = False
-
+import matplotlib.pyplot as plt
 import time
 import numpy as np
 import rospy
 
 from sensor_msgs.msg import Range
-from Ranging import Ranging
+
 from RobotCommand import RobotCommand
 from Servos import Servos
 #from pedestal_classification.PedestalTracker import PedestalTracker
 
 if onJetson:
     from Cameras import RealSense
+
+'''
 from Color import Color
 from Color import LED
+from Ranging import Ranging
+'''
+from Sensors import Color, LED, Ranging
 
 
 #This will be the main class that inherits everything from every other class
@@ -512,12 +517,12 @@ class Robot:
 
     def startRound(self):
         currYaw = self.realSense.getCurrYaw()
-        print("Starting Round")
-        print("current YAW: ", self.realSense.getCurrYaw())
+        #print("Starting Round")
+        #print("current YAW: ", self.realSense.getCurrYaw())
         while (self.realSense.getCurrYaw() > currYaw - 90):
-            print("In loop YAW: ", self.realSense.getCurrYaw())
+            #print("In loop YAW: ", self.realSense.getCurrYaw())
             self.ctrl.rotateLeft()
-        print("done Rotating")
+        #print("done Rotating")
             
         self.alignBack()
 
@@ -525,7 +530,7 @@ class Robot:
 
         while(self.led.getRedLed == 0):
             self.ctrl.stopBot()
-        print("LED DETECTED")
+        #print("LED DETECTED")
         self.startRound()
 
 #Put helper functions here prob will make a util class later
@@ -541,21 +546,29 @@ def within1inch(n, target, threshold=1):
 
 if __name__ == "__main__":
 
-    time.sleep(2)
-    print("TURN ON MOTORS")
-
     if sim:
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    
+    while True:
+        pass
 
     '''
     bot.ctrl.stopBot()
     bot.initServos()
     bot.pickupPathLeft()
     '''
-    bot.run()
+    # Open file in write mode
+    
+    try:
+        pass
+         
+    except rospy.ROSInterruptException:
+        pass
+    
+        
+        
+
 
 
     
