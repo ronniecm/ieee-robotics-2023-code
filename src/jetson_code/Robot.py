@@ -39,6 +39,7 @@ from RobotCommand import RobotCommand
 from Servos import Servos
 #from pedestal_classification.PedestalTracker import PedestalTracker
 
+
 if onJetson:
     from Cameras import RealSense
 
@@ -535,6 +536,39 @@ class Robot:
 
 #Put helper functions here prob will make a util class later
 
+def milestone1(self):
+    while not bot.rng.getRight(1) < 10.0:
+        bot.ctrl.goRight(0.75)
+    
+    bot.ctrl.stopBot()
+
+    while not bot.rng.getBack(1) > 60.0:
+        bot.ctrl.goFoward(0.5)
+
+    bot.ctrl.stopBot()
+
+    while not bot.rng.getBack(1) < 10.0:
+        bot.ctrl.goBackwards(0.5)
+    
+    bot.ctrl.stopBot()
+    bot.alignBack()
+    bot.stopBot()
+
+    while not bot.rng.getLeft(1) < 10.0:
+        pos = bot.rng.getRight(1)
+        while bot.rng.getRight(1) < pos + 30.0:
+            bot.ctrl.goLeft(0.75)
+        bot.ctrl.stopBot()
+        while not bot.rng.getBack(1) > 60.0:
+            bot.ctrl.goFoward(0.5)
+        bot.ctrl.stopBot()
+        while not bot.rng.getBack(1) < 10.0:
+            bot.ctrl.goBackwards(0.5)
+        bot.ctrl.stopBot()
+        bot.alignBack()
+        bot.ctrl.stopBot()
+
+
 def within1inch(n, target, threshold=1):
     # Convert threshold to centimeters
 
@@ -550,28 +584,21 @@ if __name__ == "__main__":
         bot = Robot("sim","talker","cmd_vel", queue_size = 10)
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
-    while True:
-        pass
+    
 
-    '''
+    print("starting program")
+
+    time.sleep(2)
+    print("Turn on motors")
+
+    currYaw = bot.realSense.getCurrYaw()
+    print(currYaw)
+
+    while (bot.realSense.getCurrYaw() < currYaw + 90):
+        print("In loop YAW: ", bot.realSense.getCurrYaw())
+        bot.ctrl.rotateRight(0.45)
+        
+    print("done Rotating")
     bot.ctrl.stopBot()
-    bot.initServos()
-    bot.pickupPathLeft()
-    '''
-    # Open file in write mode
-    
-    try:
-        pass
-         
-    except rospy.ROSInterruptException:
-        pass
-    
-        
-        
-
-
-
-    
-   
-    
+    print("Program")
     

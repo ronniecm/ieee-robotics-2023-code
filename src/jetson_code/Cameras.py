@@ -352,7 +352,7 @@ class RealSense:
             #print(self.rpy[1])
 
             self.rpy = [combinedangleX, combinedangleY - 180 - self.yawOffset, combinedangleZ]
-            print(self.rpy[1])
+            #print(self.rpy[1])
     
 
     def getCurrYaw(self):
