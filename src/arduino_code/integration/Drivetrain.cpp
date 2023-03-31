@@ -43,7 +43,7 @@ Drivetrain::Drivetrain()
     // Initialize all 4 moving average filters
     for (int i = 0; i < 4; i++)
     {
-        rpmFilter[i] = new MovingAverageFilter(100);
+        rpmFilter[i] = new MovingAverageFilter(200);
     }
   
     //initialize count to 0
