@@ -7,21 +7,8 @@
 #include <Wire.h>
 #include "std_msgs/Float32.h"
 
-#define FL_in1 1
-#define FL_in2 2
-
-#define FR_in1 6
-#define FR_in2 7
-
-#define BR_in1 5
-#define BR_in2 6
-
-#define BL_in1 28
-#define BL_in2 29
-
 Drivetrain* drivetrain;
 Ultrasonic* ultrasonics;
-//TOF ROS data stuff
 
 IntervalTimer intTimer;
 
@@ -37,17 +24,16 @@ void mecanumCallback(const geometry_msgs::Twist& msg) {
 
 ros::Subscriber<geometry_msgs::Twist> speedSub("/bot/cmd_vel", mecanumCallback);
 
+unsigned long currentMillis, previousMillis;
+
 void setup()
 {
     //Serial.begin(115200);
     nh.initNode();
-    Serial.println("initialized node");
     drivetrain = new Drivetrain();
     initDrivetrain();
-    Serial.println("constructed drivetrain");
     ultrasonics = new Ultrasonic();
     initUltrasonics();
-    Serial.println("constructed ultrasonics");
     for(int i = 0; i < 6; i++) {
       nh.advertise(*ultrasonics->getPub(i));
     }
@@ -57,10 +43,13 @@ void setup()
 void loop()
 {
   // Mecanum drive now a function of twist msgs
-  drivetrain->mecanumDrive(cmd_y, cmd_x,  cmd_z); 
+  currentMillis = millis();
+  while (currentMillis - previousMillis >= 10) {
+    previousMillis = currentMillis;
+    drivetrain->mecanumDrive(cmd_y, cmd_x,  cmd_z);
+  }
   ultrasonics->publishData();
   nh.spinOnce();
-  delay(10);
 }
 
 void initDrivetrain()
