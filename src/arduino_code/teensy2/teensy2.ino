@@ -1,10 +1,13 @@
 #include "amc.h"
 #include "ros.h"
 #include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Float32.h"
 #include "std_msgs/Int32MultiArray.h"
 #include "std_msgs/Int16.h"
 #include "std_msgs/UInt16MultiArray.h"
 #include "std_msgs/String.h"
+#include "Wire.h"
+#include "Adafruit_VL6180X.h"
 
 
 #define UPPER_LIMIT 39
@@ -21,6 +24,7 @@ Amc* arm;
 
 //std_msgs::Int32MultiArray carouselMsg;
 std_msgs::UInt16MultiArray pedestalColorMsg;
+std_msgs::Float32 tofMsg;
 
 std_msgs::Int16 gripperRotateCmd;
 std_msgs::Int16 gripperClampCmd;
@@ -38,7 +42,7 @@ std_msgs::Int16 liftingCmd;
 
 
 ros::Publisher PedestalColor("/bot/pedestalColor", &pedestalColorMsg);
-
+ros::Publisher tofPublisher("/bot/TOF", &tofMsg);
 
 void gripperRotateCB(const std_msgs::Int16 &cmd_msg)
 {
@@ -108,12 +112,14 @@ ros::Subscriber<std_msgs::Int16> lifting("/bot/lifting_cmd", liftingCB);
 
 // This will be the callback function for wheel commands from jetson
 
+Adafruit_VL6180X tof = Adafruit_VL6180X();
 
 void setup()
 {
     arm = new Amc();
     //Wire2.begin();
 
+    setupTOF();
     nh.initNode();
     
     nh.subscribe(gripperRotate);
@@ -129,6 +135,7 @@ void setup()
     nh.subscribe(lifting);
 
     nh.advertise(PedestalColor);
+    nh.advertise(tofPublisher);
     
     gripperRotateCmd.data = 0;
     gripperClampCmd.data = 0;
@@ -149,6 +156,7 @@ void setup()
      {
         pedestalColorMsg.data[i] = uint16_t(0);
       }
+      Serial.println("setup finifhsed");
 
 }
 
@@ -176,27 +184,34 @@ void loop()
 
     arm->liftingCmd(liftingCmd.data);
     
-    if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0;}
+    if (liftingCmd.data == 1 && digitalRead(UPPER_LIMIT)== LOW) {liftingCmd.data = 0; Serial.println("done lifting");}
     if (liftingCmd.data == -1 && digitalRead(LOWER_LIMIT)== LOW) {liftingCmd.data = 0;}
     arm->liftingCmd(liftingCmd.data);
-   
     
-    arm->carouselCmd(carouselCmd.data);
-    
-    //Reset the message after pedestal loaded
-    carouselCmd.data = 0;
-
-    
-    pedestalColorMsg.data[0] = arm->r;
-    pedestalColorMsg.data[1] = arm->g;
-    pedestalColorMsg.data[2] = arm->b;
-    pedestalColorMsg.data[3] = arm->c;
-
-    PedestalColor.publish(&pedestalColorMsg);
-    
-    
+    getTOF();
+    tofPublisher.publish(&tofMsg);
     nh.spinOnce();
     //arm->getColorData();
     //Serial.println("END OF LOOP");
-    delay(50);
+    //delay(50);
+}
+
+void setupTOF() {
+ if (!tof.begin(&Wire1)) {
+    Serial.println("Failed to find sensor"); 
+    while (1);
+ }
+ Serial.println("Sensor found!");
+}
+
+void getTOF() {
+  float lux = tof.readLux(VL6180X_ALS_GAIN_5);
+  
+  uint8_t range = tof.readRange();
+  uint8_t status = tof.readRangeStatus();
+
+  if (status == VL6180X_ERROR_NONE) {
+    Serial.print("Range: "); Serial.println(range * 0.1);
+    tofMsg.data = range * 0.1;
+ }  
 }

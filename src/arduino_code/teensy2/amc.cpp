@@ -1,7 +1,7 @@
 //#include <stdint.h>
 #include "amc.h"
 
-#define flipMIN 120
+#define flipMIN 125
 #define flipMAX 510
 
 #define wristMIN 120
@@ -9,6 +9,7 @@
 
 #define servoMIN 103
 #define servoMAX 512
+
 #define upper_limit 39  //upper limit switch
 #define lower_limit 38  //lower limit switch
 
