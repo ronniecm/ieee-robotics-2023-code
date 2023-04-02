@@ -13,11 +13,14 @@ class UltraGUI(QWidget):
         super(UltraGUI, self).__init__()
         self.value =[0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
-        self.sim = True
+        self.sim = False
 
         if self.sim:
             robot_name = 'sim'
             ultra_msg_type = Range
+        else:
+            robot_name = 'bot'
+            ultra_msg_type = Float32
             
         rospy.init_node('ultraGUI', anonymous=True)
         print(robot_name)

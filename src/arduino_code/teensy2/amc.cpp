@@ -9,6 +9,7 @@
 
 #define servoMIN 103
 #define servoMAX 512
+
 #define upper_limit 39  //upper limit switch
 #define lower_limit 38  //lower limit switch
 

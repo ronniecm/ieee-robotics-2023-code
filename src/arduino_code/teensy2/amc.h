@@ -2,8 +2,7 @@
 #define AMC_H
 
 #include <Wire.h>
-extern TwoWire Wire1;
-extern TwoWire Wire2;
+
 #include <Adafruit_PWMServoDriver.h>
 #include <SoftwareSerial.h>
 #include <SPI.h>
