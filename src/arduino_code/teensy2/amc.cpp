@@ -1,8 +1,8 @@
 //#include <stdint.h>
 #include "amc.h"
 
-#define flipMIN 125
-#define flipMAX 510
+#define flipMIN 115
+#define flipMAX 520
 
 #define wristMIN 120
 #define wristMAX 530
@@ -13,8 +13,8 @@
 #define upper_limit 39  //upper limit switch
 #define lower_limit 38  //lower limit switch
 
-#define carouselDir 14
-#define carouselStep 15
+#define carouselDir 23
+#define carouselStep 22
 
 #define elevatorDir 20
 #define elevatorStep 21
@@ -93,7 +93,7 @@ void Amc::foodChipCmd(int angle) {
 
 void Amc::liftingCmd(int liftCmd)
 {
-
+  
   if (liftCmd == 1) {
     Serial.print("In Lifting");
     digitalWrite(elevatorDir, LOW);
@@ -113,6 +113,9 @@ void Amc::liftingCmd(int liftCmd)
       delayMicroseconds(1000);
     }
   }  
+  else{
+    return;
+  }
 
 }
 
@@ -120,7 +123,7 @@ void Amc::liftingCmd(int liftCmd)
 void Amc::carouselCmd(int stackType)
 {
 
-    Serial.println("in carousel");
+    //Serial.println("in carousel");
   
     if (stackType == 2 || stackType ==3) {
       //fillStack(stackType);
@@ -138,7 +141,7 @@ void Amc::carouselCmd(int stackType)
     }
     else
     {
-      Serial.println("HERE");
+      //Serial.println("HERE");
     }
 
 }
