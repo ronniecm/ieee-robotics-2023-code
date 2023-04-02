@@ -1,11 +1,12 @@
 #include "amc.h"
 #include "ros.h"
 #include "std_msgs/Float32MultiArray.h"
+#include "std_msgs/Float32.h"
 #include "std_msgs/Int32MultiArray.h"
 #include "std_msgs/Int16.h"
 #include "std_msgs/UInt16MultiArray.h"
 #include "std_msgs/String.h"
-
+#include "Adafruit_VL6180X.h"
 
 #define UPPER_LIMIT 39
 #define LOWER_LIMIT 38
@@ -107,11 +108,14 @@ ros::Subscriber<std_msgs::Int16> lifting("/bot/lifting_cmd", liftingCB);
 
 
 // This will be the callback function for wheel commands from jetson
-
+Adafruit_VL6180X tofSensor = Adafruit_VL6180X();
+std_msgs::Float32 tofMsg;
+ros::Publisher tofPub("/bot/tof", &tofMsg);
 
 void setup()
 {
     arm = new Amc();
+    setupTOF();
     //Wire2.begin();
 
     nh.initNode();
@@ -129,7 +133,8 @@ void setup()
     nh.subscribe(lifting);
 
     nh.advertise(PedestalColor);
-    
+    nh.advertise(tofPub);
+
     gripperRotateCmd.data = 0;
     gripperClampCmd.data = 0;
     wristCmd.data = 180;
@@ -138,7 +143,7 @@ void setup()
     doorCmd.data = 120;
     foodChipColorCmd.data = 90;
 
-    liftingCmd.data = 1;
+    liftingCmd.data = 0;
     carouselCmd.data = 0;
 
     
@@ -154,6 +159,9 @@ void setup()
 
 void loop()
 {
+    readTOF();
+    tofPub.publish(&tofMsg);
+    
     
     arm->gripperRotateCmd(gripperRotateCmd.data);
     
@@ -199,4 +207,22 @@ void loop()
     //arm->getColorData();
     //Serial.println("END OF LOOP");
     delay(50);
+}
+
+void setupTOF() {
+  if (!tofSensor.begin(&Wire1)) {
+    Serial.println("Cannot find sensor");
+    while (1);
+  }
+  Serial.println("Found TOF sensor");
+}
+
+void readTOF() {
+  float lux = tofSensor.readLux(VL6180X_ALS_GAIN_5);
+  float range = tofSensor.readRange();
+  uint8_t status = tofSensor.readRangeStatus();
+
+  if (status == VL6180X_ERROR_NONE) {
+    tofMsg.data = range * 0.1;
+  }
 }
