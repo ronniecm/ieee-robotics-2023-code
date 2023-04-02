@@ -3,7 +3,6 @@
 #include "Ultrasonic.h"
 #include "ros.h"
 #include "geometry_msgs/Twist.h"
-#include <Adafruit_VL6180X.h>
 #include <Wire.h>
 #include "std_msgs/Float32.h"
 
@@ -47,8 +46,10 @@ void loop()
   while (currentMillis - previousMillis >= 10) {
     previousMillis = currentMillis;
     drivetrain->mecanumDrive(cmd_y, cmd_x,  cmd_z);
+    //drivetrain->mecanumDrive(0.0, 0.80, 0.0);
   }
   ultrasonics->publishData();
+  drivetrain->printRPM();
   nh.spinOnce();
 }
 

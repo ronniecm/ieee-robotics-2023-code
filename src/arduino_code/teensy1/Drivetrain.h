@@ -20,8 +20,8 @@
 #define BR_enc1 12
 #define BR_enc2 11
 
-#define BL_in1 29
-#define BL_in2 28
+#define BL_in1 28
+#define BL_in2 29
 #define BL_enc1 31
 #define BL_enc2 32
 

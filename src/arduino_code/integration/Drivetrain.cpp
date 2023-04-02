@@ -1,24 +1,28 @@
 #include "Drivetrain.h"
 
+// Front left motor pin definition
 #define FL_in1 2
-#define FL_in2 1
-#define FL_enc1 3
-#define FL_enc2 4
+#define FL_in2 3
+#define FL_enc_in1 20
+#define FL_enc_in2 21
 
-#define FR_in1 7
-#define FR_in2 8
-#define FR_enc1 25
-#define FR_enc2 24
+// Front right motor pin definition
+#define FR_in1 36
+#define FR_in2 37
+#define FR_enc_in1 35
+#define FR_enc_in2 34
 
-#define BR_in1 5
-#define BR_in2 6
-#define BR_enc1 12
-#define BR_enc2 11
+// Back left motor pin definition
+#define BL_in1 22
+#define BL_in2 23
+#define BL_enc_in1 4
+#define BL_enc_in2 5
 
-#define BL_in1 29
-#define BL_in2 28
-#define BL_enc1 31
-#define BL_enc2 32
+// Back right motor pin definition
+#define BR_in1 28
+#define BR_in2 29
+#define BR_enc_in1 31
+#define BR_enc_in2 30
 
 // Measured encoder ticks per single revolution
 #define TICKS_PER_REV 2678
@@ -26,10 +30,10 @@
 Drivetrain::Drivetrain()
 {
     //First initialize all 4 encoder objects
-    enc[0] = new Encoder(FL_enc1, FL_enc2);
-    enc[1] = new Encoder(FR_enc1, FR_enc2);
-    enc[2] = new Encoder(BL_enc1, BL_enc2);
-    enc[3] = new Encoder(BR_enc1, BR_enc2);
+    enc[0] = new Encoder(FL_enc_in1, FL_enc_in2);
+    enc[1] = new Encoder(FR_enc_in1, FR_enc_in2);
+    enc[2] = new Encoder(BL_enc_in1, BL_enc_in2);
+    enc[3] = new Encoder(BR_enc_in1, BR_enc_in2);
 
   
     //Next initialize all 4 PID speed controllers with proper PID and setpoint values
@@ -43,7 +47,7 @@ Drivetrain::Drivetrain()
     // Initialize all 4 moving average filters
     for (int i = 0; i < 4; i++)
     {
-        rpmFilter[i] = new MovingAverageFilter(200);
+        rpmFilter[i] = new MovingAverageFilter(100);
     }
   
     //initialize count to 0
@@ -66,6 +70,12 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     double backLeft = y - x + z;
     double backRight = y + x - z;
 
+    // map -1.0 to 1.0 range to -100 to 100 RPM
+    double frontLeftRPM = frontLeft * 100.0;
+    double frontRightRPM = frontRight * 100.0;
+    double backLeftRPM = backLeft * 100.0;
+    double backRightRPM = backRight * 100.0;
+
     /*
     frontLeft = frontLeft * 255;
     frontRight = frontRight * 255;
@@ -73,55 +83,104 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     backRight = backRight * 255;
     */
 
-    
+    for(int i = 0; i < 4; i++) {
+      in[i] = abs(finalRpm[i]);  
+    }
+
+    // set the setpoint of each PID speed controller
+    setpoint[0] = abs(frontLeftRPM);
+    setpoint[1] = abs(frontRightRPM);
+    setpoint[2] = abs(backLeftRPM);
+    setpoint[3] = abs(backRightRPM);
+
+    // set the input of each PID speed controller and compute the output
+    for (int i = 0; i < 4; i++)
+    {
+      // speedController[i]->Compute();
+      
+      if(setpoint[i] == 0) {
+           out[i] = 0;
+      }
+      else {
+
+      // speedController[i]->SetTunings(kPlow[i], kIlow[i], kDlow[i]);
+
+      //     // // If setpoint is less than 60 RPM, use low speed PID values
+      //     // if (setpoint[i] < 70)
+      //     // {
+      //     //     speedController[i]->SetTunings(kPlow[i], kIlow[i], kDlow[i]);
+      //     // } else {
+      //     //     speedController[i]->SetTunings(kPhigh[i], kIhigh[i], kDhigh[i]);
+      //     // }
+      
+        speedController[i]->Compute();
+      }
+      
+    }
+
+    // Apply the calculated values to the motor control pins
+    /*
+
     // Front left motor
     if (frontLeft >= 0)
     {
         // Clockwise rotation
         analogWrite(FL_in1, 0);
-        analogWrite(FL_in2, abs(frontLeft) * 255);
+        analogWrite(FL_in2, out[0]);
     }
     else
     {
-        analogWrite(FL_in1,  abs(frontLeft) * 255);
+
+        analogWrite(FL_in1,  out[0]);
         analogWrite(FL_in2, 0);
-    }   
-
-    if (backLeft >= 0)
-    {
-        // Clockwise rotation
-        analogWrite(BL_in1, 0);
-        analogWrite(BL_in2, abs(backLeft) * 255);
     }
-    else
-    {
-        analogWrite(BL_in1,  abs(backLeft) * 255);
-        analogWrite(BL_in2, 0);
-    }   
 
-    if (backRight >= 0)
-    {
-        // Clockwise rotation
-        analogWrite(BR_in1, 0);
-        analogWrite(BR_in2, abs(backRight) * 255);
-    }
-    else
-    {
-        analogWrite(BR_in1,  abs(backRight) * 255);
-        analogWrite(BR_in2, 0);
-    }  
-
+   */
+    // Front right motor
     if (frontRight >= 0)
     {
         // Clockwise rotation
         analogWrite(FR_in1, 0);
-        analogWrite(FR_in2, abs(frontRight) * 255);
+        analogWrite(FR_in2, out[1]);
     }
     else
     {
-        analogWrite(FR_in1,  abs(frontRight) * 255);
+        // Counter-clockwise rotation
+        analogWrite(FR_in1, out[1]);
         analogWrite(FR_in2, 0);
-    }  
+    }
+    /*
+    // Back left motor
+    if (backLeft >= 0)
+    {
+        // Clockwise rotation
+        analogWrite(BL_in1,0);
+        analogWrite(BL_in2, out[2]);
+    }
+  
+    else
+    {
+        // Counter-clockwise rotation
+
+        analogWrite(BL_in1, out[2]);
+        analogWrite(BL_in2, 0);
+    }
+
+    */
+    // Back right motor
+    if (backRight >= 0)
+    {
+        // Clockwise rotation
+        analogWrite(BR_in1, out[3]);
+        analogWrite(BR_in2, 0);
+    }
+    else
+    {
+        // Counter-clockwise rotation
+        analogWrite(BR_in1, 0);
+        analogWrite(BR_in2, out[3]);
+    }
+    
 }
 
 // void Drivetrain::calcRPM()
@@ -155,7 +214,6 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
 
 void Drivetrain::calcRPM()
 {
-  
     // Get the current time in microseconds
     unsigned long currentTime = micros();
     
@@ -179,7 +237,7 @@ void Drivetrain::calcRPM()
         // Apply moving average filter
         finalRpm[i] = rpmFilter[i]->process(rpmCalc);
     }
-  
+
 }
 
 

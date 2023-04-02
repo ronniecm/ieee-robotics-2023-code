@@ -34,6 +34,7 @@ float Ultrasonic::getDistance(int i) {
   float inches = (duration / 2) / 74;
   float cm = 2.54 * inches;
   readings[i] = filters[i]->process(cm);
+  //readings[i] = cm;
   return cm;  
 }
 
