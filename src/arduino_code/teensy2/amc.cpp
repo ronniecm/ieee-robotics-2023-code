@@ -126,8 +126,16 @@ void Amc::carouselCmd(int stackType)
     //Serial.println("in carousel");
   
     if (stackType == 2 || stackType ==3) {
-      //fillStack(stackType);
       
+      if(stackType ==2){
+        this->onTwo = true;
+      }
+
+      if(stackType ==3){
+        this->onThree = true;
+      }
+      
+      fillStack(stackType);
     }
      
     else if (stackType == 1)
@@ -142,6 +150,7 @@ void Amc::carouselCmd(int stackType)
     else
     {
       //Serial.println("HERE");
+      return;
     }
 
 }
@@ -155,12 +164,12 @@ void Amc::fillStack(int stackType)
   Serial.println("Fillstack");
   for (int i = 0; i < stackType; i++)
   {
-    //dispense();
+    dispense();
   }
 
   this->dispense_stack = true;
   //This will clear the tube making sure we are ready to dispense the next stack
-  //dispense_stack_helper();
+  dispense_stack_helper();
 
   // will check to see if there is a green pedestal"2" in the second indec of the tube then mark it as built
   if ((stackType == 2) && (this->built[2] == 0) && (this->tube[1] == GREEN))
@@ -256,11 +265,11 @@ void Amc::drop_in_action()
       Serial.println(c);
       
       
-      if (g > r && g > b && abs(r - g) > 500)
+      if (g > r && g > b && c < 3200 && c > 2000 )
       {
         this->slots[0] = GREEN;
       } // green
-      else if (r > g && r > b && abs(r - g) > 500)
+      else if (r > g && r > b && c < 2000 && c > 1000)
       {
         this->slots[0] = RED;
       } // red
@@ -290,8 +299,8 @@ void Amc::drop_in_action()
           this->onGreen = false;
           if(this->onTwo){
             built[1] = 1;
+            this->onTwo = false;
             this->onWhite = true;
-            this->onRed = false;
             this->dispense_stack = true;
             dispense_stack_helper();
           }
@@ -361,9 +370,21 @@ void Amc::dispense()
     { // white pedetal at bottom
       dispense_helper(findPedestalSlot(GREEN), GREEN);
       this->onGreen = false;
-      this->onRed = true;
+      
+      
+      if(this->onTwo){
+        this->onTwo = false;
+        this->onWhite = true;
+      }
+      else{
+        this->onWhite = false;
+        this->onRed =true;
+        
+        
+      }      
       return;
     }
+    
     else if (built[0] == 0 && this->onRed)
     {
       if(this->built[2] == 0){
@@ -435,7 +456,7 @@ void Amc::dispense_helper(int index, int pedestal)
       for (int i = 0; i < index; i++)
       {
         
-        this->stepsLeft -= 200;
+        this->stepsLeft += 200;
         stepperContinue();
         update_slots(0);
       }
@@ -451,7 +472,7 @@ void Amc::dispense_helper(int index, int pedestal)
       for (int i = 0; i < 5-index; i++)
       {
         //Counter ClockWise Turn
-        this->stepsLeft += 200;
+        this->stepsLeft -= 200;
         stepperContinue();
         update_slots(1);
       }
@@ -461,8 +482,6 @@ void Amc::dispense_helper(int index, int pedestal)
     }
   }
 }
-
-
 
 int Amc::findEmptySlot(){
   if (this->slots[4] == EMPTY){
@@ -519,7 +538,7 @@ void Amc::initSlotFour(int index){
     //so we will do 1 turn for 0 index and 2 turns for 1 index
     for (int i = 0; i <= index; i++)
     {
-      this->stepsLeft -= 200;
+      this->stepsLeft += 200;
       stepperContinue();
       update_slots(0);
     }
@@ -532,7 +551,7 @@ void Amc::initSlotFour(int index){
     //loop condistion. Basically will tell us how many turns to make
     for (int i = 0; i < 4-index; i++)
     {
-      this->stepsLeft += 200;
+      this->stepsLeft -= 200;
       stepperContinue();
       update_slots(1);
     }
@@ -543,7 +562,7 @@ void Amc::activate_paddle()
 {
   // Serial.println("Dropping");
   servos->setPWM(4, 0, map(0, 0, 180, servoMIN, servoMAX)); // paddle
-  delay(1500);
+  delay(2000);
   servos->setPWM(4, 0, map(135, 0, 180, servoMIN, servoMAX)); // paddle
   
 }

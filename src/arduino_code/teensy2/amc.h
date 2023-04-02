@@ -37,7 +37,9 @@ public:
   int carouselSpeed = 1000;
   int speedControl = 0;
   uint16_t r, g, b, c, lux;
-  bool onWhite, onGreen, onRed;
+  bool onWhite = true;
+  bool onGreen = false;
+  bool onRed = false;
   bool onTwo = true;
   bool onThree = false;
   bool drop_in = false;
