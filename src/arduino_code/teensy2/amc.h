@@ -47,7 +47,7 @@ public:
   bool dispensed = false;
   bool dispense_stack_start = false;
   bool dispense_stack_finish = false;
-  int slots[5] = {0, 0, 0, 0, 0}; // slot assignment start from tube & ccw: 0,1,2,3,4
+  int slots[5] = {1, 0, 3, 0, 0}; // slot assignment start from tube & ccw: 0,1,2,3,4
   int tube[3] = {0, 0, 0};        // What is in tube
   int built[3] = {0, 0, 0};       //{0} for 3 stack, [1],[2] for 2 stack
   
@@ -65,6 +65,7 @@ public:
   void initSlotFour(int index);
   void activate_paddle();
   void getColorData();
+  void initCarouselVars();
 
 private:
   Adafruit_PWMServoDriver *servos;

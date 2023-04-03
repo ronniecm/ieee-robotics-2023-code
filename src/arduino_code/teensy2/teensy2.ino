@@ -216,6 +216,11 @@ void loop()
 
     PedestalColor.publish(&rgbMsg);
 
+    if(clearSlotsCmd.data == 1){
+      arm->initCarouselVars();
+      clearSlotsCmd.data = 0;
+    }
+    
     
 
     //updating what is in slots
@@ -225,14 +230,8 @@ void loop()
     
     Slots.publish(&slotsMsg);
 
-    if(clearSlotsCmd.data == 1)
-    {
-      for(int i = 0; i < 5; i++){
-      slotsMsg.data[i] = int(0);
-      }
-    }
     
-    clearSlotsCmd.data = 0;
+      
 
         
     getTOF();

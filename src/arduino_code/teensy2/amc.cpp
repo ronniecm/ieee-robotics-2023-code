@@ -580,3 +580,27 @@ void Amc::getColorData()
   Serial.print(" Clear: ");
   Serial.println(c);
 }
+
+
+//
+void Amc::initCarouselVars()
+{
+  this->onWhite = true;
+  this->onGreen = false;
+  this->onRed = false;
+  this->onTwo = true;
+  this->onThree = false;
+  this->drop_in = false;
+  this->dispense_stack = false;
+  
+  for(int i = 0; i < 5; i++){
+      slots[i] = uint16_t(0);
+  }
+  for(int i = 0; i < 3; i++){
+      tube[i] = 0;
+  }
+  
+  for(int i = 0; i < 3; i++){
+      built[i] = 0;
+  }
+}
