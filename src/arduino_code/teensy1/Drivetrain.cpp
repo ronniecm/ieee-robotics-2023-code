@@ -21,7 +21,7 @@ Drivetrain::Drivetrain()
     // Initialize all 4 moving average filters
     for (int i = 0; i < 4; i++)
     {
-        rpmFilter[i] = new MovingAverageFilter(150);
+        rpmFilter[i] = new MovingAverageFilter(200);
     }
   
     //initialize count to 0
@@ -43,29 +43,61 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     double frontRight = y - x - z;
     double backLeft = y - x + z;
     double backRight = y + x - z;
+
+    double frontLeftRPM = abs(frontLeft) * 100;
+    double frontRightRPM = abs(frontRight) * 100;
+    double backLeftRPM = abs(backLeft) * 100;
+    double backRightRPM = abs(backRight) * 100;
+    
+    setpoint[0] = frontLeftRPM;
+    setpoint[1] = frontRightRPM;
+    setpoint[2] = backLeftRPM;
+    setpoint[3] = backRightRPM;
+
+    for(int i = 0; i < 4; i++) {
+      in[i] = abs(finalRpm[i]);  
+      if (setpoint[i] == 0) {
+        out[i] = 0;  
+      }  
+      else {
+        speedController[i]->Compute();  
+      }
+    }
     
     // Front left motor
     if (frontLeft >= 0)
     {
         // Clockwise rotation
         analogWrite(FL_in1, 0);
-        analogWrite(FL_in2, abs(frontLeft) * 255);
+        analogWrite(FL_in2, out[0]);
     }
     else
     {
-        analogWrite(FL_in1,  abs(frontLeft) * 255);
+        analogWrite(FL_in1,  out[0]);
         analogWrite(FL_in2, 0);
     }   
 
+    if (frontRight >= 0)
+    {
+        // Clockwise rotation
+        analogWrite(FR_in1, 0);
+        analogWrite(FR_in2, out[1]);
+    }
+    else
+    {
+        analogWrite(FR_in1,  out[1]);
+        analogWrite(FR_in2, 0);
+    } 
+    
     if (backLeft >= 0)
     {
         // Clockwise rotation
         analogWrite(BL_in1, 0);
-        analogWrite(BL_in2, abs(backLeft) * 255);
+        analogWrite(BL_in2, out[2]);
     }
     else
     {
-        analogWrite(BL_in1,  abs(backLeft) * 255);
+        analogWrite(BL_in1,  out[2]);
         analogWrite(BL_in2, 0);
     }   
 
@@ -73,25 +105,13 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     {
         // Clockwise rotation
         analogWrite(BR_in1, 0);
-        analogWrite(BR_in2, abs(backRight) * 255);
+        analogWrite(BR_in2, out[3]);
     }
     else
     {
-        analogWrite(BR_in1,  abs(backRight) * 255);
+        analogWrite(BR_in1,  out[3]);
         analogWrite(BR_in2, 0);
-    }  
-
-    if (frontRight >= 0)
-    {
-        // Clockwise rotation
-        analogWrite(FR_in1, 0);
-        analogWrite(FR_in2, abs(frontRight) * 255);
-    }
-    else
-    {
-        analogWrite(FR_in1,  abs(frontRight) * 255);
-        analogWrite(FR_in2, 0);
-    }  
+    }   
 }
 
 void Drivetrain::calcRPM()

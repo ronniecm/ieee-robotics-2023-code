@@ -5,6 +5,7 @@
 #include "geometry_msgs/Twist.h"
 #include <Wire.h>
 #include "std_msgs/Float32.h"
+#include "std_msgs/Float32MultiArray.h"
 
 Drivetrain* drivetrain;
 Ultrasonic* ultrasonics;
@@ -36,7 +37,7 @@ void setup()
     for(int i = 0; i < 6; i++) {
       nh.advertise(*ultrasonics->getPub(i));
     }
-    nh.subscribe(speedSub);
+    nh.subscribe(speedSub);    
 }
 
 void loop()
@@ -49,7 +50,6 @@ void loop()
     //drivetrain->mecanumDrive(0.0, 0.80, 0.0);
   }
   ultrasonics->publishData();
-  drivetrain->printRPM();
   nh.spinOnce();
 }
 

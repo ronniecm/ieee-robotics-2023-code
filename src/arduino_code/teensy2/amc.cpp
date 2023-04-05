@@ -71,11 +71,6 @@ void Amc::wristCmd(int angle)
   servos->setPWM(2, 0, map(angle, 0, 270, wristMIN, wristMAX));
 }
 
-void Amc::doorCmd(int angle)
-{
-  servos->setPWM(5, 0, map(angle, 0, 180, servoMIN, servoMAX));
-}
-
 void Amc::armCmd(int angle)
 {
   servos->setPWM(3, 0, map(angle, 0, 180, flipMIN, flipMAX));
@@ -87,9 +82,13 @@ void Amc::paddleCmd(int angle)
 }
 
 void Amc::foodChipCmd(int angle) {
-  servos->setPWM(6, 0, map(angle, 0, 180, servoMIN, servoMAX));  
+  servos->setPWM(5, 0, map(angle, 0, 180, servoMIN, servoMAX));  
 }
 
+void Amc::doorCmd(int angle)
+{
+  servos->setPWM(6, 0, map(angle, 0, 180, servoMIN, servoMAX));
+}
 
 void Amc::liftingCmd(int liftCmd)
 {
@@ -265,11 +264,11 @@ void Amc::drop_in_action()
       Serial.println(c);
       
       
-      if (g > r && g > b && c < 3200 && c > 2000 )
+      if (g > r && abs(g - r) > 200)
       {
         this->slots[0] = GREEN;
       } // green
-      else if (r > g && r > b && c < 2000 && c > 1000)
+      else if (r > g && abs(r - g) > 200)
       {
         this->slots[0] = RED;
       } // red
@@ -592,10 +591,22 @@ void Amc::initCarouselVars()
   this->onThree = false;
   this->drop_in = false;
   this->dispense_stack = false;
+
+
+  /*
+  this->slots[0] = 2;
+  this->slots[1] = 1;
+  this->slots[2] = 1;
+  this->slots[3] = 3;
+  this->slots[4] = 2;
+  */
+  
   
   for(int i = 0; i < 5; i++){
       slots[i] = uint16_t(0);
   }
+  
+  
   for(int i = 0; i < 3; i++){
       tube[i] = 0;
   }
