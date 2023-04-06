@@ -147,7 +147,7 @@ void setup()
     wristCmd.data = 180;
     armCmd.data = 172;
     paddleCmd.data = 135;
-    doorCmd.data = 120;
+    doorCmd.data = 180;
     foodChipColorCmd.data = 90;
 
     liftingCmd.data = 0;
@@ -257,7 +257,7 @@ void getTOF() {
   uint8_t status = tof.readRangeStatus();
 
   if (status == VL6180X_ERROR_NONE) {
-    Serial.print("Range: "); Serial.println(range * 0.1);
+    //Serial.print("Range: "); Serial.println(range * 0.1);
     tofMsg.data = range * 0.1;
  }  
 }

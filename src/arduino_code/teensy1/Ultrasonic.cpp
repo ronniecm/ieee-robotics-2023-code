@@ -15,7 +15,7 @@ Ultrasonic::Ultrasonic() {
   ultraPublishers[5] = new ros::Publisher("/bot/ultra7", &ultraMessages[5]);
   Serial.println("constructed publishers");
   for(int i = 0; i < 6; i++) {
-    filters[i] = new MovingAverageFilter(5);
+    filters[i] = new MovingAverageFilter(7);
   }
 }
 
