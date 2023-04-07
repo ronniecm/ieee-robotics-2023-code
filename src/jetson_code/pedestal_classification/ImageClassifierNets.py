@@ -7,15 +7,17 @@ import numpy as np
 class CustomTensorDataset(Dataset):
     """TensorDataset with support of transforms.
     """
-    def __init__(self, tensors, transform=None):
+    def __init__(self, tensors, transform=None, device='cpu'):
         assert all(tensors[0].size(0) == tensor.size(0) for tensor in tensors)
         self.tensors = tensors
         self.transform = transform
+        self.device = device
 
     def __getitem__(self, index):
         x = self.tensors[0][index]
 
         if self.transform:
+            # x = x.to(self.device)
             x = self.transform(x)
 
         y = self.tensors[1][index]
@@ -59,6 +61,40 @@ class LightweightCNN(nn.Module):
         self.fc1 = nn.Linear(128, 64)
         self.dropout = nn.Dropout(p=0.5)
         self.fc2 = nn.Linear(64, 6)
+
+    def forward(self, x):
+        x = F.relu(self.conv1(x))
+        x = self.maxpool1(x)
+        x = F.relu(self.conv2(x))
+        x = self.maxpool2(x)
+        x = F.relu(self.conv3(x))
+        x = self.maxpool3(x)
+
+        # Reshape for fully connected layer
+        x = torch.flatten(x, 1)
+        
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)
+        x = self.fc2(x)
+        
+        return x
+    
+
+class MediumweightCNN(nn.Module):
+    def __init__(self):
+        super(MediumweightCNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, stride=2, padding=1)
+        self.maxpool1 = nn.MaxPool2d(kernel_size=4, stride=2)
+
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=1)
+        self.maxpool2 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=1)
+        self.maxpool3 = nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.fc1 = nn.Linear(256, 128)
+        self.dropout = nn.Dropout(p=0.5)
+        self.fc2 = nn.Linear(128, 6)
 
     def forward(self, x):
         x = F.relu(self.conv1(x))
