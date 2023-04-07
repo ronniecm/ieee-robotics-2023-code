@@ -2,7 +2,7 @@ import cv2 as cv
 from math import atan2, cos, sin, sqrt, pi
 import numpy as np
 import sys
-
+import torch
 from ImageClassifierNets import LightweightCNN
 
 # Python script to demonstrate working of PCA
@@ -109,11 +109,11 @@ def getOrientation(pts, img):
 
 def img_2_tensor(img):
     # Resize image to 160x120 using INTER_AREA interpolation
-    img = cv2.resize(img, (160, 120), interpolation=cv2.INTER_AREA)
+    img = cv.resize(img, (160, 120), interpolation=cv.INTER_AREA)
 
     # Convert image to RGB and normalize
-    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB).astype(np.float32)
-    cv2.normalize(img_rgb, img_rgb, 0, 1, cv2.NORM_MINMAX)
+    img_rgb = cv.cvtColor(img, cv.COLOR_BGR2RGB).astype(np.float32)
+    cv.normalize(img_rgb, img_rgb, 0, 1, cv.NORM_MINMAX)
 
     # Swap the dimensions and convert to tensor
     img_tensor = torch.as_tensor(img_rgb).permute(2, 0, 1)
@@ -184,13 +184,18 @@ def main():
 
         # Now that we have the prediction, find contours on the correct color frame
         img = cv.resize(img, (0, 0), fx=0.1, fy=0.1) # Downsample img
-        frame = cv.cvtColor(img, cv.COLOR_BGR2GRAY) # Default value for frame
 
+        frame = None
+        
         # Check if frame is green or red, white is already grayscale
         if pred == 0 or pred == 1:
-            frame = frame[:, :, 1]
+            frame = img[:, :, 1]
+
         elif pred == 2 or pred == 3:
-            frame = frame[:, :, 2]
+            frame = img[:, :, 2]
+
+        else:
+            frame = cv.cvtColor(img, cv.COLOR_BGR2GRAY) # Default value for frame
 
         # Convert image to binary
         _, bw = cv.threshold(frame, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)

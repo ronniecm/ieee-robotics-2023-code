@@ -10,22 +10,23 @@ import rospy
 from std_msgs.msg import Int8
 from sensor_msgs.msg import Range
 from std_msgs.msg import Float32
+from std_msgs.msg import Int16
+from std_msgs.msg import UInt16MultiArray
 from std_msgs.msg import Int32MultiArray
 
 
 class Color:
     def __init__(self, robot_name):
         self.robot_name = robot_name
-        
-        rospy.Subscriber('%s/color' %robot_name, Int8, self.callBack)
-        self.isWhite = 1
+        rospy.Subscriber('%s/colorValues/' %robot_name, UInt16MultiArray, self.callBack)
+        self.pub = rospy.Publisher("/%s/colorRequest" %robot_name, Int16, queue_size =10)
+        self.values = [0, 0]
 
     def callBack(self, msg):
+        self.values = msg.data
 
-        if msg.data == 0:
-            self.isWhite == 1
-        else:
-            self.isWhite == 0
+    def requestColorValues(self):
+        self.pub.publish(1)
 
 class LED:
     def __init__(self, robot_name):
@@ -65,8 +66,8 @@ class Ranging:
         rospy.Subscriber('%s/ultra7' %robot_name, ultra_msg_type, self.ultra7)
 
 
-        rospy.Subscriber('%s/leftTOF' %robot_name, ultra_msg_type, self.tof0)
-        rospy.Subscriber('%s/rightTOF' %robot_name, ultra_msg_type , self.tof1)
+    
+        rospy.Subscriber('%s/tof' %robot_name, ultra_msg_type , self.tof)
 
         rospy.Subscriber('/obj_detect', Int32MultiArray, self.objDetect)
         '''
@@ -96,17 +97,16 @@ class Ranging:
         self.ultraBack = [0.0, 0.0]
         self.ultraLeft = [0.0, 0.0]
 
-        self.tofDist = [0.0,  0.0]
+        self.tofDist = 0.0
         self.objInfo = [0,0,0]
 
     def objDetect(self, msg):
         self.objInfo = msg.data
 
-    def tof0(self, msg):
-        self.tofDist[0] = msg.data
+    
 
-    def tof1(self, msg):
-        self.tofDist[1] = msg.data
+    def tof(self, msg):
+        self.tofDist = msg.data
 
 
     def ultra2(self, msg):
@@ -185,15 +185,9 @@ class Ranging:
 
             '''
 
-    def tofSensors(self, msg):
-        self.tofDist[0] = msg.data[0]
-        self.tofDist[1] = msg.data[1]
 
-    def getTofSensors(self, i = None):
-        if i is not None:
-            return self.tofDist[i]
-        else:
-            return self.tofDist
+    def getTOF(self):
+        return self.tofDist
 
     def getFront(self,i = None):
         if i is not None:

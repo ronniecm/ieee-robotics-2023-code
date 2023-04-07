@@ -53,6 +53,10 @@ class RealSense:
         self.detectionData = [0,0,0]
 
         self.yawOffset = 0.0
+        self.startTime = time.time()
+        
+        #self.doTimer = False
+        self.doAngles = True
         
 
         #This is for calculating yaw offsets. We are going to need to increment time in a thread
@@ -117,45 +121,34 @@ class RealSense:
         #thread = threading.Thread(target=self.objDectect)
         #thread.start()
         print("Starting Cameera")
-        angles = threading.Thread(target=self.angleCalculation)
-        angles.start()
+        self.angles = threading.Thread(target=self.angleCalculation)
+        self.angles.start()
 
-        timePassed = threading.Thread(target=self.timePassed)
-        timePassed.start()
+        
+        #self.timer = threading.Thread(target=self.timePassed)
+        #timePassed.start()
 
     
-    def timePassed(self):
-        print("Starting timePassed thread")
-        timePassed = 0.0
-
-        currTime = time.time()
-        dt = 0.0
-        timeStep = 0.5
-
-        #This is from the linear regressiong of the data
+    def getYawOffset(self):
+        #Want to track time passed for yaw offset calculation
+        #Will use a boolean to init this first time we come into this fucntion
+        #EveryTimer we enter this target funciton we will make sure doTimer is true do that we can
+        #Correction factor is basically the slope of the error. So all we are doing is subtracting a line with the error
+        #Slope from the calculated yaw angle to stabailize it
+        timePassed = time.time() - self.startTime
+        correctionFactor = 0.116006
         
-        correctionFactor = 0.11182
         '''
         To tune this let the below while loop run for some time and then plot the data in YawCorrection.txt
         Data has time and yaw offset
         After plotting add a trend line and get the slope of the line
         We want the plot to be as flat as possible, so add whatever slot you see to the correction factor
         '''
+        #noise = 2*np.random.normal(0,0.00001)
+        noise=0
+        self.yawOffset = (correctionFactor*timePassed - noise)
 
-        #Uncomment the following line and indent the while loop to write to file:
-        #Also uncomment the print statement in the while loop
-
-        #with open("yawCorrection.txt", "a") as f:
-
-        #Let loop run for 10 seconds
-        while(time.time() - currTime < 180):
-            noise = 2*timeStep*np.random.normal(0,0.00001)
-            self.yawOffset = (correctionFactor*timePassed - noise)
-            #print(timePassed, self.getCurrYaw() - self.yawOffset, file=f, flush=True)
-            prevTime = time.time()
-            time.sleep(timeStep)
-            dt = time.time() - prevTime
-            timePassed += dt
+        return self.yawOffset
             
     def filter_detections(self, detections):
         """
@@ -295,9 +288,8 @@ class RealSense:
 
     """
     def angleCalculation(self):
-        while True:
+        while self.doAngles:
            
-            
             f = self.pipeline.wait_for_frames()
             
             #gather IMU data
@@ -348,16 +340,14 @@ class RealSense:
             combinedangleX = totalgyroangleX * self.alpha + accel_angle_x * (1-self.alpha)
             combinedangleZ = totalgyroangleZ * self.alpha + accel_angle_z * (1-self.alpha)
             combinedangleY = self.totalgyroangleY
-            
-            #print(self.rpy[1])
+        
 
-            self.rpy = [combinedangleX, combinedangleY - 180 - self.yawOffset, combinedangleZ]
+
+            self.rpy = [combinedangleX, combinedangleY - 180 - self.getYawOffset(), combinedangleZ]
             #print(self.rpy[1])
     
-
     def getCurrYaw(self):
-        
-        return self.rpy[1] 
+        return round(self.rpy[1],2)
 
 
 def getScore(distance, class_id):
