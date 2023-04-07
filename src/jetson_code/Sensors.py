@@ -20,13 +20,38 @@ class Color:
         self.robot_name = robot_name
         rospy.Subscriber('%s/colorValues/' %robot_name, UInt16MultiArray, self.callBack)
         self.pub = rospy.Publisher("/%s/colorRequest" %robot_name, Int16, queue_size =10)
+        self.rgb1Sub = rospy.Subscriber("/%s/rgb1" %robot_name, UInt16MultiArray, self.rgb1Callback)
+        self.rgb2Sub = rospy.Subscriber("/%s/rgb2" %robot_name, UInt16MultiArray, self.rgb2Callback)
+
+        self.rgb1Values = [0,0,0,0]
+        self.rgb2Values = [0,0,0,0]
+
+        
         self.values = [0, 0]
 
     def callBack(self, msg):
         self.values = msg.data
 
+    def rgb1Callback(self, msg):
+        self.rgb1Values = msg.data
+
+    def rgb2Callback(self, msg):
+        self.rgb2Values = msg.data
+
     def requestColorValues(self):
         self.pub.publish(1)
+
+    def rgb1OnWhite(self):
+        if self.rgb1Values[3] > 1000:
+            return True
+        else:
+            return False
+    
+    def rgb2OnWhite(self):
+        if self.rgb2Values[3] > 1000:
+            return True
+        else:
+            return False
 
 class LED:
     def __init__(self, robot_name):

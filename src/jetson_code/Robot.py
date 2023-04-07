@@ -72,7 +72,7 @@ class Robot:
 
         #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lw_net_color_orientation_infer.ipynb"
 
-        #path = '/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_2023-04-06_17-17-38.pth'
+
         #self.pedestal_tracker = PedestalTracker(path, "cpu")
         
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
@@ -176,7 +176,7 @@ class Robot:
 
                 self.ctrl.stopBot()
                 print("correcting to ", self.initYaw)
-                #self.alignBack(2)
+                self.alignBack(2)
 
     def pickupPathRight(self):
         while not self.rng.getRight(0) <= 10 and not self.rng.getRight(1) <= 15:
@@ -233,7 +233,7 @@ class Robot:
     def pickUpDownPedestal(self, angleOffset):
         print("Arm Down")
         self.arm.sendMsg('armDown')
-        time.sleep(3)
+        time.sleep(1)
 
         print('Rotating Default')
         self.gripperRotate.sendMsg('gripperRotate90')
@@ -251,27 +251,33 @@ class Robot:
             
         print("Adjusting Wrist")
         self.wrist.sendMsg('wristAdjust', wristAdjust=(angleOffset))
-        time.sleep(2)
+        time.sleep(1)
 
         print("Lift Down")
         self.lifting.sendMsg('liftDown')
-        time.sleep(2)
+        time.sleep(4.5)
 
         print("Closing")
         self.gripperClamp.sendMsg('gripperClampClosed')
-        time.sleep(2)
+        time.sleep(1)
 
         print("Lift Up")
         self.lifting.sendMsg('liftUp')
-        time.sleep(4)
+        time.sleep(4.5)
 
         print("Arm Going Up")
         self.arm.sendMsg('armUp')
-        time.sleep(2)
+        time.sleep(1.5)
 
         print('Opening')
         self.gripperClamp.sendMsg('gripperClampOpen')
         time.sleep(1)
+
+        print("Arm Going Back Down")
+        self.arm.sendMsg('armDown')
+        time.sleep(1)
+        self.carousel.sendMsg('carouselAddPedestal')
+        
 
     def tofApproach(self):
         #We are going to go fowrward until we detect a disturbance for TOF
@@ -298,7 +304,7 @@ class Robot:
 
         threshhold = 0.1
 
-        while (self.rng.getTOF() < 4.5 or self.rng.getTOF() > 6.5):
+        while (self.rng.getTOF() < 4.5 or self.rng.getTOF() > 5.5):
             if self.rng.getTOF() < 4.5:
                 self.ctrl.goLeft(0.1)
             else:
@@ -351,7 +357,7 @@ class Robot:
         #B_y is the value we want to get from the right sensor
         print("Goint To Location A")
         A_x = 30.0
-        A_y = 69.0
+        A_y = 64.0
 
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
@@ -380,7 +386,7 @@ class Robot:
         msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.5)
         print("MSG X-Y Components: ", msg_x, msg_y)
 
-        while not abs(A_y - self.rng.getLeft(0)) < 3:
+        while not abs(A_y - self.rng.getLeft(0)) < 1:
             self.ctrl.sendMsg(msg)
         print("Exit Conditions: Right: ", self.rng.getLeft(), " Back: ", self.rng.getBack())
 
@@ -609,52 +615,74 @@ class Robot:
     
 
     def alignDropOff(self):
-        #self.alignBack(2)
-        while self.rng.getBack(0) > 10.0:
-            self.ctrl.goBackwards(.1)
-        
-        self.ctrl.stopBot()
-        self.color.requestColorValues()
-        while not self.color.values[0] == 1 or not self.color.values[1] == 1:
-            if self.color.values[0] != 1 and self.color.values[1] == 1:
-                currTime = time.time()
-                while(time.time() < currTime +.45):
-                    self.ctrl.goLeft(.2)
-                self.ctrl.stopBot()
-            elif self.color.values[0] == 1 and self.color.values[1] != 1:
-                currTime = time.time()
-                while(time.time() < currTime +.45):
-                    self.ctrl.goRight(.2)
-                self.ctrl.stopBot()
-            elif self.color.values[0] == 0 and self.color.values[1] == 0:
-                currTime = time.time()
-                while(time.time() < currTime +.45):
-                    #69 is like the y values from getting to location function
-                    if (self.rng.getLeft(0) < 69):
-                        self.ctrl.goRight(.2)
-                    else:
-                        self.ctrl.goLeft(.2)
-                self.ctrl.stopBot()
-            else:
-                self.ctrl.stopBot()
-
+        bot.color.requestColorValues()
+        while not self.color.rgb1OnWhite() and not self.color.rgb2OnWhite():
+            currTime = time.time()
+            while time.time() < currTime + 0.60:
+                self.ctrl.goBackwards(.1)
+            self.ctrl.stopBot()
             self.color.requestColorValues()
-            self.ctrl.stopBot(.5)
-            
+
+        self.door.sendMsg("doorOpen")
+        while not self.rng.getBack(0) == 13:
+            if self.rng.getBack(0) > 13:
+                self.ctrl.goBackwards(0.1)
+            else:
+                self.ctrl.goFoward(0.1)
         self.ctrl.stopBot()
+        print("Made it to location")
+
+    def alignDropOff2(self):
+        isWhite1 = False
+        isWhite2 = False
+
+        while self.rng.ultraBack(0) > 13:
+            self.ctrl.goBackwards(0.1)
+        self.ctrl.stopBot()
+        
+        bot.color.requestColorValues()
+        if self.color.values[0] and self.color.values[1]:
+           return
+
+        if self.color.values[0]:
+            isWhite1 = True
+
+        if self.color.values[1]:
+            isWhite2 = True
+        
+        while not isWhite1 and not isWhite2:
+            if isWhite1 and not isWhite2:
+                while time.time() < currTime + 0.60:
+                    self.ctrl.goRight(.1)
+
+            if not isWhite1 and  isWhite2:
+                while time.time() < currTime + 0.60:
+                    self.ctrl.goLeft(.1)
+
+            self.ctrl.stopBot()
+            bot.color.requestColorValues()
+            self.ctrl.stopBot(.5)
+
+            if self.color.values[0]:
+                isWhite1 = True
+
+            if self.color.values[1]:
+                isWhite2 = True
+            
+            
         print("Made it to location")
 
     def milestone3(self):
         self.pickupPathLeft()
         time.sleep(3)
-
+        self.alignBack(2)
         print("Going to Location A")
         self.goToLocationA()
         self.ctrl.stopBot()
         self.alignDropOff()
         self.door.sendMsg("doorOpen")
         now = time.time()
-        while abs(time.time() - now) < 2:
+        while abs(time.time() - now) < 1:
             self.ctrl.goFoward(0.4)
         self.ctrl.stopBot()
         self.door.sendMsg("doorClosed")
@@ -663,12 +691,15 @@ class Robot:
         
         self.carousel.sendMsg("twoStack")
         print("Going to Location B")
-        self.goToLocationB()        
+        while not bot.rng.getRight(0) == 66:
+            bot.ctrl.goRight(0.5)
+        bot.ctrl.stopBot()
+        #self.goToLocationB()        
         self.alignDropOff()
         self.door.sendMsg("doorOpen")
         
         now = time.time()
-        while abs(time.time() - now) < 2:
+        while abs(time.time() - now) < 1:
             self.ctrl.goFoward(0.4)
         self.ctrl.stopBot()
         self.door.sendMsg("doorClosed")
@@ -692,7 +723,7 @@ class Robot:
 
     def initBotVariables(self):
         self.initServos()
-        self.initYaw = self.realSense.getCurrYaw()
+        #self.initYaw = self.realSense.getCurrYaw()
 
   
 def within1inch(n, target, threshold=1):
@@ -713,19 +744,37 @@ if __name__ == "__main__":
     
     print("starting program")
     print("Turn on motors")
-    time.sleep(2)
+    time.sleep(3)
+    
     bot.initBotVariables()
 
-    '''
-    bot.initServos()
-    bot.milestone3()
-    '''
-    print("initYaw: ", bot.initYaw)
+    #bot.initServos()
+    #bot.milestone3()
+    #print("initYaw: ", bot.initYaw)
     
-    while bot.realSense.getCurrYaw() < 360:
-        print(bot.realSense.getCurrYaw())
-        time.sleep(2)
-       
+    bot.goToLocationA()
+    bot.alignDropOff()
+    currTime = time.time()
+    while time.time() < currTime + 1.0:
+        bot.ctrl.goFoward(0.4)
+    bot.ctrl.stopBot()
+    bot.door.sendMsg("doorClosed")
+
+    while not bot.rng.getRight(0) == 65:
+        bot.ctrl.goRight(0.5)
+    bot.alignDropOff()
+    currTime = time.time()
+    while time.time() < currTime + 1.0:
+        bot.ctrl.goFoward(0.4)
+    bot.ctrl.stopBot()
+    bot.door.sendMsg("doorClosed")
+    '''
+    while True:
+        
+        print(bot.pedestal_tracker.make_prediction())
+    '''    
+    
+   
             
             
    

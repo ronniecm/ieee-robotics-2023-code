@@ -136,7 +136,7 @@ class RealSense:
         #Correction factor is basically the slope of the error. So all we are doing is subtracting a line with the error
         #Slope from the calculated yaw angle to stabailize it
         timePassed = time.time() - self.startTime
-        correctionFactor = 0.116006
+        correctionFactor = 0.131232
         
         '''
         To tune this let the below while loop run for some time and then plot the data in YawCorrection.txt
