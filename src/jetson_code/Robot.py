@@ -56,6 +56,7 @@ class Robot:
     def __init__(self, robot_name, node_name, command_topic, queue_size, servos = {}):
         
         rospy.init_node("%s_%s" %(robot_name, node_name), anonymous=True)
+        
 
         if onJetson:
             self.realSense = RealSense()
@@ -67,6 +68,11 @@ class Robot:
 
         # Initialize pedestal tracker object
         #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_v4.pth"
+        #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation.pth"
+
+        #path = "/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lw_net_color_orientation_infer.ipynb"
+
+        #path = '/home/mdelab/ieee-robotics-2023-code/src/jetson_code/pedestal_classification/lightweight_net_color_orientation_2023-04-06_17-17-38.pth'
         #self.pedestal_tracker = PedestalTracker(path, "cpu")
         
         self.gripperRotate = Servos(robot_name, node_name, "gripperRotate", queue_size = 10)
@@ -82,17 +88,16 @@ class Robot:
         #need a node here to tell us what that current YAW is
         self.currYawAngle = 0.0  #This will ensure our starting yaw will be 0 degees easier calculations
         self.initBoardWidth = 233.0
-        self.initYaw = 0.0
         self.botWidth = 30.0
-
+        self.initYaw = 0.0
 
     #Adding Helper functions to make it easy and clearn to align bot on what ever side we want
 
     def initServos(self):
         self.lifting.sendMsg('liftUp')
         time.sleep(3)
-        self.arm.sendMsg('armUp')
-        time.sleep(2)
+        #self.arm.sendMsg('armUp')
+        #time.sleep(2)
         self.gripperClamp.sendMsg('gripperClampClosed')
         time.sleep(1)
         self.wrist.sendMsg('wristDefault')
@@ -136,11 +141,14 @@ class Robot:
 
     #Going to write the function that will make the robot go left and grab objects along the way
     def pickupPathLeft(self):
+        print("Starting Path")
         while not self.rng.getLeft(0) <= 15 and not self.rng.getLeft(1) <= 15:
-            while not self.rng.getLeft(0) <= 10:
+            while not self.rng.getLeft(0) <= 15:
                 if self.rng.getObjDetect()[0]== 1:
+                    print("detected obj")
                     break
-                self.ctrl.goLeft(0.3)
+        
+                self.ctrl.goLeft(0.5)
             
             self.ctrl.stopBot()
 
@@ -162,14 +170,16 @@ class Robot:
                     self.pickUpDownPedestal(angleOffset)
                 '''
                 self.pickUprightPedestal()
+        
+                while not self.rng.getBack(0) <= 30:
+                    self.ctrl.goBackwards(0.3)
 
-                while not self.rng.getBack(0) <= 30 and not self.rng.getBack(1) <= 30:
-                    self.ctrl.goBackwards(0.5)
                 self.ctrl.stopBot()
-                #self.alignBack()
-    
+                print("correcting to ", self.initYaw)
+                #self.alignBack(2)
+
     def pickupPathRight(self):
-        while not self.rng.getRight(0) <= 10 and not self.rng.getRight(1) <= 10:
+        while not self.rng.getRight(0) <= 10 and not self.rng.getRight(1) <= 15:
             while not self.rng.getRight(0) <= 10:
                 if self.realSense.getObjDetect(0) == 1:
                     break
@@ -188,34 +198,38 @@ class Robot:
     def pickUprightPedestal(self):
         print("Arm Down")
         self.arm.sendMsg('armDown')
-        time.sleep(3)
+        time.sleep(1)
         print('Rotating Default')
         self.gripperRotate.sendMsg('gripperRotateDefault')
-        time.sleep(1)
+        time.sleep(.5)
         print("Opening")
         self.gripperClamp.sendMsg('gripperClampOpen')
-        time.sleep(2)
+        time.sleep(.25)
         print("Lift Down")
         self.lifting.sendMsg('liftDown')
-        time.sleep(2)
+        time.sleep(4.5)
         print("Closing")
         self.gripperClamp.sendMsg('gripperClampClosed')
-        time.sleep(2)
+        time.sleep(1)
         print("Lift Up")
         self.lifting.sendMsg('liftUp')
-        time.sleep(4)
+        time.sleep(4.5)
         print("Arm Going Up")
         self.arm.sendMsg('armUp')
-        time.sleep(2)
+        time.sleep(1.5)
         print('Rotating')
         self.gripperRotate.sendMsg('gripperRotate90')
         time.sleep(1)
         print('Opening')
         self.gripperClamp.sendMsg('gripperClampOpen')
         time.sleep(1)
-        print('Closing')
-        self.gripperClamp.sendMsg('gripperClampClosed')
+        self.arm.sendMsg('armDown')
+        print('Bringing Arm Back down')
+        time.sleep(1)
+        self.carousel.sendMsg('carouselAddPedestal')
 
+        
+        
     def pickUpDownPedestal(self, angleOffset):
         print("Arm Down")
         self.arm.sendMsg('armDown')
@@ -227,10 +241,16 @@ class Robot:
 
         print("Opening")
         self.gripperClamp.sendMsg('gripperClampOpen')
-        time.sleep(2)
 
+        print("Making Angle Offset Prediciton for 2 seconds")
+        currTime = time.time()
+        angleOffset = 0.0
+        while(time.time() < currTime + 2):
+            angleOffset = self.pedestal_tracker.make_prediction()
+        print("Wrist Offset: ", angleOffset)
+            
         print("Adjusting Wrist")
-        self.wrist.sendMsg('wristAdjust', wristAdjust=(180-angleOffset))
+        self.wrist.sendMsg('wristAdjust', wristAdjust=(angleOffset))
         time.sleep(2)
 
         print("Lift Down")
@@ -255,32 +275,20 @@ class Robot:
 
     def tofApproach(self):
         #We are going to go fowrward until we detect a disturbance for TOF
-        print("Sensor Values", self.rng.getTofSensors())
-        while(self.rng.getTofSensors(1) > 12.5):
-            self.ctrl.goFoward(.1)
-
+        print("In  TOF Approach")
+        while(self.rng.getTOF() > 12.5):
+            self.ctrl.goFoward(0.35)
+            ##print("Sensor Values", self.rng.getTOF())
         #As soon as we detect a disturbance stop the bot
         self.ctrl.stopBot()
 
-    def tofApproach(self):
-        #We are going to go fowrward until we detect a disturbance for TOF
-        print("Sensor Values", self.rng.getTofSensors())
-        while(self.rng.getTofSensors(1) > 12.5):
-            self.ctrl.goFoward(.1)
-
-        #As soon as we detect a disturbance stop the bot
-        self.ctrl.stopBot()
 
     def cameraAlign(self):
         data = self.rng.getObjDetect()
-        while data[0] == 1 and (data[1] < 175 or data[1] > 290):
-            if data[1] < 175:
-                self.ctrl.goLeft(0.25)
-            else:
-                self.ctrl.goRight(0.25)
+        while data[0] == 1 and data[1] < 215:
+            self.ctrl.goLeft(0.35)
             data = self.rng.getObjDetect()
-            
-        print("stopping")
+        #print("stopping")
         self.ctrl.stopBot()
 
 
@@ -290,8 +298,8 @@ class Robot:
 
         threshhold = 0.1
 
-        while (self.rng.getTofSensors(1) < 4.5 or self.rng.getTofSensors(1) > 7):
-            if self.rng.getTofSensors(1) < 4.5:
+        while (self.rng.getTOF() < 4.5 or self.rng.getTOF() > 6.5):
+            if self.rng.getTOF() < 4.5:
                 self.ctrl.goLeft(0.1)
             else:
                 self.ctrl.goRight(0.1)
@@ -317,12 +325,12 @@ class Robot:
                 self.ctrl.rotateLeft(0.25)
         self.ctrl.stopBot()
 
-    def alignBack(self, threshhold = 0.75):
+    def alignBack(self, threshhold = 1):
         while abs(self.rng.getBack(0) - self.rng.getBack(1)) > threshhold:
             if self.rng.getBack(0) > self.rng.getBack(1):
-                self.ctrl.rotateRight(0.25)
+                self.ctrl.rotateRight(0.2)
             else:
-                self.ctrl.rotateLeft(0.25)
+                self.ctrl.rotateLeft(0.2)
         self.ctrl.stopBot()
 
     def alignLeft(self, threshhold = 0.75):
@@ -332,13 +340,6 @@ class Robot:
             else:
                 self.ctrl.rotateLeft(0.25)
         self.ctrl.stopBot()
-
-
-    def initStartingConditions(self):
-        time.sleep(2)
-        self.initYaw = self.currYawAngle
-        self.initBoardWidth = self.rng.getLeft(1) + self.botWidth + self.rng.getRight(0)
-        print("Initial Board Width", self.initBoardWidth)
 
     def goToLocationA(self):
         #It is important that in the begining of the wround the intial yaw value is saved
@@ -350,7 +351,7 @@ class Robot:
         #B_y is the value we want to get from the right sensor
         print("Goint To Location A")
         A_x = 30.0
-        A_y = 64.0
+        A_y = 69.0
 
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
@@ -363,10 +364,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(1) < A_x :
-            msg_x = A_x - self.rng.getBack(1)
+        if self.rng.getBack(0) < A_x :
+            msg_x = A_x - self.rng.getBack(0)
         else:
-            msg_x = -(self.rng.getBack(1) - A_x)
+            msg_x = -(self.rng.getBack(0) - A_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -376,10 +377,10 @@ class Robot:
             msg_y = -(self.initBoardWidth - self.rng.getRight(1) - A_y)
            
         #Now we should have the vector we need to travel in for robot to get to location
-        msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.25)
+        msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.5)
         print("MSG X-Y Components: ", msg_x, msg_y)
 
-        while not within1inch(self.rng.getLeft(0), A_y, 3)  :
+        while not abs(A_y - self.rng.getLeft(0)) < 3:
             self.ctrl.sendMsg(msg)
         print("Exit Conditions: Right: ", self.rng.getLeft(), " Back: ", self.rng.getBack())
 
@@ -403,7 +404,6 @@ class Robot:
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
 
-        currYaw = self.currYawAngle
     
         '''
         Now we know how much we should rotate. Since a clockwise rotation increases yaw, and 
@@ -426,10 +426,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(1) < B_x :
-            msg_x = B_x - self.rng.getBack(1)
+        if self.rng.getBack(0) < B_x :
+            msg_x = B_x - self.rng.getBack(0)
         else:
-            msg_x = -(self.rng.getBack(1) - B_x)
+            msg_x = -(self.rng.getBack(0) - B_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -439,7 +439,7 @@ class Robot:
             msg_y = (self.initBoardWidth - self.rng.getLeft(1) - B_y)
         
         #Now we should have the vector we need to travel in for robot to get to location
-        msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.25)
+        msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.5)
         print("MSG X-Y Components: ", msg_x, msg_y)
 
         while not within1inch(self.rng.getRight(1), B_y, 3)  :
@@ -452,6 +452,7 @@ class Robot:
         #Now we should be at or near location
 
 
+
     def goToLocationC(self):
         #It is important that in the begining of the wround the intial yaw value is saved
         #For this to happen out goal state will be dependent on back and right side sensors
@@ -461,13 +462,12 @@ class Robot:
         #B_x is the value we want to get from the back sensor
         #B_y is the value we want to get from the right sensor
         print("Goint To Location C")
-        C_x = 50.0
+        C_x = 35.0
         C_y = 100.0
 
         #First we are going to make sure that the robot has the same yaw that it had in the begining
         #This will ensure that the sensors will be parallel to their opossing wall
 
-        currYaw = self.realSense.getCurrYaw()
     
         '''
         Now we know how much we should rotate. Since a clockwise rotation increases yaw, and 
@@ -490,10 +490,10 @@ class Robot:
 
         #We'll take a moment and let values comes in
         #Need to test which sensor from back is more reliable
-        if self.rng.getBack(1) < C_x :
+        if self.rng.getBack(0) < C_x :
             msg_x = C_x - self.rng.getBack(1)
         else:
-            msg_x = -(self.rng.getBack(1) - C_x)
+            msg_x = -(self.rng.getBack(0) - C_x)
         msg_y = 0.0
 
         #This condition checks to see which sensors are closer to wall therefore we can rely on them better
@@ -503,17 +503,24 @@ class Robot:
             msg_y = C_y - self.rng.getLeft(0)
         
         #Now we should have the vector we need to travel in for robot to get to location
-        msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.25)
+        msg = self.ctrl.buildMsg(msg_x, msg_y, 0, 0.5)
         print("MSG X-Y Components: ", msg_x, msg_y)
         
 
         while not within1inch(self.rng.getRight(1), C_y, 2) and not within1inch(self.rng.getLeft(0), C_y, 2)  :
             self.ctrl.sendMsg(msg)
-        print("Exit Conditions: Right/Left: ", self.rng.getRight(),"/",self.rng.getRight(), " Back: ", self.rng.getBack())
+        print("Exit Conditions: Right/Left: ", self.rng.getRight(),"/",self.rng.getLeft(), " Back: ", self.rng.getBack())
 
         #Now that we got close we are going to align bot with back
-        
+
         self.ctrl.stopBot()
+    
+        self.rotateDegrees(170)
+
+        #self.alignBack()
+
+        
+        
         #Now we should be at or near location
 
     def startRound(self):
@@ -534,41 +541,160 @@ class Robot:
         #print("LED DETECTED")
         self.startRound()
 
-#Put helper functions here prob will make a util class later
+    #Put helper functions here prob will make a util class later
 
-def milestone1(self):
-    while not bot.rng.getRight(1) < 10.0:
-        bot.ctrl.goRight(0.75)
-    
-    bot.ctrl.stopBot()
+    def milestone1(self):
+        self.initYaw = self.realSense.getCurrYaw()
 
-    while not bot.rng.getBack(1) > 60.0:
-        bot.ctrl.goFoward(0.5)
-
-    bot.ctrl.stopBot()
-
-    while not bot.rng.getBack(1) < 10.0:
-        bot.ctrl.goBackwards(0.5)
-    
-    bot.ctrl.stopBot()
-    bot.alignBack()
-    bot.stopBot()
-
-    while not bot.rng.getLeft(1) < 10.0:
-        pos = bot.rng.getRight(1)
-        while bot.rng.getRight(1) < pos + 30.0:
-            bot.ctrl.goLeft(0.75)
+        while not bot.rng.getRight(1) < 12.0:
+            bot.ctrl.goRight(0.60)
+        
         bot.ctrl.stopBot()
+
         while not bot.rng.getBack(1) > 60.0:
-            bot.ctrl.goFoward(0.5)
+            bot.ctrl.goFoward(0.5) 
+
         bot.ctrl.stopBot()
+
         while not bot.rng.getBack(1) < 10.0:
             bot.ctrl.goBackwards(0.5)
+        
         bot.ctrl.stopBot()
-        bot.alignBack()
+        #bot.alignBack()
+        bot.correctYaw()
+
         bot.ctrl.stopBot()
 
+        while not bot.rng.getLeft(1) < 10.0:
+            pos = bot.rng.getRight(1)
+            while bot.rng.getRight(1) < pos + 30.0:
+                bot.ctrl.goLeft(0.75)
+            bot.ctrl.stopBot()
+            while not bot.rng.getBack(1) > 60.0:
+                bot.ctrl.goFoward(0.5)
+            bot.ctrl.stopBot()
+            while not bot.rng.getBack(1) < 10.0:
+                bot.ctrl.goBackwards(0.5)
+            bot.ctrl.stopBot()
 
+            #bot.alignBack()
+            bot.correctYaw()
+            bot.ctrl.stopBot()
+
+    def correctToAngle(self, angle):
+        print(abs(angle - self.realSense.getCurrYaw()))
+        while abs(angle - self.realSense.getCurrYaw()) > 5:
+            print(abs(angle - self.realSense.getCurrYaw()))
+            if angle > self.realSense.getCurrYaw():
+                self.ctrl.rotateRight(0.2)
+            else:
+                self.ctrl.rotateLeft(0.2)
+        self.ctrl.stopBot()
+        print("End Yaw", self.realSense.getCurrYaw())
+
+    def rotateDegrees(self, angle):
+        currYaw = bot.realSense.getCurrYaw()
+        print(currYaw)
+        if angle > 0:
+            while (bot.realSense.getCurrYaw() < currYaw + angle):
+                #print("In loop YAW: ", bot.realSense.getCurrYaw())
+                bot.ctrl.rotateRight(0.35)
+
+        if angle < 0:
+            while (bot.realSense.getCurrYaw() < currYaw + angle):
+                #print("In loop YAW: ", bot.realSense.getCurrYaw())
+                bot.ctrl.rotateLeft(0.35)
+        bot.ctrl.stopBot()
+
+    
+
+    def alignDropOff(self):
+        #self.alignBack(2)
+        while self.rng.getBack(0) > 10.0:
+            self.ctrl.goBackwards(.1)
+        
+        self.ctrl.stopBot()
+        self.color.requestColorValues()
+        while not self.color.values[0] == 1 or not self.color.values[1] == 1:
+            if self.color.values[0] != 1 and self.color.values[1] == 1:
+                currTime = time.time()
+                while(time.time() < currTime +.45):
+                    self.ctrl.goLeft(.2)
+                self.ctrl.stopBot()
+            elif self.color.values[0] == 1 and self.color.values[1] != 1:
+                currTime = time.time()
+                while(time.time() < currTime +.45):
+                    self.ctrl.goRight(.2)
+                self.ctrl.stopBot()
+            elif self.color.values[0] == 0 and self.color.values[1] == 0:
+                currTime = time.time()
+                while(time.time() < currTime +.45):
+                    #69 is like the y values from getting to location function
+                    if (self.rng.getLeft(0) < 69):
+                        self.ctrl.goRight(.2)
+                    else:
+                        self.ctrl.goLeft(.2)
+                self.ctrl.stopBot()
+            else:
+                self.ctrl.stopBot()
+
+            self.color.requestColorValues()
+            self.ctrl.stopBot(.5)
+            
+        self.ctrl.stopBot()
+        print("Made it to location")
+
+    def milestone3(self):
+        self.pickupPathLeft()
+        time.sleep(3)
+
+        print("Going to Location A")
+        self.goToLocationA()
+        self.ctrl.stopBot()
+        self.alignDropOff()
+        self.door.sendMsg("doorOpen")
+        now = time.time()
+        while abs(time.time() - now) < 2:
+            self.ctrl.goFoward(0.4)
+        self.ctrl.stopBot()
+        self.door.sendMsg("doorClosed")
+        print("dropped 2 Stack")
+
+        
+        self.carousel.sendMsg("twoStack")
+        print("Going to Location B")
+        self.goToLocationB()        
+        self.alignDropOff()
+        self.door.sendMsg("doorOpen")
+        
+        now = time.time()
+        while abs(time.time() - now) < 2:
+            self.ctrl.goFoward(0.4)
+        self.ctrl.stopBot()
+        self.door.sendMsg("doorClosed")
+        print("dropped 2 Stack")
+
+
+        self.carousel.sendMsg("threeStack")
+        print("Going to Location C")
+        self.goToLocationC()
+        self.alignDropOff()
+        self.door.sendMsg("doorOpen")
+        print("dropped 3 Stack")
+
+        now = time.time()
+        while abs(time.time() - now) < 2:
+            self.ctrl.goFoward(0.4)
+        self.ctrl.stopBot()
+        self.door.sendMsg("doorClosed")
+
+        self.ctrl.stopBot()
+
+    def initBotVariables(self):
+        self.initServos()
+        self.initYaw = self.realSense.getCurrYaw()
+
+  
 def within1inch(n, target, threshold=1):
     # Convert threshold to centimeters
 
@@ -585,20 +711,22 @@ if __name__ == "__main__":
     else:
         bot = Robot("bot","talker","cmd_vel", queue_size = 10)
     
-
     print("starting program")
-
-    time.sleep(2)
     print("Turn on motors")
+    time.sleep(2)
+    bot.initBotVariables()
 
-    currYaw = bot.realSense.getCurrYaw()
-    print(currYaw)
-
-    while (bot.realSense.getCurrYaw() < currYaw + 90):
-        print("In loop YAW: ", bot.realSense.getCurrYaw())
-        bot.ctrl.rotateRight(0.45)
-        
-    print("done Rotating")
-    bot.ctrl.stopBot()
-    print("Program")
+    '''
+    bot.initServos()
+    bot.milestone3()
+    '''
+    print("initYaw: ", bot.initYaw)
+    
+    while bot.realSense.getCurrYaw() < 360:
+        print(bot.realSense.getCurrYaw())
+        time.sleep(2)
+       
+            
+            
+   
     
