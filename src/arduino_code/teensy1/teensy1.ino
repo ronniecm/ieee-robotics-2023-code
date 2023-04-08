@@ -134,7 +134,7 @@ void loop()
     //drivetrain->mecanumDrive(0.0, 0.80, 0.0);
   }
   ultrasonics->publishData();
-
+  
   if(sendColorValue.data == 1){
     //Make a function for getting Color
     foodChipsTcs1.getRawData(&r1, &g1, &b1, &c1); 
@@ -248,6 +248,7 @@ int calc2Color(int r, int g, int b, int c){
         return BLACK;
       }
 }
+
 
 int determineColor(float r, float g, float b) {
   int color = -1;
