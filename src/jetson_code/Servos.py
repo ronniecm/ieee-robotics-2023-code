@@ -40,7 +40,7 @@ class Servos:
         self.servoCmds['paddleClosed'] = 180
         self.servoCmds['paddleOpen'] = 0
         self.servoCmds['doorClosed'] = 180
-        self.servoCmds['doorOpen'] = 90
+        self.servoCmds['doorOpen'] = 80
         self.servoCmds['carouselAddPedestal'] = 1
         self.servoCmds['carouselStop'] = 0
         self.servoCmds['twoStack'] = 2

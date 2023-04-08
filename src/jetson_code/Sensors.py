@@ -42,13 +42,13 @@ class Color:
         self.pub.publish(1)
 
     def rgb1OnWhite(self):
-        if self.rgb1Values[3] > 1000:
+        if self.rgb1Values[3] > 2500:
             return True
         else:
             return False
     
     def rgb2OnWhite(self):
-        if self.rgb2Values[3] > 1000:
+        if self.rgb2Values[3] > 2500:
             return True
         else:
             return False

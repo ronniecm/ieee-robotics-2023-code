@@ -13,7 +13,7 @@ import torch.nn.functional as F
 
 from math import atan2, cos, sin, sqrt, pi
 
-from .ImageClassifierNets import LightweightCNN
+from .ImageClassifierNets import LightweightCNN, MediumweightCNN
 
 def drawAxis(img, p_, q_, color, scale):
     '''
@@ -111,7 +111,8 @@ class PedestalTracker:
 
     def __init__(self, model_path, device):
         # Set up the model
-        self.model = LightweightCNN()
+        # self.model = LightweightCNN()
+        self.model = MediumweightCNN()
         self.model.load_state_dict(torch.load(model_path, map_location=device))
         self.model.eval()
         self.device = device
