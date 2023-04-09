@@ -39,10 +39,12 @@ class Servos:
         self.servoCmds['armUp'] = 0
         self.servoCmds['paddleClosed'] = 180
         self.servoCmds['paddleOpen'] = 0
-        self.servoCmds['doorClosed'] = 100
-        self.servoCmds['doorOpen'] = 0
+        self.servoCmds['doorClosed'] = 180
+        self.servoCmds['doorOpen'] = 80
         self.servoCmds['carouselAddPedestal'] = 1
         self.servoCmds['carouselStop'] = 0
+        self.servoCmds['twoStack'] = 2
+        self.servoCmds['threeStack'] = 3
         self.servoCmds['liftUp'] = 1
         self.servoCmds['liftDown'] = -1
         self.servoCmds['dispenseRed'] = 1

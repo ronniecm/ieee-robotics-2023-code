@@ -13,7 +13,7 @@ import torch.nn.functional as F
 
 from math import atan2, cos, sin, sqrt, pi
 
-from .ImageClassifierNets import LightweightCNN
+from .ImageClassifierNets import LightweightCNN, MediumweightCNN
 
 def drawAxis(img, p_, q_, color, scale):
     '''
@@ -75,23 +75,10 @@ def getOrientation(pts, img):
           cntr[1] + 0.02 * eigenvectors[0, 1] * eigenvalues[0, 0])
     p2 = (cntr[0] - 0.02 * eigenvectors[1, 0] * eigenvalues[1, 0],
           cntr[1] - 0.02 * eigenvectors[1, 1] * eigenvalues[1, 0])
-    # drawAxis(img, cntr, p1, (255, 255, 0), 1)
-    # drawAxis(img, cntr, p2, (0, 0, 255), 5)
+
 
     # orientation in radians
     angle = atan2(eigenvectors[0, 1], eigenvectors[0, 0])
-    # [visualization]
-
-    # # Label with the rotation angle
-    # label = "  Rotation Angle: " + \
-    #     str(-int(np.rad2deg(angle)) - 90) + " degrees"
-    # textbox = cv2.rectangle(
-    #     img, (cntr[0], cntr[1]-25), (cntr[0] + 250, cntr[1] + 10), (255, 255, 255), -1)
-    # cv2.putText(img, label, (cntr[0], cntr[1]),
-    #            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv2.LINE_AA)
-
-    # Convert to degrees
-    angle = -int(np.rad2deg(angle)) - 90
 
     return angle
 
@@ -124,13 +111,14 @@ class PedestalTracker:
 
     def __init__(self, model_path, device):
         # Set up the model
-        self.model = LightweightCNN()
+        # self.model = LightweightCNN()
+        self.model = MediumweightCNN()
         self.model.load_state_dict(torch.load(model_path, map_location=device))
         self.model.eval()
         self.device = device
 
         # Set up the video stream
-        self.camera = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720,format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert !  appsink", cv2.CAP_GSTREAMER)
+        self.camera = cv2.VideoCapture("nvarguscamerasrc ! video/x-raw(memory:NVMM), width=(int)1280, height=(int)720, format=(string)NV12, framerate=(fraction)30/1 ! nvvidconv ! video/x-raw, format=(string)BGRx ! videoconvert ! video/x-raw, format=(string)BGR ! appsink", cv2.CAP_GSTREAMER)
 
         # Check if the camera was opened successfully
         if not self.camera.isOpened():
@@ -156,7 +144,7 @@ class PedestalTracker:
         return pred.item()
     
 
-    def make_prediction(self):
+    def make_prediction(self, n_preds=5, n_angles=50):
         """
         Prediction function for the class, returns the estimated angle of the pedestal in degrees.
         A pedestal that is standing will return -1.
@@ -165,86 +153,99 @@ class PedestalTracker:
         and the angle increases as the pedestal is rotated counterclockwise.
 
         """
+        assert(n_preds > 0)
+        assert(n_angles > 0)
 
-        # Get the frame from the camera
-        ret, frame = self.camera.read()
+        preds = []
+        for i in range(n_preds):
+            # Get the frame from the camera
+            ret, frame = self.camera.read()
 
-        # Check if the frame was captured successfully
-        if not ret:
-            print("Failed to capture frame from camera")
-            return -1
+            # Check if the frame was captured successfully
+            if not ret:
+                print("Failed to capture frame from camera")
+                return -1, -1
 
-        # Classify the frame
-        pred = self.__classify_frame(frame)
+            # Classify the frame
+            pred = self.__classify_frame(frame)
+            preds.append(pred)
+
+        # Take the most common prediction
+        pred = max(set(preds), key=preds.count)
 
         # First check if the pedestal is standing, if it is, then we shouldn't try to estimate the angle
         if pred == 1 or pred == 3 or pred == 5:
-            return None
+            return 0, 0
 
         # If the pedestal is fallen, then we can estimate the angle
+        angles = []
+        for i in range(n_angles):
+            # Get the frame from the camera
+            ret, frame = self.camera.read()
 
-        # Downsample the frame for contour detection
-        img = cv2.resize(frame, (0, 0), fx=0.5, fy=0.5)
+            # Check if the frame was captured successfully
+            if not ret:
+                print("Failed to capture frame from camera")
+                return -1, -1
 
-        # Contour detection needs a one channel image, but for optimal results we will use either the 
-        # red or green channel if the pedestal is red or green respectively. Otherwise we will convert the 
-        # image to grayscale for a white pedestal.
+            # Downsample the frame for contour detection
+            img = cv2.resize(frame, (0, 0), fx=0.1, fy=0.1)
 
-        single_frame = None
+            # Contour detection needs a one channel image, but for optimal results we will use either the 
+            # red or green channel if the pedestal is red or green respectively. Otherwise we will convert the 
+            # image to grayscale for a white pedestal.
 
-        # Check if the pedestal is red
-        if pred == 2:
-            single_frame = img[:, :, 2] # Assume BGR format
-        # Check if the pedestal is green
-        elif pred == 0:
-            single_frame = img[:, :, 1] # Assume BGR format
-        # Otherwise the pedestal is white
-        else:
-            single_frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            single_frame = None
 
-        # Convert image to binary
-        _, bw = cv2.threshold(single_frame, 50, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+            # Check if the pedestal is red
+            if pred == 2:
+                single_frame = img[:, :, 2] # Assume BGR format
+            # Check if the pedestal is green
+            elif pred == 0:
+                single_frame = img[:, :, 1] # Assume BGR format
+            # Otherwise the pedestal is white
+            else:
+                single_frame = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-        # Find all the contours in the thresholded image (binary image)
-        # Countours in this scenario are a series of continous points 
-        # surrounding an area having uniform color or intensity.
-        contours, _ = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
+            # Convert image to binary
+            _, bw = cv2.threshold(single_frame, 50, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
 
-        # Filter out contours that are too small or too large
-        min_countour_area = 1000
-        max_countour_area = 100000
+            # Find all the contours in the thresholded image (binary image)
+            # Countours in this scenario are a series of continous points 
+            # surrounding an area having uniform color or intensity.
+            contours, _ = cv2.findContours(bw, cv2.RETR_LIST, cv2.CHAIN_APPROX_NONE)
 
-        # Filter out contours that are too small or too large
-        contours = [c for c in contours if min_countour_area < cv2.contourArea(c) < max_countour_area]
-        
-        # Print length of contours
-        # print("Length of contours: ", len(contours))
-        if len(contours) == 0:
-            return None
+            # Filter out contours that are too small or too large
+            min_countour_area = 1000
+            max_countour_area = 100000
 
-        # # Loop over all the contours
-        # for i, c in enumerate(contours):
+            # Filter out contours that are too small or too large
+            contours = [c for c in contours if min_countour_area < cv2.contourArea(c) < max_countour_area]
+            
+            # Print length of contours
+            # print("Length of contours: ", len(contours))
+            if len(contours) == 0:
+                return 0, 0
 
-        #     # Calculate the area of each contour
-        #     area = cv2.contourArea(c)
+            # Calculate the angle of the largest contour
+            angle = getOrientation(contours[0], img)
 
-        #     # Ignore contours that are too small or too large
-        #     # Could be used to filter out noise
-        #     if area < min_countour_area or area > max_countour_area:
-        #         continue
+            # Convert to degrees
+            angle = -int(np.rad2deg(angle)) + 90
 
-        #     # Draw each contour only for visualisation purposes
-        #     cv2.drawContours(img, contours, i, (0, 0, 255), 2)
+            # Only want angles in range of 0 to 180
+            angle = angle % 180
 
-        #     # Find the orientation of each shape
-        #     getOrientation(c, img)
+            # Append the angle to the list of angles
+            angles.append(angle)
 
-        
+        # Take the average of the angles as the final angle
+        angle = int(np.mean(angles))
 
-        # Calculate the angle of the largest contour
-        angle = getOrientation(contours[0], img)
+        # Want to return a tuple of the angle of the object and wrist angle to command
+        wrist_cmd = 180 - angle
 
 
         # Return the angle of the pedestal in degrees
-        return angle
+        return angle, wrist_cmd
     

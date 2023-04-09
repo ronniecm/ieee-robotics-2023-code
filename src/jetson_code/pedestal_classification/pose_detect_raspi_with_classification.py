@@ -98,12 +98,12 @@ def getOrientation(pts, img):
     # [visualization]
 
     # Label with the rotation angle
-    label = "  Rotation Angle: " + \
-        str(-int(np.rad2deg(angle)) - 90) + " degrees"
-    textbox = cv.rectangle(
-        img, (cntr[0], cntr[1]-25), (cntr[0] + 250, cntr[1] + 10), (255, 255, 255), -1)
-    cv.putText(img, label, (cntr[0], cntr[1]),
-               cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv.LINE_AA)
+    # label = "  Rotation Angle: " + \
+    #     str(-int(np.rad2deg(angle)) - 90) + " degrees"
+    # textbox = cv.rectangle(
+    #     img, (cntr[0], cntr[1]-25), (cntr[0] + 250, cntr[1] + 10), (255, 255, 255), -1)
+    # cv.putText(img, label, (cntr[0], cntr[1]),
+    #            cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 0), 1, cv.LINE_AA)
 
     return angle
 
@@ -149,7 +149,7 @@ def main():
     cv.namedWindow("Pose Detection", cv.WINDOW_NORMAL)
 
     # Create moving average objects for smoothing out angle measurements
-    angle_avg = MovingAverageFilter(20)
+    angle_avg = MovingAverageFilter(50)
 
     # Initialize model
     print("Initializing model...")
@@ -178,7 +178,8 @@ def main():
         # Convert image to tensor for classification
         img_tensor = img_2_tensor(img)
         with torch.no_grad():
-            _, pred = torch.max(model(img_tensor), 1)
+            output = model(img_tensor)
+            _, pred = torch.max(output, 1)
         
         print_prediction(pred.item())
 
@@ -198,7 +199,7 @@ def main():
             frame = cv.cvtColor(img, cv.COLOR_BGR2GRAY) # Default value for frame
 
         # Convert image to binary
-        _, bw = cv.threshold(frame, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
+        _, bw = cv.threshold(frame, 20, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
 
         # Find all the contours in the thresholded image (binary image)
         contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
@@ -225,13 +226,16 @@ def main():
             angle = getOrientation(c, img)
 
             # Convert to degrees
-            deg_angle = -int(np.rad2deg(angle)) - 90
+            deg_angle = -int(np.rad2deg(angle)) + 90
+            deg_angle = deg_angle % 180
 
             # Apply moving average filter
             angle_avg.add(deg_angle)
             smoothed = angle_avg.get()
 
             print("Angle: ", smoothed)
+            print("Wrist Rotation: ", 180 - smoothed)
+            # print("Accuracy of Neural Network Prediction: ", float(output[0][pred.item()]))
 
         # Display the image
         cv.imshow("Pose Detection", img)

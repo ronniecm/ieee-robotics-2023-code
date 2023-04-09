@@ -65,16 +65,16 @@ def main():
     # Define the image transformations
     transform = transforms.Compose([
         transforms.ToPILImage(),
-        transforms.RandomHorizontalFlip(),
+        transforms.RandomHorizontalFlip(),s
         transforms.RandomVerticalFlip(),
         transforms.RandomRotation(45),
-        transforms.ColorJitter(brightness=0.25),
+        # transforms.ColorJitter(brightness=0.25),
         # transforms.RandomPerspective(),
         transforms.ToTensor()
     ])
 
     # Split the dataset into training, validation, and testing sets
-    train_split = 0.85
+    train_split = 0.90
     train_size = int(train_split * len(images_tensor))
     val_size = len(images_tensor) - train_size
     train_indices, temp_indices = torch.utils.data.random_split(torch.arange(len(images_tensor)), [train_size, val_size])
