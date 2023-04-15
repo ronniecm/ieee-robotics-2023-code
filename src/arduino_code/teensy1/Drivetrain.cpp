@@ -1,3 +1,4 @@
+#include "Wire.h"
 #include "Drivetrain.h"
 
 // Measured encoder ticks per single revolution
@@ -54,16 +55,17 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
     setpoint[2] = backLeftRPM;
     setpoint[3] = backRightRPM;
 
+    noInterrupts();  
     for(int i = 0; i < 4; i++) {
       in[i] = abs(finalRpm[i]);  
       if (setpoint[i] == 0) {
-        out[i] = 0;  
-      }  
+        out[i] = 0;
+      }
       else {
         speedController[i]->Compute();  
       }
     }
-    
+    interrupts();
     // Front left motor
     if (frontLeft >= 0)
     {
@@ -76,7 +78,7 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
         analogWrite(FL_in1,  out[0]);
         analogWrite(FL_in2, 0);
     }   
-
+  
     if (frontRight >= 0)
     {
         // Clockwise rotation
@@ -112,6 +114,7 @@ void Drivetrain::mecanumDrive(float x, float y, float z)
         analogWrite(BR_in1,  out[3]);
         analogWrite(BR_in2, 0);
     }   
+    
 }
 
 void Drivetrain::calcRPM()

@@ -32,6 +32,7 @@ std_msgs::UInt16MultiArray rgb2Msg;
 
 
 IntervalTimer intTimer;
+IntervalTimer mecanumTimer;
 
 Adafruit_TCS34725 foodChipsTcs1(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
 Adafruit_TCS34725 foodChipsTcs2(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
@@ -71,7 +72,7 @@ ros::Subscriber<geometry_msgs::Twist> speedSub("/bot/cmd_vel", mecanumCallback);
 
 
 unsigned long currentMillis, previousMillis;
-
+unsigned long curr, prev;
 void setup()
 {
     //Serial.begin(115200);
@@ -85,13 +86,12 @@ void setup()
       nh.advertise(*ultrasonics->getPub(i));
     }
 
-
     rgb1Msg.data_length = 4;
     rgb1Msg.data = (uint16_t *)malloc(4 * sizeof(uint16_t));
     for (int i = 0; i < 4; i++)
      {
         rgb1Msg.data[i] = uint16_t(0);
-      }
+    }
 
     rgb2Msg.data_length = 4;
     rgb2Msg.data = (uint16_t *)malloc(4 * sizeof(uint16_t));
@@ -115,9 +115,10 @@ void setup()
     nh.subscribe(colorRequest);
     nh.subscribe(speedSub); 
     
-    foodChipsTcs1.begin();
-    foodChipsTcs2.begin(0x29, &Wire1);
-       
+    if (!foodChipsTcs1.begin() || !foodChipsTcs2.begin(0x29, &Wire1)) {
+      Serial.println("Color sensor failure");
+    }
+    mecanumTimer.begin(drive, 10 * 1000);
 }
 
 void loop()
@@ -125,14 +126,9 @@ void loop()
   //cmd_x = 1.0;
   //cmd_y = 0.0;
   //cmd_z = 0.0;
-  
-  // Mecanum drive now a function of twist msgs
-  currentMillis = millis();
-  while (currentMillis - previousMillis >= 10) {
-    previousMillis = currentMillis;
-    drivetrain->mecanumDrive(cmd_y, cmd_x,  cmd_z);
-    //drivetrain->mecanumDrive(0.0, 0.80, 0.0);
-  }
+  curr = millis();
+  Serial.println(curr - prev);
+  prev = curr;
   ultrasonics->publishData();
 
   if(sendColorValue.data == 1){
@@ -165,6 +161,7 @@ void loop()
   //Serial.println(r1);
   
   nh.spinOnce();
+  delay(15);
 }
 
 void initDrivetrain()
@@ -179,6 +176,13 @@ void initDrivetrain()
   pinMode(BR_in2, OUTPUT);
 
   intTimer.begin(calcRPM, 800);
+  Serial.println("setup");
+}
+
+void drive() {
+  noInterrupts();
+  drivetrain->mecanumDrive(cmd_y, cmd_x, cmd_z);
+  interrupts();
 }
 
 void calcRPM()

@@ -3,6 +3,7 @@
 #include "MovingAverageFilter.hpp"
 #include "ros.h"
 #include "std_msgs/Float32.h"
+#include "NewPing.h"
 
 #define Ultra2_trigPin 23   // Trigger
 #define Ultra2_echoPin 22 
@@ -40,4 +41,5 @@ private:
     uint8_t echoPins[6] = {Ultra2_echoPin, Ultra3_echoPin, Ultra4_echoPin, Ultra5_echoPin, Ultra6_echoPin, Ultra7_echoPin};
     MovingAverageFilter* filters[6];
     float readings[6];
+    NewPing* sonars[6];
 };

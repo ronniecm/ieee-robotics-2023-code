@@ -52,9 +52,9 @@ private:
     double finalRpm[4]; //official RPM array for all motors
 
     //PID values for all 4 speed controllers
-    double kP[4] = {5, 5, 5, 5};
+    double kP[4] = {4.4,4.4,4.4,4.4};
     double kI[4] = {15, 15, 15, 15};
-    double kD[4] = {0.15, 0.15, 0.15, 0.15};
+    double kD[4] = {0.001, 0.001, 0.001, 0.001};
 
     //Input, output, and setpoint arrays for all PID speed controllers
     double in[4];
